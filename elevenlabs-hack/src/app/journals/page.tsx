@@ -1,6 +1,7 @@
 import { getJournalEntries } from "@/app/_actions/journal";
 import { JournalCalendar } from "@/components/JournalCalendar";
 import { SearchCommand } from "@/components/SearchCommand";
+import { Button } from "@/components/ui/button";
 import {
   Card,
   CardContent,
@@ -15,6 +16,8 @@ import {
 } from "@/components/ui/hover-card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { formatDistanceToNow } from "date-fns";
+import { ArrowRight } from "lucide-react";
+import Link from "next/link";
 
 export default async function JournalsPage() {
   const entries = await getJournalEntries();
@@ -85,10 +88,15 @@ export default async function JournalsPage() {
                       </span>
                     </div>
 
-                    <div className="flex-1 space-y-2">
+                    <div className="flex flex-1 flex-col gap-2">
                       <HoverCard>
                         <HoverCardTrigger asChild>
-                          <p className="font-medium">{entry.summarizedEntry}</p>
+                          <Link
+                            href={`/journals/${entry.id}`}
+                            className="font-medium hover:underline"
+                          >
+                            {entry.summarizedEntry}
+                          </Link>
                         </HoverCardTrigger>
                         <HoverCardContent className="w-80">
                           <div className="space-y-2">
@@ -102,10 +110,20 @@ export default async function JournalsPage() {
                         </HoverCardContent>
                       </HoverCard>
 
-                      <div className="flex items-center gap-2">
+                      <div className="flex items-center justify-between">
                         <div className="rounded-full bg-primary/10 px-2 py-1 text-xs">
                           Mood Score: {entry.moodScore}
                         </div>
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          className="opacity-0 group-hover:opacity-100"
+                          asChild
+                        >
+                          <Link href={`/journals/${entry.id}`}>
+                            <ArrowRight className="h-4 w-4" />
+                          </Link>
+                        </Button>
                       </div>
                     </div>
                   </div>

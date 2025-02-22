@@ -1,5 +1,6 @@
 "use client";
 
+import { Button } from "@/components/ui/button";
 import { Calendar } from "@/components/ui/calendar";
 import {
   HoverCard,
@@ -8,6 +9,8 @@ import {
 } from "@/components/ui/hover-card";
 import { type JournalEntry } from "@/types";
 import { format, startOfToday } from "date-fns";
+import { ArrowRight } from "lucide-react";
+import Link from "next/link";
 import { useState } from "react";
 
 interface JournalCalendarProps {
@@ -84,8 +87,25 @@ export function JournalCalendar({ entries }: JournalCalendarProps) {
                       </p>
                       <div className="space-y-4">
                         {dayEntries.map((entry) => (
-                          <div key={entry.id} className="space-y-1">
-                            <p className="text-sm">{entry.summarizedEntry}</p>
+                          <div key={entry.id} className="group space-y-1">
+                            <div className="flex items-center justify-between gap-2">
+                              <Link
+                                href={`/journals/${entry.id}`}
+                                className="text-sm hover:underline"
+                              >
+                                {entry.summarizedEntry}
+                              </Link>
+                              <Button
+                                variant="ghost"
+                                size="icon"
+                                className="h-6 w-6 opacity-0 group-hover:opacity-100"
+                                asChild
+                              >
+                                <Link href={`/journals/${entry.id}`}>
+                                  <ArrowRight className="h-4 w-4" />
+                                </Link>
+                              </Button>
+                            </div>
                             <div className="flex items-center gap-2">
                               <div
                                 className={`h-2 w-2 rounded-full ${getMoodColor(
