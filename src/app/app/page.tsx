@@ -78,6 +78,7 @@ interface ConversationTranscript {
 export default function Home() {
   const [selectedMood, setSelectedMood] = useState<string>("chat");
   const [isProcessing, setIsProcessing] = useState(false);
+  const [isRecording, setIsRecording] = useState(false);
   const transcriptRef = useRef<ConversationTranscript>({
     messages: [],
   });
@@ -213,12 +214,14 @@ export default function Home() {
   const toggleRecording = async () => {
     if (conversation?.status === "connected") {
       console.log("Stopping recording...");
-      await conversation.endSession();
+      setIsRecording(false);
       setIsProcessing(true);
+      await conversation.endSession();
       setTranscript({ messages: [] });
       transcriptRef.current.messages = [];
       setIsProcessing(false);
     } else {
+      setIsRecording(true);
       if (!selectedMood) {
         toast.error("Please select how you're feeling first");
         return;
@@ -246,6 +249,8 @@ export default function Home() {
   };
 
   const handleDeleteTranscript = () => {
+    setIsRecording(false);
+    setIsProcessing(false);
     if (conversation?.status === "connected") {
       void conversation.endSession();
     }
@@ -290,9 +295,9 @@ export default function Home() {
 
           <div className="flex items-center justify-center gap-2">
             <RecordButton
-              isRecording={conversation?.status === "connected"}
+              isRecording={isRecording}
               isProcessing={isProcessing}
-              onClick={toggleRecording}
+              onMouseDown={toggleRecording}
               disabled={isProcessing || isPending}
             />
 

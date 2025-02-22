@@ -8,15 +8,17 @@ import { PulsatingButton } from "./ui/button";
 interface RecordButtonProps {
   isRecording: boolean;
   isProcessing: boolean;
-  onClick: () => void;
+  onClick?: () => void;
+  onMouseDown?: () => void;
   disabled?: boolean;
 }
 
 export function RecordButton({
   isRecording,
   isProcessing,
-  onClick,
   disabled,
+
+  ...props
 }: RecordButtonProps) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
 
@@ -114,7 +116,7 @@ export function RecordButton({
       >
         <PulsatingButton
           pulseEnabled={!isRecording}
-          onClick={onClick}
+          {...props}
           disabled={disabled}
           className={cn(
             "group relative flex size-16 items-center justify-center rounded-full transition-all duration-300 ease-in-out",
