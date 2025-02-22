@@ -24,14 +24,6 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import {
-  Sheet,
-  SheetContent,
-  SheetDescription,
-  SheetHeader,
-  SheetTitle,
-  SheetTrigger,
-} from "@/components/ui/sheet";
 import { cn } from "@/lib/utils";
 import { api } from "@/trpc/react";
 import type { JournalEntry } from "@/types";
@@ -40,7 +32,6 @@ import { useUser } from "@clerk/nextjs";
 import { BookOpen, Loader2, Mic, MicOff, Trash2 } from "lucide-react";
 import { useRef, useState } from "react";
 import { toast } from "sonner";
-import { BREATHING_EXERCISES, GROUNDING_TECHNIQUES } from "./CalmingExercises";
 type Mood = {
   id: string;
   label: string;
@@ -81,11 +72,11 @@ interface ConversationTranscript {
 
 export function VoiceJournal() {
   const [selectedMood, setSelectedMood] = useState<string>("chat");
-  const [currentExercise, setCurrentExercise] = useState<number>(0);
-  const [currentStep, setCurrentStep] = useState<number>(0);
-  const [timer, setTimer] = useState<number>(0);
-  const [isBreathing, setIsBreathing] = useState(false);
-  const [isBurning, setIsBurning] = useState(false);
+  // const [currentExercise, setCurrentExercise] = useState<number>(0);
+  // const [currentStep, setCurrentStep] = useState<number>(0);
+  // const [timer, setTimer] = useState<number>(0);
+  // const [isBreathing, setIsBreathing] = useState(false);
+  // const [isBurning, setIsBurning] = useState(false);
   const [isProcessing, setIsProcessing] = useState(false);
   const transcriptRef = useRef<ConversationTranscript>({
     messages: [],
@@ -176,15 +167,15 @@ export function VoiceJournal() {
     return `Hi ${name}! How can I help you today?`;
   };
 
-  const startBreathing = (exerciseIndex: number) => {
-    const exercise = BREATHING_EXERCISES[exerciseIndex];
-    if (!exercise) return;
+  // const startBreathing = (exerciseIndex: number) => {
+  //   const exercise = BREATHING_EXERCISES[exerciseIndex];
+  //   if (!exercise) return;
 
-    setCurrentExercise(exerciseIndex);
-    setCurrentStep(0);
-    setTimer(exercise.totalTime);
-    setIsBreathing(true);
-  };
+  //   setCurrentExercise(exerciseIndex);
+  //   setCurrentStep(0);
+  //   setTimer(exercise.totalTime);
+  //   setIsBreathing(true);
+  // };
 
   const saveJournalEntry = async () => {
     try {
@@ -392,7 +383,7 @@ export function VoiceJournal() {
         </CardContent>
       </Card>
 
-      <Card className="relative w-full overflow-hidden border-sage-200 bg-gradient-to-br from-sage-50 to-white shadow-none transition-all hover:border-sage-300 hover:shadow-lg">
+      {/* <Card className="relative w-full overflow-hidden border-sage-200 bg-gradient-to-br from-sage-50 to-white shadow-none transition-all hover:border-sage-300 hover:shadow-lg">
         <CardHeader>
           <CardTitle>Need to calm down?</CardTitle>
           <CardDescription>Try these exercises</CardDescription>
@@ -480,7 +471,7 @@ export function VoiceJournal() {
             </SheetContent>
           </Sheet>
         </CardContent>
-      </Card>
+      </Card> */}
     </div>
   );
 }
