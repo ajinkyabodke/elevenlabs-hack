@@ -14,6 +14,7 @@ import {
   BookOpen,
   Brain,
   Clock,
+  Heart,
   LineChart,
   Menu,
   MessageSquare,
@@ -45,7 +46,12 @@ const sidebarItems = [
   {
     title: "Trends",
     icon: LineChart,
-    href: "/",
+    href: "/trends",
+  },
+  {
+    title: "Calming Exercises",
+    icon: Heart,
+    href: "/calm",
   },
 ] as const;
 
