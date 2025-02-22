@@ -194,7 +194,7 @@ const Footer = () => {
         </div>
 
         {/* Footer Sections */}
-        {Object.entries(sections).map(([key, section]) => (
+        {/* {Object.entries(sections).map(([key, section]) => (
           <div key={key} className="mt-10 min-w-44 pl-2 lg:mt-0 lg:pl-0">
             <h3 className="mb-4 font-medium text-gray-900 sm:text-sm">
               {section.title}
@@ -212,7 +212,7 @@ const Footer = () => {
               ))}
             </ul>
           </div>
-        ))}
+        ))} */}
       </footer>
     </div>
   );

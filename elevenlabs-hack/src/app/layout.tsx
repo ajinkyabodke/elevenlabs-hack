@@ -7,8 +7,6 @@ import { GeistSans } from "geist/font/sans";
 import type { Metadata } from "next/dist/lib/metadata/types/metadata-interface";
 
 import { Toaster } from "sonner";
-import Footer from "./landing/components/ui/Footer";
-import { NavBar } from "./landing/components/ui/Navbar";
 
 export const metadata: Metadata = {
   metadataBase: new URL("https://elevenlabs-hack.vercel.app"),
@@ -51,10 +49,12 @@ export default function RootLayout({
       <html lang="en">
         <TRPCReactProvider>
           <body className={GeistSans.className}>
-            <NavBar />
-            {children}
-            <Footer />
-            <Toaster />
+            <div className="flex h-screen">
+              <div className="flex-1 overflow-auto">
+                <main className="container mx-auto p-4">{children}</main>
+              </div>
+              <Toaster />
+            </div>
           </body>
         </TRPCReactProvider>
       </html>

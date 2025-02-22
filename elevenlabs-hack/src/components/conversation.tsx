@@ -1,10 +1,10 @@
 "use client";
 
 import { Button } from "@/components/ui/button";
+import { cn } from "@/lib/utils";
 import { useConversation } from "@11labs/react";
 import { Mic, MicOff } from "lucide-react";
 import { useCallback } from "react";
-import { cn } from "tailwind-variants";
 interface Message {
   content: string;
   role: "user" | "assistant";

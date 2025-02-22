@@ -17,6 +17,7 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
+import { cn } from "@/lib/utils";
 import { type CalendarEvent, type JournalEntry } from "@/types";
 import {
   addDays,
@@ -33,7 +34,6 @@ import {
 } from "date-fns";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import { useMemo, useState } from "react";
-import { cn } from "tailwind-variants";
 interface EnhancedCalendarProps {
   events: CalendarEvent[];
   entries: JournalEntry[];

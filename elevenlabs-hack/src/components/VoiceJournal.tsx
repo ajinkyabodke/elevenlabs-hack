@@ -32,6 +32,7 @@ import {
   SheetTitle,
   SheetTrigger,
 } from "@/components/ui/sheet";
+import { cn } from "@/lib/utils";
 import { api } from "@/trpc/react";
 import type { JournalEntry } from "@/types";
 import { useConversation } from "@11labs/react";
@@ -39,7 +40,6 @@ import { useUser } from "@clerk/nextjs";
 import { BookOpen, Loader2, Mic, MicOff, Trash2 } from "lucide-react";
 import { useRef, useState } from "react";
 import { toast } from "sonner";
-import { cn } from "tailwind-variants";
 import { BREATHING_EXERCISES, GROUNDING_TECHNIQUES } from "./CalmingExercises";
 type Mood = {
   id: string;
