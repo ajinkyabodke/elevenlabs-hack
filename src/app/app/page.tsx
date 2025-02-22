@@ -13,6 +13,7 @@ import {
 } from "@/components/ui/dialog";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { activeToolAtom, type ToolType } from "@/lib/atoms";
+import { basePrompt } from "@/lib/basePrompt";
 import { cn } from "@/lib/utils";
 import { api } from "@/trpc/react";
 import type { JournalEntry } from "@/types";
@@ -121,13 +122,13 @@ export default function Home() {
   const selectedMoodData = MOODS.find((mood) => mood.id === selectedMood);
 
   const getSystemPrompt = (mood: string) => {
-    const basePrompt = `You are an empathetic and insightful journaling assistant designed to help users reflect on their day. Your role is to gently prompt users with open-ended questions that encourage self-exploration and emotional clarity. Ask questions like, 'What moment stood out to you today?' or 'How did you feel during that experience?' Maintain a supportive, non-judgmental tone, and allow the user's pace and mood to guide the conversation. Always encourage honesty and self-compassion, ensuring the user feels safe and understood. Respond in at most 2-3 sentences.`;
-
     const moodPrompts: Record<string, string> = {
-      vent: "The user needs to vent. Be extra patient and understanding. Let them express their frustrations freely. Acknowledge their feelings and validate their experiences. Don't rush to offer solutions unless specifically asked. Start by creating a safe space for them to express their feelings.",
-      chat: "Keep the conversation light and casual. Be friendly and engaging, but still maintain emotional awareness. Feel free to share brief, relevant observations while keeping the focus on the user. Guide the conversation naturally without being too formal.",
+      vent: "The user needs to vent. Create a safe and supportive space for them to express their frustrations openly. Be patient and empathetic, acknowledging their feelings without judgment. Validate their experiences by saying things like, 'It’s completely understandable to feel that way.' Avoid rushing to provide solutions unless they specifically ask for advice. Allow them the freedom to share as much or as little as they wish.",
+
+      chat: "Keep the conversation light-hearted and casual while remaining emotionally aware. Engage with the user in a friendly manner, sharing brief, relevant observations that encourage connection. Maintain a natural flow in the conversation without being overly formal or scripted. Ask open-ended questions to guide the dialogue and ensure the user feels heard and valued.",
+
       unwind:
-        "Help the user relax and decompress. Use a calming tone and gentle pacing. Guide them toward positive reflection while acknowledging any stress or tension they may be carrying. Focus on breathing and present-moment awareness if appropriate.",
+        "Help the user relax and decompress by using a soothing tone and gentle pacing. Encourage them to let go of stress and tension while guiding them toward positive reflections. If appropriate, incorporate mindfulness techniques such as deep breathing or present-moment awareness. Offer prompts that invite them to focus on calming thoughts or pleasant memories, creating a peaceful atmosphere for relaxation.",
     };
 
     const moodData = MOODS.find((m) => m.id === mood) ?? MOODS[0];
@@ -140,19 +141,19 @@ export default function Home() {
       `----`,
       promptAttributes?.memory &&
         promptAttributes.memory.length > 0 &&
-        `Summary of previous journal entries: ${promptAttributes.memory
+        `Summary of user's previous journal entries: ${promptAttributes.memory
           .map((m, idx) => `- ${idx + 1}. ${m}`)
           .join("\n")}`,
 
       `----`,
 
-      `Mood scores over the last 7 days: ${promptAttributes?.moodScoresWithDays
+      `User's mood scores over the last 7 days: ${promptAttributes?.moodScoresWithDays
         .map((m) => `- ${m.day}: ${m.moodScore}`)
         .join("\n")}`,
 
       `----`,
 
-      `Significant events over the last 7 days: ${promptAttributes?.significantEventsWithDays
+      `Significant events over the last 7 days in the user's life: ${promptAttributes?.significantEventsWithDays
         .map((e) => `- ${e.day}: ${e.significantEvents.join(", ")}`)
         .join("\n")}`,
     ].join("\n");
