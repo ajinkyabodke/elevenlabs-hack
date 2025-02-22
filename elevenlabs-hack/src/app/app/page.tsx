@@ -27,7 +27,7 @@ import {
 } from "@/components/ui/select";
 import { activeToolAtom, type ToolType } from "@/lib/atoms";
 import { cn } from "@/lib/utils";
-import { api } from "@/trpc/react";
+import { api, RouterOutputs } from "@/trpc/react";
 import type { JournalEntry } from "@/types";
 import { useConversation } from "@11labs/react";
 import { useUser } from "@clerk/nextjs";
@@ -73,6 +73,57 @@ interface ConversationTranscript {
   messages: Message[];
   summary?: string;
 }
+
+const getSystemPrompt = (
+  mood: string,
+  promptAttributes: RouterOutputs["user"]["getPromptAttributes"],
+) => {
+  const basePrompt = `You are an empathetic and insightful journaling assistant designed to help users reflect on their day. Your role is to gently prompt users with open-ended questions that encourage self-exploration and emotional clarity. Ask questions like, 'What moment stood out to you today?' or 'How did you feel during that experience?' Maintain a supportive, non-judgmental tone, and allow the user's pace and mood to guide the conversation. Always encourage honesty and self-compassion, ensuring the user feels safe and understood. Respond in at most 2-3 sentences.`;
+
+  const moodPrompts: Record<string, string> = {
+    vent: "The user needs to vent. Be extra patient and understanding. Let them express their frustrations freely. Acknowledge their feelings and validate their experiences. Don't rush to offer solutions unless specifically asked. Start by creating a safe space for them to express their feelings.",
+    chat: "Keep the conversation light and casual. Be friendly and engaging, but still maintain emotional awareness. Feel free to share brief, relevant observations while keeping the focus on the user. Guide the conversation naturally without being too formal.",
+    unwind:
+      "Help the user relax and decompress. Use a calming tone and gentle pacing. Guide them toward positive reflection while acknowledging any stress or tension they may be carrying. Focus on breathing and present-moment awareness if appropriate.",
+  };
+
+  const moodData = MOODS.find((m) => m.id === mood) ?? MOODS[0];
+
+  const contextPrompt = [
+    `- User's chosen mood: ${moodData?.label}`,
+    `- Session purpose: ${moodData?.description}`,
+    `- Initial approach: ${moodData?.prompt}`,
+
+    `----`,
+    promptAttributes?.memory &&
+      promptAttributes.memory.length > 0 &&
+      `Summary of previous journal entries: ${promptAttributes.memory
+        .map((m, idx) => `- ${idx + 1}. ${m}`)
+        .join("\n")}`,
+
+    `----`,
+
+    `Mood scores over the last 7 days: ${promptAttributes?.moodScoresWithDays
+      .map((m) => `- ${m.day}: ${m.moodScore}`)
+      .join("\n")}`,
+
+    `----`,
+
+    `Significant events over the last 7 days: ${promptAttributes?.significantEventsWithDays
+      .map((e) => `- ${e.day}: ${e.significantEvents.join(", ")}`)
+      .join("\n")}`,
+  ].join("\n");
+
+  const moodSpecificPrompt = moodPrompts[mood] ?? moodPrompts.unwind;
+
+  return [`${basePrompt}`, `${moodSpecificPrompt}`, `${contextPrompt}`].join(
+    "\n",
+  );
+};
+
+const getFirstMessage = (props: { name: string }) => {
+  return `Hi ${props.name}! How can I help you today?`;
+};
 
 export default function Home() {
   const [selectedMood, setSelectedMood] = useState<string>("chat");
@@ -131,54 +182,6 @@ export default function Home() {
 
   const selectedMoodData = MOODS.find((mood) => mood.id === selectedMood);
 
-  const getSystemPrompt = (mood: string) => {
-    const basePrompt = `You are an empathetic and insightful journaling assistant designed to help users reflect on their day. Your role is to gently prompt users with open-ended questions that encourage self-exploration and emotional clarity. Ask questions like, 'What moment stood out to you today?' or 'How did you feel during that experience?' Maintain a supportive, non-judgmental tone, and allow the user's pace and mood to guide the conversation. Always encourage honesty and self-compassion, ensuring the user feels safe and understood. Respond in at most 2-3 sentences.`;
-
-    const moodPrompts: Record<string, string> = {
-      vent: "The user needs to vent. Be extra patient and understanding. Let them express their frustrations freely. Acknowledge their feelings and validate their experiences. Don't rush to offer solutions unless specifically asked. Start by creating a safe space for them to express their feelings.",
-      chat: "Keep the conversation light and casual. Be friendly and engaging, but still maintain emotional awareness. Feel free to share brief, relevant observations while keeping the focus on the user. Guide the conversation naturally without being too formal.",
-      unwind:
-        "Help the user relax and decompress. Use a calming tone and gentle pacing. Guide them toward positive reflection while acknowledging any stress or tension they may be carrying. Focus on breathing and present-moment awareness if appropriate.",
-    };
-
-    const moodData = MOODS.find((m) => m.id === mood) ?? MOODS[0];
-
-    const contextPrompt = [
-      `- User's chosen mood: ${moodData?.label}`,
-      `- Session purpose: ${moodData?.description}`,
-      `- Initial approach: ${moodData?.prompt}`,
-
-      `----`,
-      promptAttributes?.memory &&
-        promptAttributes.memory.length > 0 &&
-        `Summary of previous journal entries: ${promptAttributes.memory
-          .map((m, idx) => `- ${idx + 1}. ${m}`)
-          .join("\n")}`,
-
-      `----`,
-
-      `Mood scores over the last 7 days: ${promptAttributes?.moodScoresWithDays
-        .map((m) => `- ${m.day}: ${m.moodScore}`)
-        .join("\n")}`,
-
-      `----`,
-
-      `Significant events over the last 7 days: ${promptAttributes?.significantEventsWithDays
-        .map((e) => `- ${e.day}: ${e.significantEvents.join(", ")}`)
-        .join("\n")}`,
-    ].join("\n");
-
-    const moodSpecificPrompt = moodPrompts[mood] ?? moodPrompts.unwind;
-
-    return [`${basePrompt}`, `${moodSpecificPrompt}`, `${contextPrompt}`].join(
-      "\n",
-    );
-  };
-
-  const getFirstMessage = () => {
-    return `Hi ${name}! How can I help you today?`;
-  };
-
   const saveJournalEntry = async () => {
     try {
       console.log("Saving transcript:", transcriptRef.current);
@@ -210,6 +213,8 @@ export default function Home() {
   };
 
   const toggleRecording = async () => {
+    if (!promptAttributes) return;
+
     if (conversation?.status === "connected") {
       console.log("Stopping recording...");
       await conversation.endSession();
@@ -224,15 +229,18 @@ export default function Home() {
       }
       try {
         console.log("Starting recording with mood:", selectedMood);
-        console.log("System prompt:", getSystemPrompt(selectedMood));
+        console.log(
+          "System prompt:",
+          getSystemPrompt(selectedMood, promptAttributes),
+        );
         await navigator.mediaDevices.getUserMedia({ audio: true });
         await conversation?.startSession({
           agentId: "AupMfEyUGwuMVyOywI6b",
           overrides: {
             agent: {
-              firstMessage: getFirstMessage(),
+              firstMessage: getFirstMessage({ name: name ?? "" }),
               prompt: {
-                prompt: getSystemPrompt(selectedMood),
+                prompt: getSystemPrompt(selectedMood, promptAttributes),
               },
             },
           },
