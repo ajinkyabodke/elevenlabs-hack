@@ -10,7 +10,6 @@ import {
   RiPlaneFill,
   RiTruckFill,
 } from "@remixicon/react";
-import { SolarMark } from "public/SolarMark";
 import { Icons } from "../Icons";
 import { Orbit } from "../Orbit";
 import ChipViz from "./ChipViz";
@@ -284,9 +283,13 @@ export default function Features() {
                 ]}
               >
                 <div className="relative flex h-48 w-48 items-center justify-center">
-                  <div className="rounded-full p-1 ring-1 ring-black/10">
+                  <div className="rounded-full p-1 ring-1 ring-indigo-200">
                     <div className="relative z-10 flex size-20 items-center justify-center rounded-full bg-white shadow-[inset_0px_-15px_20px_rgba(0,0,0,0.1),0_7px_10px_0_rgba(0,0,0,0.15)] ring-1 ring-black/20">
-                      <SolarMark className="size-10" />
+                      <img
+                        src="/EchoLogo.png"
+                        alt="Echo Logo"
+                        className="size-16"
+                      />
                     </div>
                     <div className="bg-linear-to-t absolute inset-12 animate-[spin_8s_linear_infinite] rounded-full from-transparent via-orange-400 to-transparent blur-lg" />
                   </div>
@@ -353,8 +356,12 @@ export default function Features() {
 
             <div className="pointer-events-none relative h-full select-none">
               <div className="absolute left-[191.8px] top-[192px]">
-                <div className="flex h-12 w-12 items-center justify-center bg-white shadow-sm ring-1 ring-black/15">
-                  <SolarMark className="h-8 w-8" />
+                <div className="flex h-12 w-12 items-center justify-center bg-white shadow-sm ring-1 ring-indigo-200">
+                  <img
+                    src="/EchoLogo.png"
+                    alt="Echo Logo"
+                    className="h-11 w-11"
+                  />
                 </div>
               </div>
               <div className="absolute left-[48px] top-[144px]">

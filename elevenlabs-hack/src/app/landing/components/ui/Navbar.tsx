@@ -5,7 +5,6 @@ import { cx } from "@/lib/utils";
 import { siteConfig } from "@/siteConfig";
 import { RiCloseFill, RiMenuFill } from "@remixicon/react";
 import Link from "next/link";
-import { SolarLogo } from "public/SolarLogo";
 import React from "react";
 import { Button } from "../Button";
 
@@ -25,8 +24,8 @@ export function NavBar() {
       <div className="w-full md:my-auto">
         <div className="relative flex items-center justify-between">
           <Link href={siteConfig.baseLinks.home} aria-label="Home">
-            <span className="sr-only">Solar Tech Logo</span>
-            <SolarLogo className="w-22" />
+            <span className="sr-only">Echo Logo</span>
+            <img src="/EchoLogo.png" alt="Echo Logo" className="w-22" />
           </Link>
           <nav className="hidden sm:block md:absolute md:left-1/2 md:top-1/2 md:-translate-x-1/2 md:-translate-y-1/2 md:transform">
             <div className="flex items-center gap-10 font-medium">
