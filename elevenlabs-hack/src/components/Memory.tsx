@@ -5,39 +5,26 @@ import { Input } from "@/components/ui/input";
 import { cn } from "@/lib/utils";
 import { api } from "@/trpc/react";
 import { Plus, Trash2 } from "lucide-react";
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { toast } from "sonner";
 
 export function Memory() {
-  const { data: userData, isLoading } = api.user.getMemory.useQuery();
-  const [memories, setMemories] = useState<string[]>(userData ?? []);
+  const { data: userData, isLoading, refetch } = api.user.getMemory.useQuery();
   const [newMemory, setNewMemory] = useState("");
+  const inputRef = useRef<HTMLInputElement>(null);
 
   const { mutateAsync: updateMemories, isPending: isUpdatingMemories } =
     api.user.updateMemories.useMutation({
       onSuccess: () => {
+        setNewMemory("");
         toast.success("Memory saved");
+        void refetch();
       },
       onError: () => {
         toast.error("Failed to save memory");
+        void refetch();
       },
     });
-
-  const handleAddMemory = () => {
-    if (!newMemory.trim()) return;
-
-    const updatedMemories = [...memories, newMemory.trim()];
-    setMemories(updatedMemories);
-    setNewMemory("");
-
-    void updateMemories({ memories: updatedMemories });
-  };
-
-  const handleDeleteMemory = (index: number) => {
-    const updatedMemories = memories.filter((_, i) => i !== index);
-    setMemories(updatedMemories);
-    void updateMemories({ memories: updatedMemories });
-  };
 
   if (isLoading) {
     return (
@@ -52,18 +39,25 @@ export function Memory() {
       {/* Add new memory input */}
       <div className="flex gap-2">
         <Input
+          ref={inputRef}
           placeholder="Add a new memory..."
           value={newMemory}
           onChange={(e) => setNewMemory(e.target.value)}
           onKeyDown={(e) => {
             if (e.key === "Enter") {
-              handleAddMemory();
+              if (userData) {
+                void updateMemories({ memories: [...userData, newMemory] });
+              }
             }
           }}
           className="flex-1"
         />
         <Button
-          onClick={handleAddMemory}
+          onClick={() => {
+            if (userData) {
+              void updateMemories({ memories: [...userData, newMemory] });
+            }
+          }}
           disabled={!newMemory.trim() || isUpdatingMemories}
         >
           <Plus className="mr-2 h-4 w-4" />
@@ -72,8 +66,8 @@ export function Memory() {
       </div>
 
       {/* Memory list */}
-      <div className="space-y-2">
-        {memories.map((memory, index) => (
+      <div className="flex flex-col-reverse space-y-2">
+        {userData?.map((memory, index) => (
           <div
             key={index}
             className={cn(
@@ -85,7 +79,13 @@ export function Memory() {
             <Button
               variant="ghost"
               size="icon"
-              onClick={() => handleDeleteMemory(index)}
+              onClick={() => {
+                if (userData) {
+                  void updateMemories({
+                    memories: userData.filter((_, i) => i !== index),
+                  });
+                }
+              }}
               className="h-8 w-8 opacity-0 group-hover:opacity-100"
             >
               <Trash2 className="h-4 w-4 text-muted-foreground hover:text-destructive" />
@@ -93,7 +93,7 @@ export function Memory() {
           </div>
         ))}
 
-        {memories.length === 0 && (
+        {userData?.length === 0 && (
           <div className="flex min-h-[100px] items-center justify-center rounded-lg border border-dashed">
             <p className="text-sm text-muted-foreground">No memories yet</p>
           </div>
