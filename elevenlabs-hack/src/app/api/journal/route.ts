@@ -81,6 +81,11 @@ export async function POST(req: Request) {
       }),
     ]);
 
+    console.log({
+      analysis,
+      memories,
+    });
+
     // Save to database with the analysis and user ID
     const entries = await db
       .insert(journalEntries)
@@ -128,7 +133,13 @@ const addMemories = async (props: {
 }) => {
   const { object } = await generateObject({
     model: openai("gpt-4o-mini"),
-    system: [
+    prompt: [
+      `Today is ${new Date().toLocaleDateString("en-US", {
+        year: "numeric",
+        month: "long",
+        day: "numeric",
+      })}.`,
+
       props.user.memory.length > 0 &&
         `Existing memories in user's journal: ${props.user.memory
           .map((m, idx) => `- ${idx + 1}. ${m}`)
@@ -141,7 +152,8 @@ Include only the most significant events in the user's life like the user saying
 Conversation:
 ${props.conversation}
 
-Don't include any memories that are already in the user's journal.`,
+Don't include any memories that are already in the user's journal.
+Always include absolute dates, and not "last week" or "last month" etc.`,
     ].join("\n"),
     schema: z.object({
       memories: z.array(z.string()).describe("A list of memories"),
@@ -156,6 +168,8 @@ Don't include any memories that are already in the user's journal.`,
       memory: [...props.user.memory, ...memories],
     })
     .where(eq(users.id, props.user.id));
+
+  console.log(memories);
 
   return memories;
 };

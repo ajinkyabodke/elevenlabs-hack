@@ -36,7 +36,7 @@ import {
   Timer,
   Trash2,
 } from "lucide-react";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { toast } from "sonner";
 
 const MOOD_ICONS = [Flame, Brain, Timer] as const;
@@ -129,13 +129,16 @@ interface ConversationTranscript {
 }
 
 export function VoiceJournal() {
-  const [selectedMood, setSelectedMood] = useState<string>("");
+  const [selectedMood, setSelectedMood] = useState<string>("chat");
   const [currentExercise, setCurrentExercise] = useState<number>(0);
   const [currentStep, setCurrentStep] = useState<number>(0);
   const [timer, setTimer] = useState<number>(0);
   const [isBreathing, setIsBreathing] = useState(false);
   const [isBurning, setIsBurning] = useState(false);
   const [isProcessing, setIsProcessing] = useState(false);
+  const transcriptRef = useRef<ConversationTranscript>({
+    messages: [],
+  });
   const [transcript, setTranscript] = useState<ConversationTranscript>({
     messages: [],
   });
@@ -145,9 +148,11 @@ export function VoiceJournal() {
       console.log("Connected to ElevenLabs");
       toast.success("Ready to record");
     },
-    onDisconnect: () => {
-      console.log("Disconnected from ElevenLabs");
+    onDisconnect: (props) => {
+      console.log("Disconnected from ElevenLabs", props);
       toast.info("Recording stopped");
+
+      void saveJournalEntry();
     },
     onMessage: async (message: Message) => {
       console.log("Received message:", message);
@@ -155,6 +160,8 @@ export function VoiceJournal() {
         ...prev,
         messages: [...prev.messages, message],
       }));
+
+      transcriptRef.current.messages.push(message);
     },
     onError: (error: Error) => {
       console.error("Error from ElevenLabs:", error);
@@ -202,8 +209,8 @@ export function VoiceJournal() {
 
   const saveJournalEntry = async () => {
     try {
-      console.log("Saving transcript:", transcript);
-      const rawEntry = transcript.messages
+      console.log("Saving transcript:", transcriptRef.current);
+      const rawEntry = transcriptRef.current.messages
         .map((msg) => `${msg.source}: ${msg.message}`)
         .join("\n");
 
@@ -237,6 +244,7 @@ export function VoiceJournal() {
       setIsProcessing(true);
       await saveJournalEntry();
       setTranscript({ messages: [] });
+      transcriptRef.current.messages = [];
       setIsProcessing(false);
     } else {
       if (!selectedMood) {
@@ -272,7 +280,7 @@ export function VoiceJournal() {
 
   return (
     <div className="grid gap-6 md:grid-cols-2">
-      <Card className="border-sage-200 from-sage-50 hover:border-sage-300 relative w-full overflow-hidden bg-gradient-to-br to-white shadow-none transition-all hover:shadow-lg">
+      <Card className="relative w-full overflow-hidden border-sage-200 bg-gradient-to-br from-sage-50 to-white shadow-none transition-all hover:border-sage-300 hover:shadow-lg">
         {isBurning && <BurnEffect onComplete={handleBurnComplete} />}
         <CardHeader>
           <CardTitle>How are you feeling?</CardTitle>
@@ -358,7 +366,7 @@ export function VoiceJournal() {
         </CardContent>
       </Card>
 
-      <Card className="border-sage-200 from-sage-50 hover:border-sage-300 relative w-full overflow-hidden bg-gradient-to-br to-white shadow-none transition-all hover:shadow-lg">
+      <Card className="relative w-full overflow-hidden border-sage-200 bg-gradient-to-br from-sage-50 to-white shadow-none transition-all hover:border-sage-300 hover:shadow-lg">
         <CardHeader>
           <CardTitle>Need to calm down?</CardTitle>
           <CardDescription>Try these exercises</CardDescription>
