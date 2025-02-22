@@ -1,6 +1,7 @@
 import "@/styles/globals.css";
 
 import { Sidebar } from "@/components/layout/Sidebar";
+import { TRPCReactProvider } from "@/trpc/react";
 import { ClerkProvider } from "@clerk/nextjs";
 import { GeistSans } from "geist/font/sans";
 import { Toaster } from "sonner";
@@ -20,15 +21,17 @@ export default function RootLayout({
   return (
     <ClerkProvider>
       <html lang="en">
-        <body className={GeistSans.className}>
-          <div className="flex h-screen">
-            <Sidebar />
-            <div className="flex-1 overflow-auto">
-              <main className="container mx-auto p-4">{children}</main>
+        <TRPCReactProvider>
+          <body className={GeistSans.className}>
+            <div className="flex h-screen">
+              <Sidebar />
+              <div className="flex-1 overflow-auto">
+                <main className="container mx-auto p-4">{children}</main>
+              </div>
             </div>
-          </div>
-          <Toaster />
-        </body>
+            <Toaster />
+          </body>
+        </TRPCReactProvider>
       </html>
     </ClerkProvider>
   );
