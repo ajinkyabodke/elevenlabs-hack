@@ -8,15 +8,17 @@ import { eq } from "drizzle-orm";
 import { z } from "zod";
 
 const journalAnalysisSchema = z.object({
-  summary: z
-    .string()
-    .describe("A brief 1-2 sentence summary of the conversation"),
   moodScore: z
     .number()
     .min(0)
     .max(100)
     .describe(
       "A number between 0-100 representing the emotional state: 0-20 (very negative), 21-40 (negative), 41-60 (neutral), 61-80 (positive), 81-100 (very positive)",
+    ),
+  summary: z
+    .string()
+    .describe(
+      "A simple, natural journal entry written in first person, as if written by the user themselves",
     ),
 });
 
@@ -66,11 +68,31 @@ export async function POST(req: Request) {
 
     // Analyze the entry using Vercel AI SDK
     const { object: analysis } = await generateObject({
-      model: openai("gpt-3.5-turbo-0125"),
+      model: openai("gpt-4o-mini"),
       schema: journalAnalysisSchema,
-      prompt: `Analyze this conversation and provide a summary and mood score:\n\n${rawEntry}`,
-      system:
-        "You are an expert at analyzing conversations and determining emotional states. Be concise but insightful in your analysis.",
+      prompt: `Transform this conversation into a simple, natural journal entry. Write it exactly how someone would write in their personal diary - casual, honest, and straightforward.
+
+Conversation transcript:
+${rawEntry}
+
+Guidelines:
+1. Use simple, everyday language
+2. Write in first person, present tense
+3. Focus on feelings and thoughts
+4. Keep it brief and natural
+5. Remove all AI interactions
+6. Write as if you're writing in a personal diary
+
+Example style:
+"I'm feeling down today. Work was really stressful and I couldn't focus. My mind kept wandering to the argument I had with Sarah. I just need some time to process everything."`,
+      system: `You are helping someone write in their personal diary. Write exactly how they would write - simple, honest, and natural. No fancy words, no complex analysis. Just their thoughts and feelings in their own voice.
+
+Remember:
+- Write like you're writing in a diary
+- Use everyday language
+- Keep it short and simple
+- Focus on their feelings
+- Remove any trace of AI conversation`,
       temperature: 0.7,
       maxTokens: 500,
     });
