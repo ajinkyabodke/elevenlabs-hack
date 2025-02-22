@@ -58,6 +58,13 @@ export const journalEntries = createTable(
     createdAt: timestamp("created_at", { withTimezone: true })
       .default(sql`CURRENT_TIMESTAMP`)
       .notNull(),
+
+    significantEvents: text("significant_events")
+      .array()
+      .notNull()
+      .$type<string[]>()
+      // empty array as default
+      .default(sql`ARRAY[]::text[]`),
   },
   (table) => ({
     createdAtIndex: index("created_at_idx").on(table.createdAt),
