@@ -1,6 +1,5 @@
 "use client";
 
-import { BurnEffect } from "@/components/BurnEffect";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -10,43 +9,33 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
+import { ScrollArea } from "@/components/ui/scroll-area";
+import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import {
-  Sheet,
-  SheetContent,
-  SheetDescription,
-  SheetHeader,
-  SheetTitle,
-  SheetTrigger,
-} from "@/components/ui/sheet";
 import { cn } from "@/lib/utils";
 import type { JournalEntry } from "@/types";
 import { useConversation } from "@11labs/react";
-import {
-  Brain,
-  Flame,
-  Loader2,
-  Mic,
-  MicOff,
-  Timer,
-  Trash2,
-} from "lucide-react";
-import { useEffect, useRef, useState } from "react";
+import { useUser } from "@clerk/nextjs";
+import { BookOpen, Loader2, Mic, MicOff, Trash2 } from "lucide-react";
+import { useRef, useState } from "react";
 import { toast } from "sonner";
-
-const MOOD_ICONS = [Flame, Brain, Timer] as const;
-type MoodIcon = (typeof MOOD_ICONS)[number];
 
 type Mood = {
   id: string;
   label: string;
   description: string;
-  icon: MoodIcon;
   prompt: string;
 };
 
@@ -55,66 +44,19 @@ const MOODS: Mood[] = [
     id: "vent",
     label: "I need to vent",
     description: "Let it all out",
-    icon: Flame,
     prompt: "I am here to listen. Tell me what is bothering you...",
   },
   {
     id: "chat",
     label: "Just chat",
     description: "Have a casual conversation",
-    icon: Brain,
     prompt: "How was your day? I would love to hear about it...",
   },
   {
     id: "unwind",
     label: "Help me unwind",
     description: "Relax and reflect",
-    icon: Timer,
     prompt: "Let us take a moment to relax. How are you feeling right now?",
-  },
-];
-
-const BREATHING_EXERCISES = [
-  {
-    name: "4-7-8 Breathing",
-    description:
-      "Inhale for 4, hold for 7, exhale for 8. Calms the nervous system.",
-    steps: ["Inhale: 4s", "Hold: 7s", "Exhale: 8s"],
-    totalTime: 19,
-  },
-  {
-    name: "Box Breathing",
-    description:
-      "Equal duration for inhale, hold, exhale, and hold. Great for focus.",
-    steps: ["Inhale: 4s", "Hold: 4s", "Exhale: 4s", "Hold: 4s"],
-    totalTime: 16,
-  },
-  {
-    name: "3-4-5 Breathing",
-    description: "Progressive breathing for beginners. Easy to remember.",
-    steps: ["Inhale: 3s", "Hold: 4s", "Exhale: 5s"],
-    totalTime: 12,
-  },
-];
-
-const GROUNDING_TECHNIQUES = [
-  {
-    name: "5-4-3-2-1 Technique",
-    steps: [
-      "Name 5 things you can see",
-      "Name 4 things you can touch",
-      "Name 3 things you can hear",
-      "Name 2 things you can smell",
-      "Name 1 thing you can taste",
-    ],
-  },
-  {
-    name: "3-3-3 Technique",
-    steps: [
-      "Name 3 things you can see",
-      "Name 3 things you can hear",
-      "Name 3 things you can feel",
-    ],
   },
 ];
 
@@ -143,12 +85,15 @@ export function VoiceJournal() {
     messages: [],
   });
 
+  const { user } = useUser();
+  const name = user?.firstName;
+
   const conversation = useConversation({
     onConnect: () => {
       console.log("Connected to ElevenLabs");
       toast.success("Ready to record");
     },
-    onDisconnect: (props) => {
+    onDisconnect: (props: unknown) => {
       console.log("Disconnected from ElevenLabs", props);
       toast.info("Recording stopped");
 
@@ -171,40 +116,26 @@ export function VoiceJournal() {
 
   const selectedMoodData = MOODS.find((mood) => mood.id === selectedMood);
 
-  useEffect(() => {
-    let interval: NodeJS.Timeout;
-    if (isBreathing && timer > 0) {
-      interval = setInterval(() => {
-        setTimer((prev) => {
-          if (prev <= 1) {
-            // Move to next step or finish exercise
-            const nextStep = currentStep + 1;
-            const currentExerciseData = BREATHING_EXERCISES[currentExercise];
-            if (!currentExerciseData) return 0;
+  const getSystemPrompt = (mood: string) => {
+    const basePrompt = `You are an empathetic and insightful journaling assistant designed to help users reflect on their day. Your role is to gently prompt users with open-ended questions that encourage self-exploration and emotional clarity. Ask questions like, 'What moment stood out to you today?' or 'How did you feel during that experience?' Maintain a supportive, non-judgmental tone, and allow the user's pace and mood to guide the conversation. Always encourage honesty and self-compassion, ensuring the user feels safe and understood.`;
 
-            if (nextStep < currentExerciseData.steps.length) {
-              setCurrentStep(nextStep);
-              return currentExerciseData.totalTime;
-            } else {
-              setIsBreathing(false);
-              return 0;
-            }
-          }
-          return prev - 1;
-        });
-      }, 1000);
-    }
-    return () => clearInterval(interval);
-  }, [isBreathing, timer, currentStep, currentExercise]);
+    const moodPrompts: Record<string, string> = {
+      vent: "The user needs to vent. Be extra patient and understanding. Let them express their frustrations freely. Acknowledge their feelings and validate their experiences. Don't rush to offer solutions unless specifically asked. Start by creating a safe space for them to express their feelings.",
+      chat: "Keep the conversation light and casual. Be friendly and engaging, but still maintain emotional awareness. Feel free to share brief, relevant observations while keeping the focus on the user. Guide the conversation naturally without being too formal.",
+      unwind:
+        "Help the user relax and decompress. Use a calming tone and gentle pacing. Guide them toward positive reflection while acknowledging any stress or tension they may be carrying. Focus on breathing and present-moment awareness if appropriate.",
+    };
 
-  const startBreathing = (exerciseIndex: number) => {
-    const exercise = BREATHING_EXERCISES[exerciseIndex];
-    if (!exercise) return;
+    const moodData = MOODS.find((m) => m.id === mood);
+    const contextPrompt = `\n\nCurrent Context:\n- User's chosen mood: ${moodData?.label}\n- Session purpose: ${moodData?.description}\n- Initial approach: ${moodData?.prompt}`;
 
-    setCurrentExercise(exerciseIndex);
-    setCurrentStep(0);
-    setTimer(exercise.totalTime);
-    setIsBreathing(true);
+    const moodSpecificPrompt = moodPrompts[mood] ?? moodPrompts.unwind;
+    return `${basePrompt}\n\n${moodSpecificPrompt}${contextPrompt}`;
+  };
+
+  const getFirstMessage = () => {
+    // Simple greeting that works for all moods
+    return `Hi ${name}! How can I help you today?`;
   };
 
   const saveJournalEntry = async () => {
@@ -253,9 +184,19 @@ export function VoiceJournal() {
       }
       try {
         console.log("Starting recording with mood:", selectedMood);
+        console.log("First message:", getFirstMessage());
+        console.log("System prompt:", getSystemPrompt(selectedMood));
         await navigator.mediaDevices.getUserMedia({ audio: true });
         await conversation?.startSession({
-          agentId: "9O7dItLkE9z4UD6y9kwV",
+          agentId: "iJew1GA0fB9bF8IjEY85",
+          overrides: {
+            agent: {
+              firstMessage: getFirstMessage(),
+              prompt: {
+                prompt: getSystemPrompt(selectedMood),
+              },
+            },
+          },
         });
       } catch (error) {
         console.error("Failed to start recording:", error);
@@ -264,48 +205,47 @@ export function VoiceJournal() {
     }
   };
 
-  const handleBurnEntry = () => {
+  const handleDeleteTranscript = () => {
     if (conversation?.status === "connected") {
-      setIsBurning(true);
       void conversation.endSession();
     }
+    setTranscript({ messages: [] });
+    toast.success("Transcript cleared");
   };
 
-  const handleBurnComplete = () => {
-    setIsBurning(false);
-    toast.success("Entry burned 🔥", {
-      description: "Sometimes it helps just to let it out.",
-    });
-  };
+  // Get the last two messages for the preview
+  const lastTwoMessages = transcript.messages.slice(-2);
 
   return (
-    <div className="grid gap-6 md:grid-cols-2">
+    <div className="mx-auto max-w-2xl space-y-6">
       <Card className="relative w-full overflow-hidden border-sage-200 bg-gradient-to-br from-sage-50 to-white shadow-none transition-all hover:border-sage-300 hover:shadow-lg">
-        {isBurning && <BurnEffect onComplete={handleBurnComplete} />}
         <CardHeader>
-          <CardTitle>How are you feeling?</CardTitle>
+          <CardTitle>Voice Journal</CardTitle>
           <CardDescription>
             Select your mood and start recording your thoughts
           </CardDescription>
         </CardHeader>
-        <CardContent className="space-y-4">
+        <CardContent className="space-y-6">
           <Select value={selectedMood} onValueChange={setSelectedMood}>
             <SelectTrigger>
-              <SelectValue placeholder="Select your mood" />
+              <SelectValue placeholder="How are you feeling?" />
             </SelectTrigger>
             <SelectContent>
               {MOODS.map((mood) => (
                 <SelectItem key={mood.id} value={mood.id}>
                   <div className="flex items-center gap-2">
-                    {mood.icon && (
-                      <mood.icon className="h-4 w-4 text-muted-foreground" />
-                    )}
                     <span>{mood.label}</span>
                   </div>
                 </SelectItem>
               ))}
             </SelectContent>
           </Select>
+
+          {selectedMoodData && (
+            <p className="text-sm text-muted-foreground">
+              {selectedMoodData.prompt}
+            </p>
+          )}
 
           <div className="flex gap-2">
             <Button
@@ -338,7 +278,7 @@ export function VoiceJournal() {
               <Button
                 variant="outline"
                 size="icon"
-                onClick={handleBurnEntry}
+                onClick={handleDeleteTranscript}
                 disabled={isProcessing}
               >
                 <Trash2 className="h-4 w-4" />
@@ -346,21 +286,59 @@ export function VoiceJournal() {
             )}
           </div>
 
-          {transcript.messages.length > 0 && (
-            <div className="space-y-4 rounded-lg border bg-card p-4 text-card-foreground shadow-sm">
-              {transcript.messages.map((msg, idx) => (
-                <div
-                  key={idx}
-                  className={cn(
-                    "text-sm",
-                    msg.source === "user"
-                      ? "text-primary"
-                      : "text-muted-foreground",
-                  )}
-                >
-                  {msg.message}
-                </div>
-              ))}
+          {lastTwoMessages.length > 0 && (
+            <div className="space-y-2">
+              <div className="flex items-center justify-between">
+                <h3 className="text-sm font-medium">Recent Messages</h3>
+                <Dialog>
+                  <DialogTrigger asChild>
+                    <Button variant="ghost" size="sm">
+                      <BookOpen className="mr-2 h-4 w-4" />
+                      View Full Conversation
+                    </Button>
+                  </DialogTrigger>
+                  <DialogContent className="max-w-2xl">
+                    <DialogHeader>
+                      <DialogTitle>Conversation History</DialogTitle>
+                      <DialogDescription>
+                        Full transcript of your current session
+                      </DialogDescription>
+                    </DialogHeader>
+                    <ScrollArea className="h-[400px]">
+                      <div className="space-y-4 p-4">
+                        {transcript.messages.map((msg, idx) => (
+                          <div
+                            key={idx}
+                            className={cn(
+                              "rounded-lg p-3",
+                              msg.source === "user"
+                                ? "bg-primary/10 text-primary"
+                                : "bg-muted text-muted-foreground",
+                            )}
+                          >
+                            {msg.message}
+                          </div>
+                        ))}
+                      </div>
+                    </ScrollArea>
+                  </DialogContent>
+                </Dialog>
+              </div>
+              <div className="space-y-2 rounded-lg border bg-card p-4 text-card-foreground shadow-sm">
+                {lastTwoMessages.map((msg, idx) => (
+                  <div
+                    key={idx}
+                    className={cn(
+                      "text-sm",
+                      msg.source === "user"
+                        ? "text-primary"
+                        : "text-muted-foreground",
+                    )}
+                  >
+                    {msg.message}
+                  </div>
+                ))}
+              </div>
             </div>
           )}
         </CardContent>
