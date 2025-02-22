@@ -107,23 +107,25 @@ export function Memory() {
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h2 className="text-2xl font-bold">Memory Bank</h2>
-          <p className="text-muted-foreground">
+          <h2 className="text-sage-800 text-2xl font-bold">Memory Bank</h2>
+          <p className="text-sage-600">
             Store important patterns, triggers, and preferences
           </p>
         </div>
 
         <Dialog>
           <DialogTrigger asChild>
-            <Button>
+            <Button className="bg-sage-500 hover:bg-sage-600 text-white">
               <Plus className="mr-2 h-4 w-4" />
               Add Memory
             </Button>
           </DialogTrigger>
-          <DialogContent>
+          <DialogContent className="from-sage-50 bg-gradient-to-br to-white">
             <DialogHeader>
-              <DialogTitle>Add New Memory</DialogTitle>
-              <DialogDescription>
+              <DialogTitle className="text-sage-800">
+                Add New Memory
+              </DialogTitle>
+              <DialogDescription className="text-sage-600">
                 Record a new pattern, trigger, or preference to help track your
                 journey.
               </DialogDescription>
@@ -204,23 +206,33 @@ export function Memory() {
       </div>
 
       <div className="grid gap-4 md:grid-cols-2">
-        {memories.map((memory) => (
-          <Card key={memory.id}>
+        {memories.map((memory, index) => (
+          <Card
+            key={memory.id}
+            className={`card-hover border-sage-200 from-sage-50 bg-gradient-to-br to-white fade-in`}
+            style={{ animationDelay: `${index * 0.1}s` }}
+          >
             <CardHeader>
               <div className="flex items-start justify-between">
                 <div className="space-y-1">
-                  <CardTitle className="flex items-center gap-2">
-                    <span>{getTypeIcon(memory.type)}</span>
+                  <CardTitle className="text-sage-800 flex items-center gap-2">
+                    <span
+                      className="scale-in"
+                      style={{ animationDelay: `${index * 0.1 + 0.2}s` }}
+                    >
+                      {getTypeIcon(memory.type)}
+                    </span>
                     {memory.title}
                   </CardTitle>
-                  <CardDescription>
+                  <CardDescription className="text-sage-600">
                     Added {memory.dateAdded.toLocaleDateString()}
                   </CardDescription>
                 </div>
                 <Button
                   variant="ghost"
                   size="icon"
-                  className="text-muted-foreground hover:text-destructive"
+                  className="text-sage-500 hover:bg-sage-100 hover:text-sage-700 rotate-in"
+                  style={{ animationDelay: `${index * 0.1 + 0.3}s` }}
                   onClick={() => handleDeleteMemory(memory.id)}
                 >
                   <Trash2 className="h-4 w-4" />
@@ -228,10 +240,18 @@ export function Memory() {
               </div>
             </CardHeader>
             <CardContent>
-              <p className="text-sm">{memory.description}</p>
+              <p
+                className="text-sage-700 slide-up"
+                style={{ animationDelay: `${index * 0.1 + 0.4}s` }}
+              >
+                {memory.description}
+              </p>
             </CardContent>
             <CardFooter>
-              <div className="flex items-center gap-2 text-sm text-muted-foreground">
+              <div
+                className="text-sage-600 slide-up flex items-center gap-2"
+                style={{ animationDelay: `${index * 0.1 + 0.5}s` }}
+              >
                 <Star className="h-4 w-4" />
                 Importance: {memory.importance}/10
               </div>

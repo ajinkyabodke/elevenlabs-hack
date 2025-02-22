@@ -13,265 +13,266 @@ import {
   Dialog,
   DialogContent,
   DialogDescription,
-  DialogFooter,
   DialogHeader,
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
-import { Input } from "@/components/ui/input";
 import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+  Form,
+  FormControl,
+  FormDescription,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from "@/components/ui/form";
+import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-import { addDays, format } from "date-fns";
-import { Clock, Mail, Plus, TimerReset } from "lucide-react";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { Lock, PenLine, Tag, Trash2, Unlock } from "lucide-react";
 import { useState } from "react";
+import { useForm } from "react-hook-form";
 import { toast } from "sonner";
+import { z } from "zod";
 
-interface TimeCapsuleEntry {
-  id: string;
-  type: "future" | "past";
-  title: string;
+const letterSchema = z.object({
+  topic: z.string().min(1, "Topic is required"),
+  content: z.string().min(10, "Letter must be at least 10 characters"),
+  openDate: z.string().refine((date) => new Date(date) > new Date(), {
+    message: "Open date must be in the future",
+  }),
+});
+
+type Letter = {
+  id: number;
+  topic: string;
   content: string;
-  createdAt: Date;
-  deliveryDate?: Date;
-}
+  writtenDate: Date;
+  openDate: Date;
+  isOpen: boolean;
+};
 
 export function TimeCapsule() {
-  const [entries, setEntries] = useState<TimeCapsuleEntry[]>([
+  const form = useForm<z.infer<typeof letterSchema>>({
+    resolver: zodResolver(letterSchema),
+    defaultValues: {
+      topic: "",
+      content: "",
+      openDate: "",
+    },
+  });
+
+  const [letters, setLetters] = useState<Letter[]>([
     {
-      id: "1",
-      type: "future",
-      title: "Goals for Next Year",
-      content: "Dear Future Self, I hope by now you've...",
-      createdAt: new Date(),
-      deliveryDate: addDays(new Date(), 365),
+      id: 1,
+      topic: "Career Goals",
+      content: "Dear future me, I hope you've achieved...",
+      writtenDate: new Date("2024-01-01"),
+      openDate: new Date("2024-12-31"),
+      isOpen: false,
     },
     {
-      id: "2",
-      type: "past",
-      title: "Reflection on Growth",
-      content: "Looking back, I can see how much I've grown...",
-      createdAt: new Date(),
+      id: 2,
+      topic: "Personal Growth",
+      content: "Remember to always stay true to...",
+      writtenDate: new Date("2024-02-15"),
+      openDate: new Date("2024-06-15"),
+      isOpen: true,
     },
   ]);
 
-  const [newEntry, setNewEntry] = useState<Partial<TimeCapsuleEntry>>({
-    type: "future",
-  });
-
-  const handleAddEntry = () => {
-    if (!newEntry.title || !newEntry.content) {
-      toast.error("Please fill in all fields");
-      return;
-    }
-
-    const entry: TimeCapsuleEntry = {
-      id: Math.random().toString(36).substring(7),
-      type: newEntry.type ?? "future",
-      title: newEntry.title,
-      content: newEntry.content,
-      createdAt: new Date(),
-      deliveryDate:
-        newEntry.type === "future"
-          ? (newEntry.deliveryDate ?? addDays(new Date(), 30))
-          : undefined,
+  const handleSubmit = (values: z.infer<typeof letterSchema>) => {
+    const newLetter: Letter = {
+      id: letters.length + 1,
+      topic: values.topic,
+      content: values.content,
+      writtenDate: new Date(),
+      openDate: new Date(values.openDate),
+      isOpen: false,
     };
+    setLetters([...letters, newLetter]);
+    toast.success("Letter sealed successfully");
+  };
 
-    setEntries((prev) => [...prev, entry]);
-    setNewEntry({ type: "future" });
-    toast.success(
-      entry.type === "future"
-        ? "Letter to future self scheduled"
-        : "Reflection on past self saved",
+  const handleOpenLetter = (id: number) => {
+    setLetters(
+      letters.map((letter) =>
+        letter.id === id ? { ...letter, isOpen: true } : letter,
+      ),
     );
   };
 
-  const futureEntries = entries.filter((entry) => entry.type === "future");
-  const pastEntries = entries.filter((entry) => entry.type === "past");
+  const handleDeleteLetter = (id: number) => {
+    setLetters(letters.filter((letter) => letter.id !== id));
+    toast.success("Letter deleted successfully");
+  };
 
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h2 className="text-2xl font-bold">Time Capsule</h2>
-          <p className="text-muted-foreground">
-            Write to your future self or reflect on your past
-          </p>
+          <h2 className="text-sand-800 text-2xl font-bold">Time Capsule</h2>
+          <p className="text-sand-600">Write letters to your future self</p>
         </div>
 
         <Dialog>
           <DialogTrigger asChild>
-            <Button>
-              <Plus className="mr-2 h-4 w-4" />
-              New Entry
+            <Button className="bg-sand-500 hover:bg-sand-600 text-white">
+              <PenLine className="mr-2 h-4 w-4" />
+              Write Letter
             </Button>
           </DialogTrigger>
-          <DialogContent>
+          <DialogContent className="from-sand-50 bg-gradient-to-br to-white">
             <DialogHeader>
-              <DialogTitle>Create Time Capsule Entry</DialogTitle>
-              <DialogDescription>
-                Write a letter to your future self or reflect on your past.
+              <DialogTitle className="text-sand-800">
+                Write to Future You
+              </DialogTitle>
+              <DialogDescription className="text-sand-600">
+                Leave a message for yourself to read in the future.
               </DialogDescription>
             </DialogHeader>
-            <div className="grid gap-4 py-4">
-              <div className="grid gap-2">
-                <Select
-                  value={newEntry.type}
-                  onValueChange={(value: "future" | "past") =>
-                    setNewEntry((prev) => ({ ...prev, type: value }))
-                  }
+            <Form {...form}>
+              <form
+                onSubmit={form.handleSubmit(handleSubmit)}
+                className="space-y-4"
+              >
+                <FormField
+                  control={form.control}
+                  name="topic"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel className="text-sand-700">Topic</FormLabel>
+                      <FormControl>
+                        <Input
+                          placeholder="e.g., Career Goals, Personal Growth"
+                          className="border-sand-200 bg-white/50"
+                          {...field}
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={form.control}
+                  name="content"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel className="text-sand-700">
+                        Your Letter
+                      </FormLabel>
+                      <FormControl>
+                        <Textarea
+                          placeholder="Dear future me..."
+                          className="border-sand-200 min-h-[200px] bg-white/50"
+                          {...field}
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={form.control}
+                  name="openDate"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel className="text-sand-700">Open Date</FormLabel>
+                      <FormControl>
+                        <Input
+                          type="date"
+                          className="border-sand-200 bg-white/50"
+                          {...field}
+                        />
+                      </FormControl>
+                      <FormDescription className="text-sand-600">
+                        Choose when you want to read this letter
+                      </FormDescription>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <Button
+                  type="submit"
+                  className="bg-sand-500 hover:bg-sand-600 w-full text-white"
                 >
-                  <SelectTrigger>
-                    <SelectValue placeholder="Select type" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="future">
-                      Letter to Future Self
-                    </SelectItem>
-                    <SelectItem value="past">
-                      Reflection on Past Self
-                    </SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-              <div className="grid gap-2">
-                <Input
-                  placeholder="Title"
-                  value={newEntry.title ?? ""}
-                  onChange={(e) =>
-                    setNewEntry((prev) => ({ ...prev, title: e.target.value }))
-                  }
-                />
-              </div>
-              <div className="grid gap-2">
-                <Textarea
-                  placeholder={
-                    newEntry.type === "future"
-                      ? "Dear Future Self..."
-                      : "Looking back..."
-                  }
-                  value={newEntry.content ?? ""}
-                  onChange={(e) =>
-                    setNewEntry((prev) => ({
-                      ...prev,
-                      content: e.target.value,
-                    }))
-                  }
-                  className="min-h-[200px]"
-                />
-              </div>
-              {newEntry.type === "future" && (
-                <div className="grid gap-2">
-                  <Select
-                    value={
-                      newEntry.deliveryDate
-                        ? format(newEntry.deliveryDate, "yyyy-MM-dd")
-                        : undefined
-                    }
-                    onValueChange={(value) =>
-                      setNewEntry((prev) => ({
-                        ...prev,
-                        deliveryDate: new Date(value),
-                      }))
-                    }
-                  >
-                    <SelectTrigger>
-                      <SelectValue placeholder="When to deliver?" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem
-                        value={format(addDays(new Date(), 30), "yyyy-MM-dd")}
-                      >
-                        In 1 month
-                      </SelectItem>
-                      <SelectItem
-                        value={format(addDays(new Date(), 90), "yyyy-MM-dd")}
-                      >
-                        In 3 months
-                      </SelectItem>
-                      <SelectItem
-                        value={format(addDays(new Date(), 180), "yyyy-MM-dd")}
-                      >
-                        In 6 months
-                      </SelectItem>
-                      <SelectItem
-                        value={format(addDays(new Date(), 365), "yyyy-MM-dd")}
-                      >
-                        In 1 year
-                      </SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-              )}
-            </div>
-            <DialogFooter>
-              <Button onClick={handleAddEntry}>
-                {newEntry.type === "future"
-                  ? "Schedule Letter"
-                  : "Save Reflection"}
-              </Button>
-            </DialogFooter>
+                  Seal Letter
+                </Button>
+              </form>
+            </Form>
           </DialogContent>
         </Dialog>
       </div>
 
-      <Tabs defaultValue="future" className="space-y-4">
-        <TabsList>
-          <TabsTrigger value="future" className="flex items-center gap-2">
-            <Mail className="h-4 w-4" />
-            Letters to Future Self
-          </TabsTrigger>
-          <TabsTrigger value="past" className="flex items-center gap-2">
-            <TimerReset className="h-4 w-4" />
-            Past Reflections
-          </TabsTrigger>
-        </TabsList>
-
-        <TabsContent value="future" className="space-y-4">
-          {futureEntries.map((entry) => (
-            <Card key={entry.id}>
-              <CardHeader>
-                <CardTitle>{entry.title}</CardTitle>
-                <CardDescription className="flex items-center gap-2">
-                  <Clock className="h-4 w-4" />
-                  Delivery date:{" "}
-                  {entry.deliveryDate?.toLocaleDateString() ?? "Not set"}
-                </CardDescription>
-              </CardHeader>
-              <CardContent>
-                <p className="whitespace-pre-wrap text-sm">{entry.content}</p>
-              </CardContent>
-              <CardFooter>
-                <p className="text-sm text-muted-foreground">
-                  Written on {entry.createdAt.toLocaleDateString()}
-                </p>
-              </CardFooter>
-            </Card>
-          ))}
-        </TabsContent>
-
-        <TabsContent value="past" className="space-y-4">
-          {pastEntries.map((entry) => (
-            <Card key={entry.id}>
-              <CardHeader>
-                <CardTitle>{entry.title}</CardTitle>
-                <CardDescription>
-                  Reflection from {entry.createdAt.toLocaleDateString()}
-                </CardDescription>
-              </CardHeader>
-              <CardContent>
-                <p className="whitespace-pre-wrap text-sm">{entry.content}</p>
-              </CardContent>
-            </Card>
-          ))}
-        </TabsContent>
-      </Tabs>
+      <div className="grid gap-4 md:grid-cols-2">
+        {letters.map((letter, index) => (
+          <Card
+            key={letter.id}
+            className={`card-hover border-sand-200 from-sand-50 bg-gradient-to-br to-white fade-in`}
+            style={{ animationDelay: `${index * 0.1}s` }}
+          >
+            <CardHeader>
+              <div className="flex items-start justify-between">
+                <div className="space-y-1">
+                  <CardTitle
+                    className="text-sand-800 slide-up"
+                    style={{ animationDelay: `${index * 0.1 + 0.2}s` }}
+                  >
+                    To be opened on {letter.openDate.toLocaleDateString()}
+                  </CardTitle>
+                  <CardDescription className="text-sand-600">
+                    Written {letter.writtenDate.toLocaleDateString()}
+                  </CardDescription>
+                </div>
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  className="text-sand-500 hover:bg-sand-100 hover:text-sand-700 rotate-in"
+                  style={{ animationDelay: `${index * 0.1 + 0.3}s` }}
+                  onClick={() => handleDeleteLetter(letter.id)}
+                >
+                  <Trash2 className="h-4 w-4" />
+                </Button>
+              </div>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-2">
+                <div
+                  className="text-sand-700 slide-up flex items-center gap-2"
+                  style={{ animationDelay: `${index * 0.1 + 0.4}s` }}
+                >
+                  <Tag className="h-4 w-4" />
+                  {letter.topic}
+                </div>
+                {letter.isOpen ? (
+                  <p
+                    className="text-sand-700 scale-in"
+                    style={{ animationDelay: `${index * 0.1 + 0.5}s` }}
+                  >
+                    {letter.content}
+                  </p>
+                ) : (
+                  <div className="bg-sand-100 breathing-animation flex items-center justify-center rounded-lg p-8">
+                    <Lock className="text-sand-500 h-8 w-8" />
+                  </div>
+                )}
+              </div>
+            </CardContent>
+            <CardFooter>
+              {!letter.isOpen && new Date() >= letter.openDate && (
+                <Button
+                  className="bg-ocean-500 hover:bg-ocean-600 scale-in text-white"
+                  style={{ animationDelay: `${index * 0.1 + 0.6}s` }}
+                  onClick={() => handleOpenLetter(letter.id)}
+                >
+                  <Unlock className="mr-2 h-4 w-4" />
+                  Open Letter
+                </Button>
+              )}
+            </CardFooter>
+          </Card>
+        ))}
+      </div>
     </div>
   );
 }
