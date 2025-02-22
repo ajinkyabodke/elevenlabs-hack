@@ -24,6 +24,14 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import {
+  Sheet,
+  SheetContent,
+  SheetDescription,
+  SheetHeader,
+  SheetTitle,
+  SheetTrigger,
+} from "@/components/ui/sheet";
 import { cn } from "@/lib/utils";
 import type { JournalEntry } from "@/types";
 import { useConversation } from "@11labs/react";
@@ -31,6 +39,7 @@ import { useUser } from "@clerk/nextjs";
 import { BookOpen, Loader2, Mic, MicOff, Trash2 } from "lucide-react";
 import { useRef, useState } from "react";
 import { toast } from "sonner";
+import { BREATHING_EXERCISES, GROUNDING_TECHNIQUES } from "./CalmingExercises";
 
 type Mood = {
   id: string;
@@ -117,7 +126,7 @@ export function VoiceJournal() {
   const selectedMoodData = MOODS.find((mood) => mood.id === selectedMood);
 
   const getSystemPrompt = (mood: string) => {
-    const basePrompt = `You are an empathetic and insightful journaling assistant designed to help users reflect on their day. Your role is to gently prompt users with open-ended questions that encourage self-exploration and emotional clarity. Ask questions like, 'What moment stood out to you today?' or 'How did you feel during that experience?' Maintain a supportive, non-judgmental tone, and allow the user's pace and mood to guide the conversation. Always encourage honesty and self-compassion, ensuring the user feels safe and understood.`;
+    const basePrompt = `You are an empathetic and insightful journaling assistant designed to help users reflect on their day. Your role is to gently prompt users with open-ended questions that encourage self-exploration and emotional clarity. Ask questions like, 'What moment stood out to you today?' or 'How did you feel during that experience?' Maintain a supportive, non-judgmental tone, and allow the user's pace and mood to guide the conversation. Always encourage honesty and self-compassion, ensuring the user feels safe and understood. Respond in at most 2-3 sentences.`;
 
     const moodPrompts: Record<string, string> = {
       vent: "The user needs to vent. Be extra patient and understanding. Let them express their frustrations freely. Acknowledge their feelings and validate their experiences. Don't rush to offer solutions unless specifically asked. Start by creating a safe space for them to express their feelings.",
@@ -136,6 +145,16 @@ export function VoiceJournal() {
   const getFirstMessage = () => {
     // Simple greeting that works for all moods
     return `Hi ${name}! How can I help you today?`;
+  };
+
+  const startBreathing = (exerciseIndex: number) => {
+    const exercise = BREATHING_EXERCISES[exerciseIndex];
+    if (!exercise) return;
+
+    setCurrentExercise(exerciseIndex);
+    setCurrentStep(0);
+    setTimer(exercise.totalTime);
+    setIsBreathing(true);
   };
 
   const saveJournalEntry = async () => {
@@ -173,7 +192,7 @@ export function VoiceJournal() {
       console.log("Stopping recording...");
       await conversation.endSession();
       setIsProcessing(true);
-      await saveJournalEntry();
+      // await saveJournalEntry(); // dont do this here because otherwise it runs twice.
       setTranscript({ messages: [] });
       transcriptRef.current.messages = [];
       setIsProcessing(false);
