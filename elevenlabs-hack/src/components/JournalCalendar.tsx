@@ -20,7 +20,7 @@ interface JournalCalendarProps {
 export function JournalCalendar({ entries }: JournalCalendarProps) {
   const [date, setDate] = useState<Date>(startOfToday());
 
-  // Create a map of dates to entries for quick lookup
+  // Creates a map of dates to entries for quick lookup
   const entriesByDate = entries.reduce(
     (acc, entry) => {
       const date = new Date(entry.createdAt);
