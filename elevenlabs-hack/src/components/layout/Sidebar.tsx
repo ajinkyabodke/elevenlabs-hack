@@ -80,6 +80,8 @@ export function Sidebar() {
     </div>
   );
 
+  if (pathname === "/") return null;
+
   return (
     <>
       {/* Mobile Sidebar */}
