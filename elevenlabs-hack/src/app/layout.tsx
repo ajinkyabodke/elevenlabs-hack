@@ -1,5 +1,6 @@
 import "@/styles/globals.css";
 
+import { GeistSans } from "geist/font/sans";
 import { Inter } from "next/font/google";
 import { Toaster } from "sonner";
 
@@ -22,7 +23,7 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en">
-      <body className={`font-sans ${inter.variable}`}>
+      <body className={GeistSans.className}>
         {children}
         <Toaster />
       </body>
