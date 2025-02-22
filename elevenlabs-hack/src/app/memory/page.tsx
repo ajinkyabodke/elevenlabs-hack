@@ -13,7 +13,7 @@ export default function MemoryPage() {
         </p>
       </div>
 
-      <div className="mt-4 rounded-lg bg-neutral-50 p-2">
+      <div className="mt-4 rounded-lg p-2">
         <Memory />
       </div>
     </main>
