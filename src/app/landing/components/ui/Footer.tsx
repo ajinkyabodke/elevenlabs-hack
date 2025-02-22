@@ -187,7 +187,7 @@ const Footer = () => {
               </Link>
             </div>
             <div className="ml-2 hidden text-sm text-gray-700 lg:inline">
-              &copy; {CURRENT_YEAR} Voice Journal AI
+              &copy; {CURRENT_YEAR} Echo AI
             </div>
           </div>
         </div>
