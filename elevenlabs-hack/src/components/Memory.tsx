@@ -32,14 +32,31 @@ import { Plus, Star, Trash2 } from "lucide-react";
 import { useState } from "react";
 import { toast } from "sonner";
 
+const MEMORY_TYPES = ["trigger", "pattern", "preference"] as const;
+type MemoryType = (typeof MEMORY_TYPES)[number];
+
 interface MemoryItem {
   id: string;
-  type: "trigger" | "pattern" | "preference";
+  type: MemoryType;
   title: string;
   description: string;
   importance: number;
   dateAdded: Date;
 }
+
+interface NewMemory {
+  type: MemoryType;
+  title: string;
+  description: string;
+  importance: number;
+}
+
+const DEFAULT_NEW_MEMORY: NewMemory = {
+  type: "pattern",
+  title: "",
+  description: "",
+  importance: 5,
+};
 
 export function Memory() {
   const [memories, setMemories] = useState<MemoryItem[]>([
@@ -62,37 +79,40 @@ export function Memory() {
     },
   ]);
 
-  const [newMemory, setNewMemory] = useState<Partial<MemoryItem>>({
-    type: "pattern",
-    importance: 5,
-  });
+  const [newMemory, setNewMemory] = useState<NewMemory>(DEFAULT_NEW_MEMORY);
 
   const handleAddMemory = () => {
     if (!newMemory.title || !newMemory.description) {
-      toast.error("Please fill in all fields");
+      toast.error("Please fill in all fields", {
+        description: "Both title and description are required.",
+      });
       return;
     }
 
     const memory: MemoryItem = {
-      id: Math.random().toString(36).substring(7),
-      type: newMemory.type as "trigger" | "pattern" | "preference",
+      id: crypto.randomUUID(),
+      type: newMemory.type,
       title: newMemory.title,
       description: newMemory.description,
-      importance: newMemory.importance || 5,
+      importance: newMemory.importance,
       dateAdded: new Date(),
     };
 
     setMemories((prev) => [...prev, memory]);
-    setNewMemory({ type: "pattern", importance: 5 });
-    toast.success("Memory added");
+    setNewMemory(DEFAULT_NEW_MEMORY);
+    toast.success("Memory added", {
+      description: "Your memory has been saved to the bank.",
+    });
   };
 
   const handleDeleteMemory = (id: string) => {
     setMemories((prev) => prev.filter((m) => m.id !== id));
-    toast.success("Memory deleted");
+    toast.success("Memory deleted", {
+      description: "The memory has been removed from your bank.",
+    });
   };
 
-  const getTypeIcon = (type: MemoryItem["type"]) => {
+  const getTypeIcon = (type: MemoryType) => {
     switch (type) {
       case "trigger":
         return "⚡️";
@@ -135,8 +155,8 @@ export function Memory() {
                 <Label htmlFor="type">Type</Label>
                 <Select
                   value={newMemory.type}
-                  onValueChange={(value) =>
-                    setNewMemory((prev) => ({ ...prev, type: value as any }))
+                  onValueChange={(value: MemoryType) =>
+                    setNewMemory((prev) => ({ ...prev, type: value }))
                   }
                 >
                   <SelectTrigger>
@@ -153,7 +173,7 @@ export function Memory() {
                 <Label htmlFor="title">Title</Label>
                 <Input
                   id="title"
-                  value={newMemory.title || ""}
+                  value={newMemory.title}
                   onChange={(e) =>
                     setNewMemory((prev) => ({ ...prev, title: e.target.value }))
                   }
@@ -164,7 +184,7 @@ export function Memory() {
                 <Label htmlFor="description">Description</Label>
                 <Textarea
                   id="description"
-                  value={newMemory.description || ""}
+                  value={newMemory.description}
                   onChange={(e) =>
                     setNewMemory((prev) => ({
                       ...prev,
@@ -177,7 +197,7 @@ export function Memory() {
               <div className="grid gap-2">
                 <Label htmlFor="importance">Importance (1-10)</Label>
                 <Select
-                  value={newMemory.importance?.toString()}
+                  value={newMemory.importance.toString()}
                   onValueChange={(value) =>
                     setNewMemory((prev) => ({
                       ...prev,
