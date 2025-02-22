@@ -10,7 +10,6 @@ import {
   RiPlaneFill,
   RiTruckFill,
 } from "@remixicon/react";
-import { SolarMark } from "public/SolarMark";
 import { Icons } from "../Icons";
 import { Orbit } from "../Orbit";
 import ChipViz from "./ChipViz";
@@ -129,9 +128,9 @@ export default function Features() {
       <div className="grid grid-cols-1 gap-12 md:grid-cols-4 md:gap-0">
         {/* Content */}
         <div className="col-span-2 my-auto px-2">
-          <h2 className="relative text-lg font-semibold tracking-tight text-orange-500">
+          <h2 className="relative text-lg font-semibold tracking-tight text-cyan-500">
             AI-Powered Journaling
-            <div className="absolute -left-[8px] top-1 h-5 w-[3px] rounded-r-sm bg-orange-500" />
+            <div className="absolute -left-[8px] top-1 h-5 w-[3px] rounded-r-sm bg-cyan-500" />
           </h2>
           <p className="mt-2 text-balance text-3xl font-semibold tracking-tighter text-gray-900 md:text-4xl">
             Transform your voice into structured reflections
@@ -284,9 +283,13 @@ export default function Features() {
                 ]}
               >
                 <div className="relative flex h-48 w-48 items-center justify-center">
-                  <div className="rounded-full p-1 ring-1 ring-black/10">
+                  <div className="rounded-full p-1 ring-1 ring-indigo-200">
                     <div className="relative z-10 flex size-20 items-center justify-center rounded-full bg-white shadow-[inset_0px_-15px_20px_rgba(0,0,0,0.1),0_7px_10px_0_rgba(0,0,0,0.15)] ring-1 ring-black/20">
-                      <SolarMark className="size-10" />
+                      <img
+                        src="/EchoLogo.png"
+                        alt="Echo Logo"
+                        className="size-16"
+                      />
                     </div>
                     <div className="bg-linear-to-t absolute inset-12 animate-[spin_8s_linear_infinite] rounded-full from-transparent via-orange-400 to-transparent blur-lg" />
                   </div>
@@ -297,9 +300,9 @@ export default function Features() {
         </div>
 
         <div className="col-span-2 my-auto px-2">
-          <h2 className="relative text-lg font-semibold tracking-tight text-orange-500">
+          <h2 className="relative text-lg font-semibold tracking-tight text-cyan-500">
             Emotional Intelligence
-            <div className="absolute -left-[8px] top-1 h-5 w-[3px] rounded-r-sm bg-orange-500" />
+            <div className="absolute -left-[8px] top-1 h-5 w-[3px] rounded-r-sm bg-cyan-500" />
           </h2>
           <p className="mt-2 text-balance text-3xl font-semibold tracking-tighter text-gray-900 md:text-4xl">
             Understand your emotional landscape
@@ -353,8 +356,12 @@ export default function Features() {
 
             <div className="pointer-events-none relative h-full select-none">
               <div className="absolute left-[191.8px] top-[192px]">
-                <div className="flex h-12 w-12 items-center justify-center bg-white shadow-sm ring-1 ring-black/15">
-                  <SolarMark className="h-8 w-8" />
+                <div className="flex h-12 w-12 items-center justify-center bg-white shadow-sm ring-1 ring-indigo-200">
+                  <img
+                    src="/EchoLogo.png"
+                    alt="Echo Logo"
+                    className="h-11 w-11"
+                  />
                 </div>
               </div>
               <div className="absolute left-[48px] top-[144px]">
@@ -426,9 +433,9 @@ export default function Features() {
           </div>
         </div>
         <div className="col-span-2 my-auto px-2">
-          <h2 className="relative text-lg font-semibold tracking-tight text-orange-500">
+          <h2 className="relative text-lg font-semibold tracking-tight text-cyan-500">
             Personal Growth
-            <div className="absolute -left-[7px] top-1 h-5 w-[3px] rounded-r-sm bg-orange-500" />
+            <div className="absolute -left-[7px] top-1 h-5 w-[3px] rounded-r-sm bg-cyan-500" />
           </h2>
           <p className="mt-2 text-balance text-3xl font-semibold tracking-tighter text-gray-900 md:text-4xl">
             Track your journey with actionable insights
