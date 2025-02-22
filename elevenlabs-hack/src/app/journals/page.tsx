@@ -18,6 +18,8 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { formatDistanceToNow } from "date-fns";
 import { ArrowRight } from "lucide-react";
 import Link from "next/link";
+import { EnhancedCalendar } from "@/components/EnhancedCalendar";
+import { CalendarWrapper } from "@/components/CalendarWrapper";
 
 export default async function JournalsPage() {
   const entries = await getJournalEntries();
@@ -138,12 +140,12 @@ export default async function JournalsPage() {
             <CardHeader>
               <CardTitle>Calendar View</CardTitle>
               <CardDescription>
-                View your entries in a calendar format. Dots indicate mood
+                View your entries and events in a calendar format. Emojis indicate mood
                 scores.
               </CardDescription>
             </CardHeader>
             <CardContent>
-              <JournalCalendar entries={entries} />
+              <CalendarWrapper entries={entries} />
             </CardContent>
           </Card>
         </TabsContent>
