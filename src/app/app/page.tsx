@@ -1,5 +1,6 @@
 "use client";
 
+import { RecordButton } from "@/components/RecordButton";
 import { ToolDialog } from "@/components/ToolDialog";
 import { Button } from "@/components/ui/button";
 import {
@@ -32,7 +33,7 @@ import type { JournalEntry } from "@/types";
 import { useConversation } from "@11labs/react";
 import { useUser } from "@clerk/nextjs";
 import { useAtom } from "jotai";
-import { BookOpen, Loader2, Mic, MicOff, Trash2 } from "lucide-react";
+import { BookOpen, Trash2 } from "lucide-react";
 import { useRef, useState } from "react";
 import { toast } from "sonner";
 
@@ -287,32 +288,13 @@ export default function Home() {
             </p>
           )}
 
-          <div className="flex gap-2">
-            <Button
-              variant={
-                conversation?.status === "connected" ? "destructive" : "default"
-              }
+          <div className="flex items-center justify-center gap-2">
+            <RecordButton
+              isRecording={conversation?.status === "connected"}
+              isProcessing={isProcessing}
               onClick={toggleRecording}
               disabled={isProcessing || isPending}
-              className="flex-1"
-            >
-              {isProcessing ? (
-                <>
-                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                  Processing...
-                </>
-              ) : conversation?.status === "connected" ? (
-                <>
-                  <MicOff className="mr-2 h-4 w-4" />
-                  Stop Recording
-                </>
-              ) : (
-                <>
-                  <Mic className="mr-2 h-4 w-4" />
-                  Start Recording
-                </>
-              )}
-            </Button>
+            />
 
             {conversation?.status === "connected" && (
               <Button
