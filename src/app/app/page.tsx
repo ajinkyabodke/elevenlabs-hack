@@ -1,14 +1,7 @@
 "use client";
 
-import { ToolDialog } from "@/components/ToolDialog";
+import { RecordButton } from "@/components/RecordButton";
 import { Button } from "@/components/ui/button";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
 import {
   Dialog,
   DialogContent,
@@ -18,13 +11,6 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
 import { activeToolAtom, type ToolType } from "@/lib/atoms";
 import { cn } from "@/lib/utils";
 import { api } from "@/trpc/react";
@@ -32,7 +18,8 @@ import type { JournalEntry } from "@/types";
 import { useConversation } from "@11labs/react";
 import { useUser } from "@clerk/nextjs";
 import { useAtom } from "jotai";
-import { BookOpen, Loader2, Mic, MicOff, Trash2 } from "lucide-react";
+import { BookOpen, LucideX } from "lucide-react";
+import { motion } from "motion/react";
 import { useRef, useState } from "react";
 import { toast } from "sonner";
 
@@ -77,6 +64,7 @@ interface ConversationTranscript {
 export default function Home() {
   const [selectedMood, setSelectedMood] = useState<string>("chat");
   const [isProcessing, setIsProcessing] = useState(false);
+  const [isRecording, setIsRecording] = useState(false);
   const transcriptRef = useRef<ConversationTranscript>({
     messages: [],
   });
@@ -92,11 +80,9 @@ export default function Home() {
   const conversation = useConversation({
     onConnect: () => {
       console.log("Connected to ElevenLabs");
-      toast.success("Ready to record");
     },
     onDisconnect: (props: unknown) => {
       console.log("Disconnected from ElevenLabs", props);
-      toast.info("Recording stopped");
 
       void saveJournalEntry();
     },
@@ -212,12 +198,14 @@ export default function Home() {
   const toggleRecording = async () => {
     if (conversation?.status === "connected") {
       console.log("Stopping recording...");
-      await conversation.endSession();
+      setIsRecording(false);
       setIsProcessing(true);
+      await conversation.endSession();
       setTranscript({ messages: [] });
       transcriptRef.current.messages = [];
       setIsProcessing(false);
     } else {
+      setIsRecording(true);
       if (!selectedMood) {
         toast.error("Please select how you're feeling first");
         return;
@@ -245,144 +233,175 @@ export default function Home() {
   };
 
   const handleDeleteTranscript = () => {
+    setIsRecording(false);
+    setIsProcessing(false);
     if (conversation?.status === "connected") {
       void conversation.endSession();
     }
     setTranscript({ messages: [] });
-    toast.success("Transcript cleared");
   };
 
   // Get the last two messages for the preview
   const lastTwoMessages = transcript.messages.slice(-2);
 
   return (
-    <div className="mx-auto max-w-2xl space-y-6">
-      <ToolDialog />
-      <Card className="relative w-full overflow-hidden border-sage-200 bg-gradient-to-br from-sage-50 to-white shadow-none transition-all hover:border-sage-300 hover:shadow-lg">
-        <CardHeader>
-          <CardTitle>Voice Journal</CardTitle>
-          <CardDescription>
-            Select your mood and start recording your thoughts
-          </CardDescription>
-        </CardHeader>
-        <CardContent className="space-y-6">
-          <Select value={selectedMood} onValueChange={setSelectedMood}>
-            <SelectTrigger>
-              <SelectValue placeholder="How are you feeling?" />
-            </SelectTrigger>
-            <SelectContent>
-              {MOODS.map((mood) => (
-                <SelectItem key={mood.id} value={mood.id}>
-                  <div className="flex items-center gap-2">
-                    <span>{mood.label}</span>
-                  </div>
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
+    <>
+      <div className="space-y-6">
+        <div className="mx-auto mt-10 w-full max-w-lg">
+          <div className="relative flex items-center rounded-full bg-secondary/30 p-1">
+            {MOODS.map((mood) => (
+              <button
+                key={mood.id}
+                onClick={() => setSelectedMood(mood.id)}
+                className={cn(
+                  "relative z-10 flex w-full items-center justify-center gap-2 rounded-full py-2.5 text-sm font-medium transition-colors duration-200",
+                  "hover:text-primary",
+                  selectedMood === mood.id
+                    ? "text-primary-foreground"
+                    : "text-muted-foreground hover:text-primary",
+                )}
+              >
+                <motion.span
+                  initial={{ scale: 0.9 }}
+                  animate={{
+                    scale: selectedMood === mood.id ? 1.1 : 0.9,
+                    opacity: selectedMood === mood.id ? 1 : 0.8,
+                  }}
+                  transition={{ type: "spring", stiffness: 400, damping: 20 }}
+                  className="flex items-center gap-2"
+                >
+                  <span className="text-base">
+                    {mood.id === "vent" && "😡"}
+                    {mood.id === "chat" && "😄"}
+                    {mood.id === "unwind" && "😌"}
+                  </span>
+                  <span>{mood.label}</span>
+                </motion.span>
+              </button>
+            ))}
+
+            <motion.div
+              className="absolute inset-0 z-0"
+              initial={false}
+              animate={{
+                x: `${(MOODS.findIndex((m) => m.id === selectedMood) * 100) / MOODS.length}%`,
+              }}
+              transition={{ type: "spring", stiffness: 300, damping: 30 }}
+            >
+              <div className="h-full w-[calc(100%/3)] rounded-full bg-primary shadow-sm" />
+            </motion.div>
+          </div>
+        </div>
+
+        <div className="mt-20 h-20" />
+
+        {selectedMoodData && (
+          <h4 className="flex w-full justify-center gap-3 text-center font-serif text-6xl text-card-foreground">
+            {/* <span className="text-orange-400">✱</span> */}
+            <span>{selectedMoodData.description}</span>
+          </h4>
+        )}
+
+        <div className="-mt-4 flex items-center justify-center gap-3 text-center font-serif text-4xl tracking-tight sm:text-6xl">
+          {/* <h1>Happy late night, {name}</h1> */}
 
           {selectedMoodData && (
-            <p className="text-sm text-muted-foreground">
+            <h1 className="flex items-center gap-3 text-center text-2xl tracking-normal text-accent-foreground">
+              <span className="text-orange-400">✱</span>
               {selectedMoodData.prompt}
-            </p>
+            </h1>
           )}
+        </div>
 
-          <div className="flex gap-2">
+        <div className="flex items-center justify-center gap-2">
+          <RecordButton
+            isRecording={isRecording}
+            isProcessing={isProcessing}
+            onMouseDown={toggleRecording}
+            disabled={isProcessing || isPending}
+          />
+
+          {isRecording && (
             <Button
-              variant={
-                conversation?.status === "connected" ? "destructive" : "default"
-              }
-              onClick={toggleRecording}
-              disabled={isProcessing || isPending}
-              className="flex-1"
+              variant="ghost"
+              size="icon"
+              className="rounded-full"
+              onClick={handleDeleteTranscript}
+              disabled={isProcessing}
             >
-              {isProcessing ? (
-                <>
-                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                  Processing...
-                </>
-              ) : conversation?.status === "connected" ? (
-                <>
-                  <MicOff className="mr-2 h-4 w-4" />
-                  Stop Recording
-                </>
-              ) : (
-                <>
-                  <Mic className="mr-2 h-4 w-4" />
-                  Start Recording
-                </>
-              )}
+              <LucideX className="h-4 w-4" />
             </Button>
-
-            {conversation?.status === "connected" && (
-              <Button
-                variant="outline"
-                size="icon"
-                onClick={handleDeleteTranscript}
-                disabled={isProcessing}
-              >
-                <Trash2 className="h-4 w-4" />
-              </Button>
-            )}
-          </div>
-
-          {lastTwoMessages.length > 0 && (
-            <div className="space-y-2">
-              <div className="flex items-center justify-between">
-                <h3 className="text-sm font-medium">Recent Messages</h3>
-                <Dialog>
-                  <DialogTrigger asChild>
-                    <Button variant="ghost" size="sm">
-                      <BookOpen className="mr-2 h-4 w-4" />
-                      View Full Conversation
-                    </Button>
-                  </DialogTrigger>
-                  <DialogContent className="max-w-2xl">
-                    <DialogHeader>
-                      <DialogTitle>Conversation History</DialogTitle>
-                      <DialogDescription>
-                        Full transcript of your current session
-                      </DialogDescription>
-                    </DialogHeader>
-                    <ScrollArea className="h-[400px]">
-                      <div className="space-y-4 p-4">
-                        {transcript.messages.map((msg, idx) => (
-                          <div
-                            key={idx}
-                            className={cn(
-                              "rounded-lg p-3",
-                              msg.source === "user"
-                                ? "bg-primary/10 text-primary"
-                                : "bg-muted text-muted-foreground",
-                            )}
-                          >
-                            {msg.message}
-                          </div>
-                        ))}
-                      </div>
-                    </ScrollArea>
-                  </DialogContent>
-                </Dialog>
-              </div>
-              <div className="space-y-2 rounded-lg border bg-card p-4 text-card-foreground shadow-sm">
-                {lastTwoMessages.map((msg, idx) => (
-                  <div
-                    key={idx}
-                    className={cn(
-                      "text-sm",
-                      msg.source === "user"
-                        ? "text-primary"
-                        : "text-muted-foreground",
-                    )}
-                  >
-                    {msg.message}
-                  </div>
-                ))}
-              </div>
-            </div>
           )}
-        </CardContent>
-      </Card>
-    </div>
+        </div>
+
+        {lastTwoMessages.length > 0 && (
+          <div className="space-y-2">
+            <div className="flex items-center justify-between">
+              <h3 className="text-sm font-medium">Recent Messages</h3>
+              <Dialog>
+                <DialogTrigger asChild>
+                  <Button variant="ghost" size="sm">
+                    <BookOpen className="mr-2 h-4 w-4" />
+                    View Full Conversation
+                  </Button>
+                </DialogTrigger>
+                <DialogContent className="max-w-2xl">
+                  <DialogHeader>
+                    <DialogTitle>Conversation History</DialogTitle>
+                    <DialogDescription>
+                      Full transcript of your current session
+                    </DialogDescription>
+                  </DialogHeader>
+                  <ScrollArea className="h-[400px]">
+                    <div className="space-y-4 p-4">
+                      {transcript.messages.map((msg, idx) => (
+                        <div
+                          key={idx}
+                          className={cn(
+                            "rounded-lg p-3",
+                            msg.source === "user"
+                              ? "bg-primary/10 text-primary"
+                              : "bg-muted text-muted-foreground",
+                          )}
+                        >
+                          {msg.message}
+                        </div>
+                      ))}
+                    </div>
+                  </ScrollArea>
+                </DialogContent>
+              </Dialog>
+            </div>
+            <div className="space-y-2 rounded-lg border bg-card p-4 text-card-foreground shadow-sm">
+              {lastTwoMessages.map((msg, idx) => (
+                <div
+                  key={idx}
+                  className={cn(
+                    "text-sm",
+                    msg.source === "user"
+                      ? "text-primary"
+                      : "text-muted-foreground",
+                  )}
+                >
+                  {msg.message}
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+      </div>
+    </>
+    // <div className="mx-auto max-w-2xl space-y-6">
+    //   <ToolDialog />
+    //   <Card className="relative w-full overflow-hidden border-sage-200 bg-gradient-to-br from-sage-50 to-white shadow-none transition-all hover:border-sage-300 hover:shadow-lg">
+    //     <CardHeader>
+    //       <CardTitle>Voice Journal</CardTitle>
+    //       <CardDescription>
+    //         Select your mood and start recording your thoughts
+    //       </CardDescription>
+    //     </CardHeader>
+
+    //   </Card>
+    // </div>
   );
 }
