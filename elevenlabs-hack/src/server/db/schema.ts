@@ -3,11 +3,12 @@
 
 import { sql } from "drizzle-orm";
 import {
+  decimal,
   index,
   integer,
   pgTableCreator,
+  text,
   timestamp,
-  varchar,
 } from "drizzle-orm/pg-core";
 
 /**
@@ -18,19 +19,18 @@ import {
  */
 export const createTable = pgTableCreator((name) => `elevenlabs-hack_${name}`);
 
-export const posts = createTable(
-  "post",
+export const journalEntries = createTable(
+  "journal_entry",
   {
     id: integer("id").primaryKey().generatedByDefaultAsIdentity(),
-    name: varchar("name", { length: 256 }),
+    rawEntry: text("raw_entry").notNull(), // Original user input
+    summarizedEntry: text("summarized_entry").notNull(), // AI-generated summary
+    moodScore: decimal("mood_score", { precision: 5, scale: 2 }).notNull(), // Score between 0-100
     createdAt: timestamp("created_at", { withTimezone: true })
       .default(sql`CURRENT_TIMESTAMP`)
       .notNull(),
-    updatedAt: timestamp("updated_at", { withTimezone: true }).$onUpdate(
-      () => new Date()
-    ),
   },
-  (example) => ({
-    nameIndex: index("name_idx").on(example.name),
-  })
+  (table) => ({
+    createdAtIndex: index("created_at_idx").on(table.createdAt),
+  }),
 );
