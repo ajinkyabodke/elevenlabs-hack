@@ -3,6 +3,7 @@ export interface JournalEntry {
   rawEntry: string;
   summarizedEntry: string;
   moodScore: string;
+  significantEvents?: string[] | null;
   createdAt: string | Date;
 }
 
