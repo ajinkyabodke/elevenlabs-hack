@@ -6,6 +6,7 @@ import {
   decimal,
   index,
   integer,
+  json,
   pgTableCreator,
   text,
   timestamp,
@@ -29,6 +30,11 @@ export const users = createTable("user", {
   updatedAt: timestamp("updated_at", { withTimezone: true })
     .default(sql`CURRENT_TIMESTAMP`)
     .notNull(),
+
+  memory: json("memory").default([]).notNull().$type<string[]>(),
+  memoryEnabledAt: timestamp("memoryEnabledAt", {
+    withTimezone: true,
+  }).defaultNow(),
 });
 
 export const journalEntries = createTable(
@@ -50,3 +56,14 @@ export const journalEntries = createTable(
     userIdIndex: index("user_id_idx").on(table.userId),
   }),
 );
+
+export const longTermMemory = createTable("long_term_memory", {
+  id: integer("id").primaryKey().generatedByDefaultAsIdentity(),
+  userId: varchar("user_id", { length: 255 })
+    .notNull()
+    .references(() => users.id, { onDelete: "cascade" }),
+  memory: text("memory").notNull(),
+  createdAt: timestamp("created_at", { withTimezone: true })
+    .default(sql`CURRENT_TIMESTAMP`)
+    .notNull(),
+});

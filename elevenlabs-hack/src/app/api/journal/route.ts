@@ -34,8 +34,6 @@ export async function POST(req: Request) {
       return Response.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    const primaryEmail = user.emailAddresses[0]?.emailAddress ?? "";
-
     const body = (await req.json()) as JournalEntryInput;
     const { rawEntry } = journalEntrySchema.parse(body);
 
