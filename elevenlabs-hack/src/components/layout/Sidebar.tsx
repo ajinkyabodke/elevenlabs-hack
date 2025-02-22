@@ -61,8 +61,8 @@ export function Sidebar() {
   const SidebarContent = () => (
     <div className="flex h-full flex-col">
       <div className="flex-1 py-4">
-        {sidebarItems.map((item) => (
-          <Link key={item.href} href={item.href}>
+        {sidebarItems.map((item, idx) => (
+          <Link key={idx} href={item.href}>
             <Button
               variant="ghost"
               className={cn(
