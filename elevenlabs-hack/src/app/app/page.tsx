@@ -1,14 +1,6 @@
 "use client";
 
-import { ToolDialog } from "@/components/ToolDialog";
 import { Button } from "@/components/ui/button";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
 import {
   Dialog,
   DialogContent,
@@ -18,7 +10,6 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { activeToolAtom, type ToolType } from "@/lib/atoms";
 import { cn } from "@/lib/utils";
 import { api, type RouterOutputs } from "@/trpc/react";
@@ -26,7 +17,8 @@ import type { JournalEntry } from "@/types";
 import { useConversation } from "@11labs/react";
 import { useUser } from "@clerk/nextjs";
 import { useAtom } from "jotai";
-import { BookOpen, Loader2, Mic, MicOff, Trash2 } from "lucide-react";
+import { BookOpen, Bot, Loader2, Mic, MicOff, Trash2 } from "lucide-react";
+import { AnimatePresence, motion } from "motion/react";
 import { useRef, useState } from "react";
 import { toast } from "sonner";
 
@@ -262,131 +254,157 @@ export default function Home() {
   const lastTwoMessages = transcript.messages.slice(-2);
 
   return (
-    <div className="mx-auto max-w-2xl space-y-6">
-      <ToolDialog />
-      <Card className="relative w-full overflow-hidden border-sage-200 bg-gradient-to-br from-sage-50 to-white shadow-none transition-all hover:border-sage-300 hover:shadow-lg">
-        <CardHeader>
-          <CardTitle>Voice Journal</CardTitle>
-          <CardDescription>
-            Select your mood and start recording your thoughts
-          </CardDescription>
-        </CardHeader>
-        <CardContent className="space-y-6">
-          <Tabs value={selectedMood} onValueChange={setSelectedMood}>
-            <TabsList className="mx-auto flex w-max items-center">
-              {MOODS.map((mood) => (
-                <TabsTrigger key={mood.id} value={mood.id}>
-                  <div className="flex items-center gap-2">
-                    <span>{mood.icon}</span>
-                    <span>{mood.label}</span>
-                  </div>
-                </TabsTrigger>
-              ))}
-            </TabsList>
-          </Tabs>
+    <div className="min-h-screen bg-gradient-to-b from-gray-50 to-gray-100 dark:from-gray-900 dark:to-gray-800">
+      <div className="container mx-auto max-w-2xl px-4 py-8">
+        <header className="mb-8 text-center">
+          <h1 className="mb-2 text-4xl font-bold tracking-tight">
+            Voice Journal
+          </h1>
+          <p className="text-muted-foreground">
+            Speak your mind, find your peace
+          </p>
+        </header>
 
-          {selectedMoodData && (
-            <p className="text-sm text-muted-foreground">
-              {selectedMoodData.prompt}
-            </p>
-          )}
-
-          <div className="flex gap-2">
-            <Button
-              variant={
-                conversation?.status === "connected" ? "destructive" : "default"
-              }
-              onClick={toggleRecording}
-              disabled={isProcessing || isPending}
-              className="flex-1"
-            >
-              {isProcessing ? (
-                <>
-                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                  Processing...
-                </>
-              ) : conversation?.status === "connected" ? (
-                <>
-                  <MicOff className="mr-2 h-4 w-4" />
-                  Stop Recording
-                </>
-              ) : (
-                <>
-                  <Mic className="mr-2 h-4 w-4" />
-                  Start Recording
-                </>
-              )}
-            </Button>
-
-            {conversation?.status === "connected" && (
+        <div className="mb-8 grid gap-4">
+          <div className="flex justify-center gap-2">
+            {MOODS.map((mood) => (
               <Button
-                variant="outline"
-                size="icon"
-                onClick={handleDeleteTranscript}
-                disabled={isProcessing}
+                key={mood.id}
+                variant={selectedMood === mood.id ? "default" : "outline"}
+                className={`gap-2 px-6 py-6`}
+                onClick={() => setSelectedMood(mood.id)}
               >
-                <Trash2 className="h-4 w-4" />
+                {mood.icon}
+                <span className="capitalize">{mood.label}</span>
               </Button>
-            )}
+            ))}
           </div>
 
-          {lastTwoMessages.length > 0 && (
-            <div className="space-y-2">
-              <div className="flex items-center justify-between">
-                <h3 className="text-sm font-medium">Recent Messages</h3>
-                <Dialog>
-                  <DialogTrigger asChild>
-                    <Button variant="ghost" size="sm">
-                      <BookOpen className="mr-2 h-4 w-4" />
-                      View Full Conversation
-                    </Button>
-                  </DialogTrigger>
-                  <DialogContent className="max-w-2xl">
-                    <DialogHeader>
-                      <DialogTitle>Conversation History</DialogTitle>
-                      <DialogDescription>
-                        Full transcript of your current session
-                      </DialogDescription>
-                    </DialogHeader>
-                    <ScrollArea className="h-[400px]">
-                      <div className="space-y-4 p-4">
-                        {transcript.messages.map((msg, idx) => (
-                          <div
-                            key={idx}
-                            className={cn(
-                              "rounded-lg p-3",
-                              msg.source === "user"
-                                ? "bg-primary/10 text-primary"
-                                : "bg-muted text-muted-foreground",
-                            )}
-                          >
-                            {msg.message}
-                          </div>
-                        ))}
-                      </div>
-                    </ScrollArea>
-                  </DialogContent>
-                </Dialog>
-              </div>
-              <div className="space-y-2 rounded-lg border bg-card p-4 text-card-foreground shadow-sm">
-                {lastTwoMessages.map((msg, idx) => (
-                  <div
-                    key={idx}
-                    className={cn(
-                      "text-sm",
-                      msg.source === "user"
-                        ? "text-primary"
-                        : "text-muted-foreground",
-                    )}
+          <AnimatePresence mode="wait">
+            {selectedMood && selectedMoodData && (
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -20 }}
+                className=""
+              >
+                <h2 className="mb-4 whitespace-pre-wrap text-xl font-semibold leading-relaxed text-foreground/90">
+                  {selectedMoodData.prompt}
+                </h2>
+
+                <div className="mb-6 flex gap-2">
+                  <Button
+                    variant={
+                      conversation?.status === "connected"
+                        ? "destructive"
+                        : "default"
+                    }
+                    onClick={toggleRecording}
+                    disabled={isProcessing || isPending}
+                    className="flex-1"
                   >
-                    {msg.message}
+                    {isProcessing ? (
+                      <>
+                        <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                        Processing...
+                      </>
+                    ) : conversation?.status === "connected" ? (
+                      <>
+                        <MicOff className="mr-2 h-4 w-4" />
+                        Stop Recording
+                      </>
+                    ) : (
+                      <>
+                        <Mic className="mr-2 h-4 w-4" />
+                        Start Recording
+                      </>
+                    )}
+                  </Button>
+
+                  {conversation?.status === "connected" && (
+                    <Button
+                      variant="outline"
+                      size="icon"
+                      onClick={handleDeleteTranscript}
+                      disabled={isProcessing}
+                    >
+                      <Trash2 className="h-4 w-4" />
+                    </Button>
+                  )}
+                </div>
+              </motion.div>
+            )}
+          </AnimatePresence>
+        </div>
+
+        <div className="space-y-4">
+          <div className="flex items-center justify-between">
+            <h3 className="text-lg font-semibold">Recent Entries</h3>
+            <Dialog>
+              <DialogTrigger asChild>
+                <Button variant="ghost" size="sm">
+                  <BookOpen className="mr-2 h-4 w-4" />
+                  View History
+                </Button>
+              </DialogTrigger>
+              <DialogContent className="max-w-2xl">
+                <DialogHeader>
+                  <DialogTitle>Conversation History</DialogTitle>
+                  <DialogDescription>
+                    Full transcript of your current session
+                  </DialogDescription>
+                </DialogHeader>
+                <ScrollArea className="h-[400px]">
+                  <div className="space-y-4 p-4">
+                    {transcript.messages.map((msg, idx) => (
+                      <div
+                        key={idx}
+                        className={cn(
+                          "rounded-lg p-3",
+                          msg.source === "user"
+                            ? "bg-primary/10 text-primary"
+                            : "bg-muted text-muted-foreground",
+                        )}
+                      >
+                        {msg.message}
+                      </div>
+                    ))}
                   </div>
-                ))}
-              </div>
+                </ScrollArea>
+              </DialogContent>
+            </Dialog>
+          </div>
+
+          <ScrollArea className="h-[200px]">
+            <div className="space-y-2">
+              {lastTwoMessages.map((msg, idx) => (
+                <div
+                  key={idx}
+                  className="flex items-center gap-4 rounded-lg border bg-background p-4 transition-colors hover:bg-muted/50"
+                >
+                  {msg.source === "user" ? (
+                    <Mic className="h-5 w-5 text-primary" />
+                  ) : (
+                    <Bot className="h-5 w-5 text-muted-foreground" />
+                  )}
+                  <div className="flex-1">
+                    <p
+                      className={cn(
+                        "text-sm",
+                        msg.source === "user"
+                          ? "text-primary"
+                          : "text-muted-foreground",
+                      )}
+                    >
+                      {msg.message}
+                    </p>
+                  </div>
+                </div>
+              ))}
             </div>
-          )}
-        </CardContent>
-      </Card>
+          </ScrollArea>
+        </div>
+      </div>
     </div>
   );
 }
