@@ -52,6 +52,7 @@ export const journalEntries = createTable(
     userId: varchar("user_id", { length: 255 })
       .notNull()
       .references(() => users.id, { onDelete: "cascade" }),
+    title: varchar("title").notNull().default(""),
     rawEntry: text("raw_entry").notNull(), // Original user input
     summarizedEntry: text("summarized_entry").notNull(), // AI-generated summary
     moodScore: decimal("mood_score", { precision: 5, scale: 2 }).notNull(), // Score between 0-100

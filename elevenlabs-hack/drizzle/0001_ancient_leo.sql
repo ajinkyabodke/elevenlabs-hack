@@ -1,0 +1,2 @@
+ALTER TABLE "elevenlabs-hack_journal_entry" ADD COLUMN "title" varchar DEFAULT '' NOT NULL;--> statement-breakpoint
+ALTER TABLE "elevenlabs-hack_journal_entry" ADD COLUMN "significant_events" text[] DEFAULT ARRAY[]::text[] NOT NULL;
