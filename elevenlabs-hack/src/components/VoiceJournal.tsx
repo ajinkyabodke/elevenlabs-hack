@@ -149,7 +149,7 @@ export function VoiceJournal() {
       console.log("Disconnected from ElevenLabs");
       toast.info("Recording stopped");
     },
-    onMessage: (message: Message) => {
+    onMessage: async (message: Message) => {
       console.log("Received message:", message);
       setTranscript((prev) => ({
         ...prev,
