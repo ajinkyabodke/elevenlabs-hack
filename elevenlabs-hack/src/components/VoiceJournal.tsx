@@ -1,5 +1,6 @@
 "use client";
 
+import { BurnEffect } from "@/components/BurnEffect";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -37,29 +38,37 @@ import {
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
 
-const MOODS = [
+type Mood = {
+  id: string;
+  label: string;
+  description: string;
+  icon: typeof Flame | typeof Brain | typeof Timer;
+  prompt: string;
+};
+
+const MOODS: Mood[] = [
   {
     id: "vent",
     label: "I need to vent",
     description: "Let it all out",
     icon: Flame,
-    prompt: "I'm here to listen. Tell me what's bothering you...",
+    prompt: "I am here to listen. Tell me what is bothering you...",
   },
   {
     id: "chat",
     label: "Just chat",
     description: "Have a casual conversation",
     icon: Brain,
-    prompt: "How was your day? I'd love to hear about it...",
+    prompt: "How was your day? I would love to hear about it...",
   },
   {
     id: "unwind",
     label: "Help me unwind",
     description: "Relax and reflect",
     icon: Timer,
-    prompt: "Let's take a moment to relax. How are you feeling right now?",
+    prompt: "Let us take a moment to relax. How are you feeling right now?",
   },
-] as const;
+];
 
 const BREATHING_EXERCISES = [
   {
@@ -113,6 +122,7 @@ export function VoiceJournal() {
   const [currentStep, setCurrentStep] = useState<number>(0);
   const [timer, setTimer] = useState<number>(0);
   const [isBreathing, setIsBreathing] = useState(false);
+  const [isBurning, setIsBurning] = useState(false);
 
   const selectedMoodData = MOODS.find((mood) => mood.id === selectedMood);
 
@@ -167,20 +177,26 @@ export function VoiceJournal() {
 
   const handleBurnEntry = () => {
     if (isRecording) {
+      setIsBurning(true);
       setIsRecording(false);
-      toast.success("Entry burned 🔥", {
-        description: "Sometimes it helps just to let it out.",
-      });
     }
+  };
+
+  const handleBurnComplete = () => {
+    setIsBurning(false);
+    toast.success("Entry burned 🔥", {
+      description: "Sometimes it helps just to let it out.",
+    });
   };
 
   return (
     <div className="grid gap-6 md:grid-cols-2">
-      <Card className="w-full">
+      <Card className="relative w-full">
+        {isBurning && <BurnEffect onComplete={handleBurnComplete} />}
         <CardHeader>
           <CardTitle className="text-center">Voice Journal</CardTitle>
           <CardDescription className="text-center">
-            Select how you're feeling and start talking
+            Select how you are feeling and start talking
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-8">
@@ -189,23 +205,26 @@ export function VoiceJournal() {
               <SelectValue placeholder="How are you feeling today?" />
             </SelectTrigger>
             <SelectContent>
-              {MOODS.map((mood) => (
-                <SelectItem
-                  key={mood.id}
-                  value={mood.id}
-                  className="flex flex-col items-start py-3"
-                >
-                  <div className="flex items-center gap-2">
-                    <mood.icon className="h-4 w-4" />
-                    <div>
-                      <div className="font-medium">{mood.label}</div>
-                      <div className="text-xs text-muted-foreground">
-                        {mood.description}
+              {MOODS.map((mood) => {
+                const Icon = mood.icon;
+                return (
+                  <SelectItem
+                    key={mood.id}
+                    value={mood.id}
+                    className="flex flex-col items-start py-3"
+                  >
+                    <div className="flex items-center gap-2">
+                      <Icon className="h-4 w-4" />
+                      <div>
+                        <div className="font-medium">{mood.label}</div>
+                        <div className="text-xs text-muted-foreground">
+                          {mood.description}
+                        </div>
                       </div>
                     </div>
-                  </div>
-                </SelectItem>
-              ))}
+                  </SelectItem>
+                );
+              })}
             </SelectContent>
           </Select>
 

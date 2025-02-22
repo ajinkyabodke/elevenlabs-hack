@@ -9,7 +9,14 @@ import {
   SheetTrigger,
 } from "@/components/ui/sheet";
 import { cn } from "@/lib/utils";
-import { BookOpen, LineChart, Menu, MessageSquare } from "lucide-react";
+import {
+  BookOpen,
+  Brain,
+  Clock,
+  LineChart,
+  Menu,
+  MessageSquare,
+} from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 
@@ -23,6 +30,16 @@ const sidebarItems = [
     title: "Past Entries",
     icon: BookOpen,
     href: "/journals",
+  },
+  {
+    title: "Memory Bank",
+    icon: Brain,
+    href: "/memory",
+  },
+  {
+    title: "Time Capsule",
+    icon: Clock,
+    href: "/time-capsule",
   },
   {
     title: "Trends",
