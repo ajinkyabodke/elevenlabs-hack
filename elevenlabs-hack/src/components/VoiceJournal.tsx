@@ -156,6 +156,12 @@ export function VoiceJournal() {
       `Mood scores over the last 7 days: ${promptAttributes?.moodScoresWithDays
         .map((m) => `- ${m.day}: ${m.moodScore}`)
         .join("\n")}`,
+
+      `----`,
+
+      `Significant events over the last 7 days: ${promptAttributes?.significantEventsWithDays
+        .map((e) => `- ${e.day}: ${e.significantEvents}`)
+        .join("\n")}`,
     ].join("\n");
 
     const moodSpecificPrompt = moodPrompts[mood] ?? moodPrompts.unwind;

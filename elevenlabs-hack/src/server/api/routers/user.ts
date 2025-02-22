@@ -21,6 +21,7 @@ export const userRouter = createTRPCRouter({
       columns: {
         moodScore: true,
         createdAt: true,
+        significantEvents: true,
       },
 
       limit: 7,
@@ -37,11 +38,19 @@ export const userRouter = createTRPCRouter({
       }),
     }));
 
-    console.log(`moodScoresWithDays`, moodScoresWithDays);
+    const significantEventsWithDays = last7DaysJournalEntries.map((entry) => ({
+      significantEvents: entry.significantEvents,
+      day: new Date(entry.createdAt).toLocaleDateString("en-US", {
+        day: "numeric",
+        month: "short",
+        weekday: "long",
+      }),
+    }));
 
     return {
       memory: user.memory,
       moodScoresWithDays,
+      significantEventsWithDays,
     };
   }),
 });
