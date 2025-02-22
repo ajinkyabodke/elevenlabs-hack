@@ -56,6 +56,18 @@ export function EnhancedCalendar({ events, entries, onAddEvent, onEditEvent }: E
     return sum / entries.length;
   };
 
+  // Add this function to get a color for each event
+  const getEventColor = (index: number) => {
+    const colors = [
+      "bg-blue-100 dark:bg-blue-900/30",
+      "bg-green-100 dark:bg-green-900/30",
+      "bg-purple-100 dark:bg-purple-900/30",
+      "bg-orange-100 dark:bg-orange-900/30",
+      "bg-pink-100 dark:bg-pink-900/30",
+    ];
+    return colors[index % colors.length];
+  };
+
   // Combine events and entries for a given date
   const getDayContent = (date: Date) => {
     const dateStr = format(date, "yyyy-MM-dd");
@@ -199,21 +211,41 @@ export function EnhancedCalendar({ events, entries, onAddEvent, onEditEvent }: E
                     >
                       {getMoodEmoji(getAverageMoodScore(dayEntries))}
                     </span>
-                    {dayEntries.length > 1 && (
+                    {/* {dayEntries.length > 1 && (
                       <span className="ml-1 text-xs text-muted-foreground">
                         ({dayEntries.length})
                       </span>
-                    )}
+                    )} */}
                   </div>
                 )}
               </div>
+              {/* Significant Events */}
+              {dayEntries.length > 0 && dayEntries[0]?.significantEvents && dayEntries[0].significantEvents.length > 0 && (
+                <div className="mt-1 space-y-1">
+                  {dayEntries[0].significantEvents.slice(0, 2).map((event, index) => (
+                    <div
+                      key={index}
+                      className={cn(
+                        "text-xs text-muted-foreground rounded px-1 py-0.5",
+                        getEventColor(index)
+                      )}>
+                      {event}
+                    </div>
+                  ))}
+                  {dayEntries[0].significantEvents.length > 2 && (
+                    <div className="text-xs text-muted-foreground">
+                      +{dayEntries[0].significantEvents.length - 2} more
+                    </div>
+                  )}
+                </div>
+              )}
 
               {/* Entry summary */}
-              {dayEntries.length > 0 && (
+              {/* {dayEntries.length > 0 && (
                 <div className="mt-1 text-xs text-muted-foreground">
                   {dayEntries[0]?.summarizedEntry}
                 </div>
-              )}
+              )} */}
 
               {/* Events list at bottom */}
               <div className="mt-auto space-y-1">
