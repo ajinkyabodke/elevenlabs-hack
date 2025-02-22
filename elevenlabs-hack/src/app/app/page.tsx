@@ -195,20 +195,20 @@ export default function Home() {
   };
 
   return (
-    <div className="grid gap-6 md:grid-cols-2">
+    <div className="mx-auto max-w-2xl space-y-6">
       <ToolDialog />
       <Card className="relative w-full overflow-hidden border-sage-200 bg-gradient-to-br from-sage-50 to-white shadow-none transition-all hover:border-sage-300 hover:shadow-lg">
         {isBurning && <BurnEffect onComplete={handleBurnComplete} />}
         <CardHeader>
-          <CardTitle>How are you feeling?</CardTitle>
+          <CardTitle>Voice Journal</CardTitle>
           <CardDescription>
             Select your mood and start recording your thoughts
           </CardDescription>
         </CardHeader>
-        <CardContent className="space-y-4">
+        <CardContent className="space-y-6">
           <Select value={selectedMood} onValueChange={setSelectedMood}>
             <SelectTrigger>
-              <SelectValue placeholder="Select your mood" />
+              <SelectValue placeholder="How are you feeling?" />
             </SelectTrigger>
             <SelectContent>
               {MOODS.map((mood) => (
@@ -223,6 +223,12 @@ export default function Home() {
               ))}
             </SelectContent>
           </Select>
+
+          {selectedMood && (
+            <p className="text-sm text-muted-foreground">
+              {MOODS.find((m) => m.id === selectedMood)?.prompt}
+            </p>
+          )}
 
           <div className="flex gap-2">
             <Button
@@ -264,20 +270,23 @@ export default function Home() {
           </div>
 
           {transcript.messages.length > 0 && (
-            <div className="space-y-4 rounded-lg border bg-card p-4 text-card-foreground shadow-sm">
-              {transcript.messages.map((msg, idx) => (
-                <div
-                  key={idx}
-                  className={cn(
-                    "text-sm",
-                    msg.source === "user"
-                      ? "text-primary"
-                      : "text-muted-foreground",
-                  )}
-                >
-                  {msg.message}
-                </div>
-              ))}
+            <div className="space-y-2">
+              <h3 className="text-sm font-medium">Recent Messages</h3>
+              <div className="space-y-4 rounded-lg border bg-card p-4 text-card-foreground shadow-sm">
+                {transcript.messages.map((msg, idx) => (
+                  <div
+                    key={idx}
+                    className={cn(
+                      "rounded-lg p-3",
+                      msg.source === "user"
+                        ? "bg-primary/10 text-primary"
+                        : "bg-muted text-muted-foreground",
+                    )}
+                  >
+                    {msg.message}
+                  </div>
+                ))}
+              </div>
             </div>
           )}
         </CardContent>
