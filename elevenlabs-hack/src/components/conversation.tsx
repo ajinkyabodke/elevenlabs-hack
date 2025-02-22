@@ -17,6 +17,20 @@ export function Conversation() {
     onDisconnect: () => console.log("Disconnected"),
     onMessage: (message: Message) => console.log("Message:", message),
     onError: (error: Error) => console.error("Error:", error),
+    clientTools: {
+      start_breathing_exercise: () => {
+        console.log("Starting breathing exercise");
+      },
+      start_grounding_exercise: () => {
+        console.log("Starting grounding exercise");
+      },
+      start_behavioral_activation_quest: () => {
+        console.log("Starting behavioral activation quest");
+      },
+      start_progressive_muscle_relaxation: () => {
+        console.log("Starting mood check");
+      },
+    },
   });
 
   const startConversation = useCallback(async () => {

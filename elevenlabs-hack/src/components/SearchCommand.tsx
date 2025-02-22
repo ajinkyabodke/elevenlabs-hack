@@ -66,9 +66,6 @@ export function SearchCommand({ entries }: SearchCommandProps) {
                     {new Date(entry.createdAt).toLocaleDateString()}
                   </span>
                 </div>
-                <span className="line-clamp-2 text-sm text-muted-foreground">
-                  {entry.rawEntry}
-                </span>
               </CommandItem>
             ))}
           </CommandGroup>

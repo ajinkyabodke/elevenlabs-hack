@@ -14,6 +14,7 @@ import { UserButton } from "@clerk/nextjs";
 import {
   BookOpen,
   Brain,
+  Clock,
   Heart,
   LineChart,
   Menu,
@@ -29,7 +30,7 @@ const sidebarItems = [
     href: "/app",
   },
   {
-    title: "Past Entries",
+    title: "History",
     icon: BookOpen,
     href: "/journals",
   },
@@ -43,6 +44,11 @@ const sidebarItems = [
   //   icon: Clock,
   //   href: "/time-capsule",
   // },
+  {
+    title: "Time Capsule",
+    icon: Clock,
+    href: "/time-capsule",
+  },
   {
     title: "Trends",
     icon: LineChart,
@@ -61,8 +67,8 @@ export function Sidebar() {
   const SidebarContent = () => (
     <div className="flex h-full flex-col">
       <div className="flex-1 py-4">
-        {sidebarItems.map((item) => (
-          <Link key={item.href} href={item.href}>
+        {sidebarItems.map((item, idx) => (
+          <Link key={idx} href={item.href}>
             <Button
               variant="ghost"
               className={cn(

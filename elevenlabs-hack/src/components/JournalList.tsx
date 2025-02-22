@@ -17,7 +17,7 @@ export function JournalList({ entries }: JournalListProps) {
   return (
     <Card className="w-full max-w-2xl">
       <CardHeader>
-        <CardTitle>Past Entries</CardTitle>
+        <CardTitle>History</CardTitle>
         <CardDescription>Your journal history and reflections</CardDescription>
       </CardHeader>
       <CardContent>

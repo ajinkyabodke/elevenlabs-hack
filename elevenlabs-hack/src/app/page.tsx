@@ -6,7 +6,7 @@ import Footer from "./landing/components/ui/Footer";
 import { Hero } from "./landing/components/ui/Hero";
 import { JournalAnalytics } from "./landing/components/ui/SolarAnalytics";
 
-export default function Home() {
+export default function AppPage() {
   return (
     <main className="relative mx-auto flex flex-col">
       <div className="pt-56">
