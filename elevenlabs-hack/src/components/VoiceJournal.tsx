@@ -25,6 +25,7 @@ import {
   SheetTrigger,
 } from "@/components/ui/sheet";
 import { cn } from "@/lib/utils";
+import type { JournalEntry } from "@/types";
 import { useConversation } from "@11labs/react";
 import {
   Brain,
@@ -38,11 +39,14 @@ import {
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
 
+const MOOD_ICONS = [Flame, Brain, Timer] as const;
+type MoodIcon = (typeof MOOD_ICONS)[number];
+
 type Mood = {
   id: string;
   label: string;
   description: string;
-  icon: typeof Flame | typeof Brain | typeof Timer;
+  icon: MoodIcon;
   prompt: string;
 };
 
@@ -115,9 +119,13 @@ const GROUNDING_TECHNIQUES = [
 ];
 
 interface Message {
-  content: string;
-  role: "user" | "assistant";
-  timestamp: number;
+  source: "user" | "ai";
+  message: string;
+}
+
+interface ConversationTranscript {
+  messages: Message[];
+  summary?: string;
 }
 
 export function VoiceJournal() {
@@ -128,20 +136,28 @@ export function VoiceJournal() {
   const [isBreathing, setIsBreathing] = useState(false);
   const [isBurning, setIsBurning] = useState(false);
   const [isProcessing, setIsProcessing] = useState(false);
+  const [transcript, setTranscript] = useState<ConversationTranscript>({
+    messages: [],
+  });
 
   const conversation = useConversation({
     onConnect: () => {
+      console.log("Connected to ElevenLabs");
       toast.success("Ready to record");
     },
     onDisconnect: () => {
+      console.log("Disconnected from ElevenLabs");
       toast.info("Recording stopped");
     },
     onMessage: (message: Message) => {
-      console.log("Message:", message);
-      // TODO: Handle the conversation message
+      console.log("Received message:", message);
+      setTranscript((prev) => ({
+        ...prev,
+        messages: [...prev.messages, message],
+      }));
     },
     onError: (error: Error) => {
-      console.error("Error:", error);
+      console.error("Error from ElevenLabs:", error);
       toast.error("Something went wrong with the recording");
     },
   });
@@ -156,9 +172,12 @@ export function VoiceJournal() {
           if (prev <= 1) {
             // Move to next step or finish exercise
             const nextStep = currentStep + 1;
-            if (nextStep < BREATHING_EXERCISES[currentExercise].steps.length) {
+            const currentExerciseData = BREATHING_EXERCISES[currentExercise];
+            if (!currentExerciseData) return 0;
+
+            if (nextStep < currentExerciseData.steps.length) {
               setCurrentStep(nextStep);
-              return BREATHING_EXERCISES[currentExercise].totalTime;
+              return currentExerciseData.totalTime;
             } else {
               setIsBreathing(false);
               return 0;
@@ -172,26 +191,60 @@ export function VoiceJournal() {
   }, [isBreathing, timer, currentStep, currentExercise]);
 
   const startBreathing = (exerciseIndex: number) => {
+    const exercise = BREATHING_EXERCISES[exerciseIndex];
+    if (!exercise) return;
+
     setCurrentExercise(exerciseIndex);
     setCurrentStep(0);
-    setTimer(BREATHING_EXERCISES[exerciseIndex].totalTime);
+    setTimer(exercise.totalTime);
     setIsBreathing(true);
+  };
+
+  const saveJournalEntry = async () => {
+    try {
+      console.log("Saving transcript:", transcript);
+      const rawEntry = transcript.messages
+        .map((msg) => `${msg.source}: ${msg.message}`)
+        .join("\n");
+
+      console.log("Formatted entry:", rawEntry);
+
+      const response = await fetch("/api/journal", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ rawEntry }),
+      });
+
+      if (!response.ok) {
+        throw new Error("Failed to save journal entry");
+      }
+
+      const savedEntry = (await response.json()) as JournalEntry;
+      console.log("Saved entry:", savedEntry);
+      toast.success("Journal entry saved!");
+    } catch (error) {
+      console.error("Failed to save journal entry:", error);
+      toast.error("Failed to save journal entry");
+    }
   };
 
   const toggleRecording = async () => {
     if (conversation?.status === "connected") {
+      console.log("Stopping recording...");
       await conversation.endSession();
       setIsProcessing(true);
-      setTimeout(() => {
-        setIsProcessing(false);
-        toast.success("Journal entry saved!");
-      }, 2000);
+      await saveJournalEntry();
+      setTranscript({ messages: [] });
+      setIsProcessing(false);
     } else {
       if (!selectedMood) {
         toast.error("Please select how you're feeling first");
         return;
       }
       try {
+        console.log("Starting recording with mood:", selectedMood);
         await navigator.mediaDevices.getUserMedia({ audio: true });
         await conversation?.startSession({
           agentId: "9O7dItLkE9z4UD6y9kwV",
