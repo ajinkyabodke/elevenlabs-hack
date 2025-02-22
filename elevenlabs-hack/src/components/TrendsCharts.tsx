@@ -181,9 +181,7 @@ export function TrendsCharts({ entries }: TrendsChartsProps) {
         <Card>
           <CardHeader>
             <CardTitle>Monthly Mood Trends</CardTitle>
-            <CardDescription>
-              {format(monthStart, "MMMM yyyy")} - Daily mood scores with trend
-            </CardDescription>
+            <CardDescription>{format(monthStart, "MMMM yyyy")}</CardDescription>
           </CardHeader>
           <CardContent>
             <AreaChart
@@ -224,10 +222,9 @@ export function TrendsCharts({ entries }: TrendsChartsProps) {
 
         <Card>
           <CardHeader>
-            <CardTitle>Weekly Mood Details</CardTitle>
+            <CardTitle>Weekly Mood Trends</CardTitle>
             <CardDescription>
-              {format(weekStart, "MMM dd")} - {format(weekEnd, "MMM dd")} -
-              Daily mood progression
+              {format(weekStart, "MMM dd")} - {format(weekEnd, "MMM dd")}
             </CardDescription>
           </CardHeader>
           <CardContent>
