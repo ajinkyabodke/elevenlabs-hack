@@ -94,7 +94,8 @@ export function VoiceJournal() {
     messages: [],
   });
   const { user } = useUser();
-  const { data: memory, isPending } = api.user.getMemory.useQuery();
+  const { data: promptAttributes, isPending } =
+    api.user.getPromptAttributes.useQuery();
 
   const name = user?.firstName;
 
@@ -144,11 +145,17 @@ export function VoiceJournal() {
       `- Initial approach: ${moodData?.prompt}`,
 
       `----`,
-      memory &&
-        memory.length > 0 &&
-        `Summary of previous journal entries: ${memory
+      promptAttributes?.memory &&
+        promptAttributes.memory.length > 0 &&
+        `Summary of previous journal entries: ${promptAttributes.memory
           .map((m, idx) => `- ${idx + 1}. ${m}`)
           .join("\n")}`,
+
+      `----`,
+
+      `Mood scores over the last 7 days: ${promptAttributes?.moodScoresWithDays
+        .map((m) => `- ${m.day}: ${m.moodScore}`)
+        .join("\n")}`,
     ].join("\n");
 
     const moodSpecificPrompt = moodPrompts[mood] ?? moodPrompts.unwind;
