@@ -121,8 +121,8 @@ export function RecordButton({
           className={cn(
             "group relative flex size-16 items-center justify-center rounded-full transition-all duration-300 ease-in-out",
             isRecording
-              ? "bg-destructive text-destructive-foreground hover:bg-destructive/90"
-              : "bg-gradient-to-r from-cyan-900 to-sky-900 text-primary-foreground hover:bg-primary/90",
+              ? "scale-100 bg-destructive text-destructive-foreground hover:bg-destructive/90"
+              : "scale-125 bg-gradient-to-r from-cyan-900 to-sky-900 text-primary-foreground hover:bg-primary/90",
             disabled && "pointer-events-none opacity-50",
           )}
         >
