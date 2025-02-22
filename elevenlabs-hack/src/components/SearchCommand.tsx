@@ -49,7 +49,7 @@ export function SearchCommand({ entries }: SearchCommandProps) {
         <CommandInput placeholder="Search all journal entries..." />
         <CommandList>
           <CommandEmpty>No results found.</CommandEmpty>
-          <CommandGroup heading="Journal Entries">
+          <CommandGroup>
             {entries.map((entry) => (
               <CommandItem
                 key={entry.id}
