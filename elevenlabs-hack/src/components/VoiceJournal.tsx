@@ -191,17 +191,19 @@ export function VoiceJournal() {
 
   return (
     <div className="grid gap-6 md:grid-cols-2">
-      <Card className="relative w-full">
+      <Card className="border-sage-200 from-sage-50 hover:border-sage-300 relative w-full overflow-hidden bg-gradient-to-br to-white shadow-none transition-all hover:shadow-lg">
         {isBurning && <BurnEffect onComplete={handleBurnComplete} />}
         <CardHeader>
-          <CardTitle className="text-center">Voice Journal</CardTitle>
-          <CardDescription className="text-center">
+          <CardTitle className="text-sage-800 text-center">
+            Voice Journal
+          </CardTitle>
+          <CardDescription className="text-sage-600 text-center">
             Select how you are feeling and start talking
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-8">
           <Select value={selectedMood} onValueChange={setSelectedMood}>
-            <SelectTrigger>
+            <SelectTrigger className="border-sage-200 text-sage-700 bg-white/50 hover:bg-white/80">
               <SelectValue placeholder="How are you feeling today?" />
             </SelectTrigger>
             <SelectContent>
@@ -211,13 +213,15 @@ export function VoiceJournal() {
                   <SelectItem
                     key={mood.id}
                     value={mood.id}
-                    className="flex flex-col items-start py-3"
+                    className="hover:bg-sage-50 flex flex-col items-start py-3"
                   >
                     <div className="flex items-center gap-2">
-                      <Icon className="h-4 w-4" />
+                      <Icon className="text-sage-600 h-4 w-4" />
                       <div>
-                        <div className="font-medium">{mood.label}</div>
-                        <div className="text-xs text-muted-foreground">
+                        <div className="text-sage-800 font-medium">
+                          {mood.label}
+                        </div>
+                        <div className="text-sage-600 text-xs">
                           {mood.description}
                         </div>
                       </div>
@@ -229,7 +233,7 @@ export function VoiceJournal() {
           </Select>
 
           {selectedMoodData && (
-            <p className="text-center text-muted-foreground">
+            <p className="text-sage-600 text-center">
               {selectedMoodData.prompt}
             </p>
           )}
@@ -238,8 +242,8 @@ export function VoiceJournal() {
             <Button
               size="lg"
               className={cn(
-                "h-24 w-24 rounded-full transition-all",
-                isRecording && "bg-red-500 hover:bg-red-600",
+                "bg-sage-100 text-sage-700 hover:bg-sage-200 h-24 w-24 rounded-full transition-all",
+                isRecording && "bg-red-500 text-white hover:bg-red-600",
               )}
               onClick={toggleRecording}
               disabled={isProcessing}
@@ -252,7 +256,7 @@ export function VoiceJournal() {
                 <Mic className="h-12 w-12" />
               )}
             </Button>
-            <p className="text-sm text-muted-foreground">
+            <p className="text-sage-600 text-sm">
               {isProcessing
                 ? "Processing your entry..."
                 : isRecording
@@ -268,7 +272,7 @@ export function VoiceJournal() {
               <Button
                 variant="ghost"
                 size="icon"
-                className="text-red-500 hover:text-red-600"
+                className="text-red-500 hover:bg-red-50 hover:text-red-600"
                 onClick={handleBurnEntry}
               >
                 <Trash2 className="h-5 w-5" />
@@ -279,23 +283,25 @@ export function VoiceJournal() {
       </Card>
 
       <div className="space-y-6">
-        <Card>
+        <Card className="border-ocean-200 from-ocean-50 hover:border-ocean-300 bg-gradient-to-br to-white shadow-none transition-all hover:shadow-lg">
           <CardHeader>
-            <CardTitle>Need to calm down?</CardTitle>
-            <CardDescription>
+            <CardTitle className="text-ocean-800">Need to calm down?</CardTitle>
+            <CardDescription className="text-ocean-600">
               Try these breathing exercises and grounding techniques
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
             <div className="space-y-2">
-              <h3 className="font-medium">Breathing Exercises</h3>
+              <h3 className="text-ocean-700 font-medium">
+                Breathing Exercises
+              </h3>
               <div className="grid gap-2">
                 {BREATHING_EXERCISES.map((exercise, index) => (
                   <Sheet key={exercise.name}>
                     <SheetTrigger asChild>
                       <Button
                         variant="outline"
-                        className="w-full justify-start"
+                        className="border-ocean-200 text-ocean-700 w-full justify-start bg-white/50 hover:bg-white/80"
                         onClick={() => startBreathing(index)}
                       >
                         <Timer className="mr-2 h-4 w-4" />
@@ -304,22 +310,26 @@ export function VoiceJournal() {
                     </SheetTrigger>
                     <SheetContent>
                       <SheetHeader>
-                        <SheetTitle>{exercise.name}</SheetTitle>
-                        <SheetDescription>
+                        <SheetTitle className="text-ocean-800">
+                          {exercise.name}
+                        </SheetTitle>
+                        <SheetDescription className="text-ocean-600">
                           {exercise.description}
                         </SheetDescription>
                       </SheetHeader>
                       <div className="mt-8 space-y-6">
                         {isBreathing && currentExercise === index ? (
                           <div className="text-center">
-                            <div className="mb-4 text-4xl font-bold">
+                            <div className="text-ocean-700 breathing-animation mb-4 text-4xl font-bold">
                               {exercise.steps[currentStep]}
                             </div>
-                            <div className="text-2xl font-medium">{timer}s</div>
+                            <div className="text-ocean-600 text-2xl font-medium">
+                              {timer}s
+                            </div>
                           </div>
                         ) : (
                           <Button
-                            className="w-full"
+                            className="bg-ocean-500 hover:bg-ocean-600 w-full text-white"
                             onClick={() => startBreathing(index)}
                           >
                             Start Exercise
@@ -333,14 +343,16 @@ export function VoiceJournal() {
             </div>
 
             <div className="space-y-2">
-              <h3 className="font-medium">Grounding Techniques</h3>
+              <h3 className="text-ocean-700 font-medium">
+                Grounding Techniques
+              </h3>
               <div className="grid gap-2">
                 {GROUNDING_TECHNIQUES.map((technique) => (
                   <Sheet key={technique.name}>
                     <SheetTrigger asChild>
                       <Button
                         variant="outline"
-                        className="w-full justify-start"
+                        className="border-ocean-200 text-ocean-700 w-full justify-start bg-white/50 hover:bg-white/80"
                       >
                         <Brain className="mr-2 h-4 w-4" />
                         {technique.name}
@@ -348,16 +360,23 @@ export function VoiceJournal() {
                     </SheetTrigger>
                     <SheetContent>
                       <SheetHeader>
-                        <SheetTitle>{technique.name}</SheetTitle>
-                        <SheetDescription>
+                        <SheetTitle className="text-ocean-800">
+                          {technique.name}
+                        </SheetTitle>
+                        <SheetDescription className="text-ocean-600">
                           Take your time with each step
                         </SheetDescription>
                       </SheetHeader>
                       <div className="mt-8">
                         <ol className="space-y-4">
                           {technique.steps.map((step, index) => (
-                            <li key={index} className="flex gap-4">
-                              <span className="font-medium">{index + 1}.</span>
+                            <li
+                              key={index}
+                              className="text-ocean-700 flex gap-4"
+                            >
+                              <span className="text-ocean-800 font-medium">
+                                {index + 1}.
+                              </span>
                               {step}
                             </li>
                           ))}
