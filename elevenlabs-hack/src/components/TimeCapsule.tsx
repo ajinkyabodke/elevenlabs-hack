@@ -34,7 +34,7 @@ import { Lock, PenLine, Tag, Trash2, Unlock } from "lucide-react";
 import { useState } from "react";
 import { type UseFormReturn, useForm } from "react-hook-form";
 import { toast } from "sonner";
-import { type z } from "zod";
+import { z } from "zod";
 
 const letterSchema = z.object({
   topic: z.string().min(1, "Topic is required"),
