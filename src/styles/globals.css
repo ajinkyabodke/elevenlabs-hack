@@ -322,7 +322,7 @@
 
 @layer base {
   * {
-    @apply outline-ring/50 border-border;
+    @apply border-border outline-ring/50;
   }
   body {
     @apply bg-background text-foreground;
@@ -373,14 +373,12 @@
 
 @layer base {
   * {
-    @apply outline-ring/50 border-border;
+    @apply border-border outline-ring/50;
   }
   body {
     @apply bg-background text-foreground;
   }
 }
-
-
 
 @layer base {
   * {
