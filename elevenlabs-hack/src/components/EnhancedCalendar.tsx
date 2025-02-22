@@ -33,7 +33,9 @@ import {
   subDays,
 } from "date-fns";
 import { ChevronLeft, ChevronRight } from "lucide-react";
+import Link from "next/link";
 import { useMemo, useState } from "react";
+
 interface EnhancedCalendarProps {
   events: CalendarEvent[];
   entries: JournalEntry[];
@@ -48,7 +50,7 @@ export function EnhancedCalendar({
   onEditEvent,
 }: EnhancedCalendarProps) {
   const [currentDate, setCurrentDate] = useState(new Date());
-  const [view, setView] = useState<"week" | "month">("week");
+  const [view, setView] = useState<"week" | "month">("month");
 
   // Get mood emoji based on score
   const getMoodEmoji = (score: number) => {
@@ -224,9 +226,18 @@ export function EnhancedCalendar({
                   className={cn(
                     "flex h-6 w-6 items-center justify-center rounded-full text-sm",
                     isToday && "bg-primary font-medium text-primary-foreground",
+                    dayEntries.length > 0 &&
+                      dayEntries[0]?.id &&
+                      "cursor-pointer hover:bg-accent",
                   )}
                 >
-                  {format(date, "d")}
+                  {dayEntries.length > 0 && dayEntries[0]?.id ? (
+                    <Link href={`/journals/${dayEntries[0].id}`}>
+                      {format(date, "d")}
+                    </Link>
+                  ) : (
+                    format(date, "d")
+                  )}
                 </span>
                 {dayEntries.length > 0 && (
                   <div className="flex items-center justify-center">
