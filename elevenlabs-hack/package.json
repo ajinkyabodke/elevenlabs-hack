@@ -21,6 +21,7 @@
     "seed": "tsx src/scripts/seed.ts"
   },
   "dependencies": {
+    "@11labs/react": "^0.0.7",
     "@hookform/resolvers": "^4.1.0",
     "@radix-ui/react-dialog": "^1.1.6",
     "@radix-ui/react-hover-card": "^1.1.6",
