@@ -27,7 +27,7 @@ const sidebarItems = [
   {
     title: "Journal",
     icon: MessageSquare,
-    href: "/",
+    href: "/app",
   },
   {
     title: "Past Entries",
