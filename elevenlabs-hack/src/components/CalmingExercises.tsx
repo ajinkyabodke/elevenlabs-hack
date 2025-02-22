@@ -19,7 +19,7 @@ import {
 import { Brain, Timer } from "lucide-react";
 import { useEffect, useState } from "react";
 
-const BREATHING_EXERCISES = [
+export const BREATHING_EXERCISES = [
   {
     name: "4-7-8 Breathing",
     description:
@@ -42,7 +42,7 @@ const BREATHING_EXERCISES = [
   },
 ] as const;
 
-const GROUNDING_TECHNIQUES = [
+export const GROUNDING_TECHNIQUES = [
   {
     name: "5-4-3-2-1 Technique",
     icon: Brain,
@@ -162,7 +162,7 @@ export function CalmingExercises() {
             {GROUNDING_TECHNIQUES.map((technique) => (
               <Sheet key={technique.name}>
                 <SheetTrigger asChild>
-                  <Card className="cursor-pointer transition-colors hover:bg-muted/50">
+                  <Card className="hover:bg-muted/50 cursor-pointer transition-colors">
                     <CardHeader>
                       <div className="flex items-center gap-2">
                         <technique.icon className="h-5 w-5 text-primary" />
@@ -190,7 +190,7 @@ export function CalmingExercises() {
                           key={step}
                           className="flex items-center gap-3 rounded-lg border bg-card p-4"
                         >
-                          <span className="flex h-8 w-8 items-center justify-center rounded-full bg-primary/10 text-sm font-medium text-primary">
+                          <span className="bg-primary/10 flex h-8 w-8 items-center justify-center rounded-full text-sm font-medium text-primary">
                             {idx + 1}
                           </span>
                           <span>{step}</span>
