@@ -1,83 +1,287 @@
-import { VoiceJournal } from "@/components/VoiceJournal";
+"use client";
 
-export default function AppPage() {
-  return <VoiceJournal />;
+import { BurnEffect } from "@/components/BurnEffect";
+import { ToolDialog } from "@/components/ToolDialog";
+import { Button } from "@/components/ui/button";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { activeToolAtom } from "@/lib/atoms";
+import { cn } from "@/lib/utils";
+import { type JournalEntry } from "@/types";
+import { useConversation } from "@11labs/react";
+import { useAtom } from "jotai";
+import {
+  Brain,
+  Flame,
+  Loader2,
+  Mic,
+  MicOff,
+  Timer,
+  Trash2,
+} from "lucide-react";
+import { useState } from "react";
+import { toast } from "sonner";
+
+const MOOD_ICONS = [Flame, Brain, Timer] as const;
+type MoodIcon = (typeof MOOD_ICONS)[number];
+
+type Mood = {
+  id: string;
+  label: string;
+  description: string;
+  icon: MoodIcon;
+  prompt: string;
+};
+
+const MOODS: Mood[] = [
+  {
+    id: "vent",
+    label: "I need to vent",
+    description: "Let it all out",
+    icon: MOOD_ICONS[0],
+    prompt: "I am here to listen. Tell me what is bothering you...",
+  },
+  {
+    id: "chat",
+    label: "Just chat",
+    description: "Have a casual conversation",
+    icon: MOOD_ICONS[1],
+    prompt: "How was your day? I would love to hear about it...",
+  },
+  {
+    id: "unwind",
+    label: "Help me unwind",
+    description: "Relax and reflect",
+    icon: MOOD_ICONS[2],
+    prompt: "Let us take a moment to relax. How are you feeling right now?",
+  },
+];
+
+interface Message {
+  source: "user" | "ai";
+  message: string;
 }
 
-// import { Button } from "@/components/ui/button";
-// import {
-//   Card,
-//   CardContent,
-//   CardDescription,
-//   CardHeader,
-//   CardTitle,
-// } from "@/components/ui/card";
-// import { SignInButton, SignedIn, SignedOut } from "@clerk/nextjs";
-// import { Brain, Mic, Timer } from "lucide-react";
-// import Link from "next/link";
+interface ConversationTranscript {
+  messages: Message[];
+  summary?: string;
+}
 
-// export default function Home() {
-//   return (
-//     <main className="container mx-auto flex min-h-screen flex-col items-center justify-center p-4">
-//       <div className="max-w-3xl text-center">
-//         <h1 className="mb-4 text-4xl font-bold tracking-tight text-gray-900 sm:text-6xl">
-//           Voice Journal
-//         </h1>
-//         <p className="mb-8 leading-relaxed text-muted-foreground">
-//           Your AI-powered voice journaling companion. Speak your thoughts, get
-//           insights, and track your emotional well-being.
-//         </p>
+export default function Home() {
+  const [selectedMood, setSelectedMood] = useState<string>("");
+  const [isBurning, setIsBurning] = useState(false);
+  const [isProcessing, setIsProcessing] = useState(false);
+  const [, setActiveTool] = useAtom(activeToolAtom);
+  const [transcript, setTranscript] = useState<ConversationTranscript>({
+    messages: [],
+  });
 
-//         <div className="mb-12 grid grid-cols-1 gap-4 sm:grid-cols-3">
-//           <Card>
-//             <CardHeader>
-//               <Mic className="mx-auto h-8 w-8 text-primary" />
-//               <CardTitle className="text-center">Voice First</CardTitle>
-//             </CardHeader>
-//             <CardContent>
-//               <CardDescription>
-//                 Just speak naturally. Our AI assistant will listen and respond.
-//               </CardDescription>
-//             </CardContent>
-//           </Card>
+  const conversation = useConversation({
+    onConnect: () => {
+      console.log("Connected to ElevenLabs");
+      toast.success("Ready to record");
+    },
+    onDisconnect: () => {
+      console.log("Disconnected from ElevenLabs");
+      toast.info("Recording stopped");
+    },
+    onMessage: async (message: Message) => {
+      console.log("Received message:", message);
+      setTranscript((prev) => ({
+        ...prev,
+        messages: [...prev.messages, message],
+      }));
+    },
+    onError: (error: Error) => {
+      console.error("Error from ElevenLabs:", error);
+      toast.error("Something went wrong with the recording");
+    },
+    clientTools: {
+      start_breathing_exercise: () => {
+        setActiveTool("breathing");
+      },
+      start_grounding_exercise: () => {
+        setActiveTool("grounding");
+      },
+      start_behavioral_activation_quest: () => {
+        setActiveTool("behavioral");
+      },
+      start_progressive_muscle_relaxation: () => {
+        setActiveTool("pmr");
+      },
+    },
+  });
 
-//           <Card>
-//             <CardHeader>
-//               <Brain className="mx-auto h-8 w-8 text-primary" />
-//               <CardTitle className="text-center">AI Analysis</CardTitle>
-//             </CardHeader>
-//             <CardContent>
-//               <CardDescription>
-//                 Get insights into your emotional state and patterns over time.
-//               </CardDescription>
-//             </CardContent>
-//           </Card>
+  const saveJournalEntry = async () => {
+    try {
+      console.log("Saving transcript:", transcript);
+      const rawEntry = transcript.messages
+        .map((msg) => `${msg.source}: ${msg.message}`)
+        .join("\n");
 
-//           <Card>
-//             <CardHeader>
-//               <Timer className="mx-auto h-8 w-8 text-primary" />
-//               <CardTitle className="text-center">Mindfulness</CardTitle>
-//             </CardHeader>
-//             <CardContent>
-//               <CardDescription>
-//                 Access breathing exercises and grounding techniques when needed.
-//               </CardDescription>
-//             </CardContent>
-//           </Card>
-//         </div>
+      console.log("Formatted entry:", rawEntry);
 
-//         <SignedIn>
-//           <Button asChild size="lg">
-//             <Link href="/app">Go to Journal</Link>
-//           </Button>
-//         </SignedIn>
+      const response = await fetch("/api/journal", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ rawEntry }),
+      });
 
-//         <SignedOut>
-//           <SignInButton mode="modal">
-//             <Button size="lg">Get Started</Button>
-//           </SignInButton>
-//         </SignedOut>
-//       </div>
-//     </main>
-//   );
-// }
+      if (!response.ok) {
+        throw new Error("Failed to save journal entry");
+      }
+
+      const savedEntry = (await response.json()) as JournalEntry;
+      console.log("Saved entry:", savedEntry);
+      toast.success("Journal entry saved!");
+    } catch (error) {
+      console.error("Failed to save journal entry:", error);
+      toast.error("Failed to save journal entry");
+    }
+  };
+
+  const toggleRecording = async () => {
+    if (conversation?.status === "connected") {
+      console.log("Stopping recording...");
+      await conversation.endSession();
+      setIsProcessing(true);
+      await saveJournalEntry();
+      setTranscript({ messages: [] });
+      setIsProcessing(false);
+    } else {
+      if (!selectedMood) {
+        toast.error("Please select how you're feeling first");
+        return;
+      }
+      try {
+        console.log("Starting recording with mood:", selectedMood);
+        await navigator.mediaDevices.getUserMedia({ audio: true });
+        await conversation?.startSession({
+          agentId: "AupMfEyUGwuMVyOywI6b",
+        });
+      } catch (error) {
+        console.error("Failed to start recording:", error);
+        toast.error("Failed to start recording");
+      }
+    }
+  };
+
+  const handleBurnEntry = () => {
+    if (conversation?.status === "connected") {
+      setIsBurning(true);
+      void conversation.endSession();
+    }
+  };
+
+  const handleBurnComplete = () => {
+    setIsBurning(false);
+    toast.success("Entry burned 🔥", {
+      description: "Sometimes it helps just to let it out.",
+    });
+  };
+
+  return (
+    <div className="grid gap-6 md:grid-cols-2">
+      <ToolDialog />
+      <Card className="relative w-full overflow-hidden border-sage-200 bg-gradient-to-br from-sage-50 to-white shadow-none transition-all hover:border-sage-300 hover:shadow-lg">
+        {isBurning && <BurnEffect onComplete={handleBurnComplete} />}
+        <CardHeader>
+          <CardTitle>How are you feeling?</CardTitle>
+          <CardDescription>
+            Select your mood and start recording your thoughts
+          </CardDescription>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <Select value={selectedMood} onValueChange={setSelectedMood}>
+            <SelectTrigger>
+              <SelectValue placeholder="Select your mood" />
+            </SelectTrigger>
+            <SelectContent>
+              {MOODS.map((mood) => (
+                <SelectItem key={mood.id} value={mood.id}>
+                  <div className="flex items-center gap-2">
+                    {mood.icon && (
+                      <mood.icon className="h-4 w-4 text-muted-foreground" />
+                    )}
+                    <span>{mood.label}</span>
+                  </div>
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+
+          <div className="flex gap-2">
+            <Button
+              variant={
+                conversation?.status === "connected" ? "destructive" : "default"
+              }
+              onClick={toggleRecording}
+              disabled={isProcessing}
+              className="flex-1"
+            >
+              {isProcessing ? (
+                <>
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  Processing...
+                </>
+              ) : conversation?.status === "connected" ? (
+                <>
+                  <MicOff className="mr-2 h-4 w-4" />
+                  Stop Recording
+                </>
+              ) : (
+                <>
+                  <Mic className="mr-2 h-4 w-4" />
+                  Start Recording
+                </>
+              )}
+            </Button>
+
+            {conversation?.status === "connected" && (
+              <Button
+                variant="outline"
+                size="icon"
+                onClick={handleBurnEntry}
+                disabled={isProcessing}
+              >
+                <Trash2 className="h-4 w-4" />
+              </Button>
+            )}
+          </div>
+
+          {transcript.messages.length > 0 && (
+            <div className="space-y-4 rounded-lg border bg-card p-4 text-card-foreground shadow-sm">
+              {transcript.messages.map((msg, idx) => (
+                <div
+                  key={idx}
+                  className={cn(
+                    "text-sm",
+                    msg.source === "user"
+                      ? "text-primary"
+                      : "text-muted-foreground",
+                  )}
+                >
+                  {msg.message}
+                </div>
+              ))}
+            </div>
+          )}
+        </CardContent>
+      </Card>
+    </div>
+  );
+}
