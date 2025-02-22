@@ -1,14 +1,13 @@
 import { siteConfig } from "@/siteConfig";
 import Link from "next/link";
 
-import { SolarLogo } from "../../public/SolarLogo";
 import { Button } from "./landing/components/Button";
 
 export default function NotFound() {
   return (
     <div className="flex h-screen flex-col items-center justify-center">
       <Link href={siteConfig.baseLinks.home}>
-        <SolarLogo className="mt-6 h-10" />
+        <img src="/EchoLogo.png" alt="Echo Logo" className="mt-6 h-10" />
       </Link>
       <p className="mt-6 text-4xl font-semibold text-amber-600 sm:text-5xl">
         Error 404

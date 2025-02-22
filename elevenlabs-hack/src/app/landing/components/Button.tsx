@@ -24,11 +24,11 @@ const buttonVariants = tv({
         // text color
         "text-white",
         // background color
-        "bg-orange-500",
+        "bg-cyan-500",
         // hover color
-        "hover:bg-orange-600",
+        "hover:bg-cyan-600",
         // disabled
-        "disabled:bg-orange-300 disabled:text-white",
+        "disabled:bg-cyan-300 disabled:text-white",
       ],
       secondary: [
         // border
@@ -114,7 +114,7 @@ const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
       <Component
         ref={forwardedRef}
         className={cx(buttonVariants({ variant }), className)}
-        disabled={disabled || isLoading}
+        disabled={disabled ?? isLoading}
         tremor-id="tremor-raw"
         {...props}
       >
@@ -124,10 +124,8 @@ const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
               className="size-4 shrink-0 animate-spin"
               aria-hidden="true"
             />
-            <span className="sr-only">
-              {loadingText ? loadingText : "Loading"}
-            </span>
-            {loadingText ? loadingText : children}
+            <span className="sr-only">{loadingText ?? "Loading"}</span>
+            {loadingText ?? children}
           </span>
         ) : (
           children
