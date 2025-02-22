@@ -3,5 +3,5 @@ export interface JournalEntry {
   rawEntry: string;
   summarizedEntry: string;
   moodScore: string;
-  createdAt: string;
+  createdAt: string | Date;
 }

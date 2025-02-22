@@ -9,15 +9,20 @@ import {
   SheetTrigger,
 } from "@/components/ui/sheet";
 import { cn } from "@/lib/utils";
-import { BookOpen, LineChart, Menu } from "lucide-react";
+import { BookOpen, LineChart, Menu, MessageSquare } from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 
 const sidebarItems = [
   {
     title: "Journal",
-    icon: BookOpen,
+    icon: MessageSquare,
     href: "/",
+  },
+  {
+    title: "Past Entries",
+    icon: BookOpen,
+    href: "/journals",
   },
   {
     title: "Trends",
@@ -59,7 +64,7 @@ export function Sidebar() {
         </SheetTrigger>
         <SheetContent side="left" className="w-64">
           <SheetHeader>
-            <SheetTitle>Menu</SheetTitle>
+            <SheetTitle>Voice Journal</SheetTitle>
           </SheetHeader>
           <SidebarContent />
         </SheetContent>
@@ -68,7 +73,7 @@ export function Sidebar() {
       {/* Desktop Sidebar */}
       <div className="hidden h-screen w-64 border-r md:block">
         <div className="flex h-14 items-center border-b px-4">
-          <h2 className="font-semibold">Daily Journal</h2>
+          <h2 className="font-semibold">Voice Journal</h2>
         </div>
         <div className="px-4">
           <SidebarContent />
