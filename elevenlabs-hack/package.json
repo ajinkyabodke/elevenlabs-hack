@@ -23,6 +23,7 @@
   "dependencies": {
     "@11labs/react": "^0.0.7",
     "@ai-sdk/openai": "^1.1.13",
+    "@clerk/nextjs": "^6.12.0",
     "@hookform/resolvers": "^4.1.0",
     "@radix-ui/react-dialog": "^1.1.6",
     "@radix-ui/react-hover-card": "^1.1.6",
