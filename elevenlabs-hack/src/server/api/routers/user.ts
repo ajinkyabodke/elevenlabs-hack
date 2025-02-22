@@ -1,4 +1,7 @@
+import { users } from "@/server/db/schema";
 import { TRPCError } from "@trpc/server";
+import { eq } from "drizzle-orm";
+import { z } from "zod";
 import { createTRPCRouter, protectedProcedure } from "../trpc";
 
 export const userRouter = createTRPCRouter({
@@ -53,4 +56,33 @@ export const userRouter = createTRPCRouter({
       significantEventsWithDays,
     };
   }),
+
+  getMemory: protectedProcedure.query(async ({ ctx }) => {
+    const user = await ctx.db.query.users.findFirst({
+      where: (u, { eq }) => eq(u.id, ctx.session.userId),
+      columns: {
+        memory: true,
+      },
+    });
+
+    if (!user) {
+      throw new TRPCError({ code: "UNAUTHORIZED" });
+    }
+
+    return user.memory;
+  }),
+
+  updateMemories: protectedProcedure
+    .input(
+      z.object({
+        memories: z.array(z.string()),
+      }),
+    )
+    .mutation(async ({ ctx, input }) => {
+      const { memories } = input;
+      await ctx.db
+        .update(users)
+        .set({ memory: memories })
+        .where(eq(users.id, ctx.session.userId));
+    }),
 });
