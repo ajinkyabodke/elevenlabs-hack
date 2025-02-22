@@ -1,18 +1,13 @@
 import "@/styles/globals.css";
 
+import { Sidebar } from "@/components/layout/Sidebar";
 import { GeistSans } from "geist/font/sans";
-import { Inter } from "next/font/google";
 import { Toaster } from "sonner";
 
-const inter = Inter({
-  subsets: ["latin"],
-  variable: "--font-sans",
-});
-
 export const metadata = {
-  title: "Daily Journal",
+  title: "Voice Journal",
   description:
-    "A simple journaling app that helps you track your daily mood and thoughts.",
+    "A voice-first journaling app that helps you track your mood and thoughts.",
   icons: [{ rel: "icon", url: "/favicon.ico" }],
 };
 
@@ -24,7 +19,12 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body className={GeistSans.className}>
-        {children}
+        <div className="flex h-screen">
+          <Sidebar />
+          <div className="flex-1 overflow-auto">
+            <main className="container mx-auto p-4">{children}</main>
+          </div>
+        </div>
         <Toaster />
       </body>
     </html>
