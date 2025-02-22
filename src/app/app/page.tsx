@@ -1,6 +1,7 @@
 "use client";
 
 import { RecordButton } from "@/components/RecordButton";
+import { ToolDialog } from "@/components/ToolDialog";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -74,7 +75,7 @@ export default function Home() {
   const { user } = useUser();
   const { data: promptAttributes, isPending } =
     api.user.getPromptAttributes.useQuery();
-  const [, setActiveTool] = useAtom<ToolType | null>(activeToolAtom);
+  const [activeTool, setActiveTool] = useAtom<ToolType | null>(activeToolAtom);
   const name = user?.firstName;
 
   const conversation = useConversation({
@@ -246,6 +247,8 @@ export default function Home() {
 
   return (
     <>
+      {activeTool && <ToolDialog />}
+
       <div className="space-y-6">
         <div className="mx-auto mt-10 w-full max-w-lg">
           <div className="relative flex items-center rounded-full bg-secondary/30 p-1">
@@ -292,16 +295,13 @@ export default function Home() {
             </motion.div>
           </div>
         </div>
-
         <div className="mt-20 h-20" />
-
         {selectedMoodData && (
           <h4 className="flex w-full justify-center gap-3 text-center font-serif text-6xl text-card-foreground">
             {/* <span className="text-orange-400">✱</span> */}
             <span>{selectedMoodData.description}</span>
           </h4>
         )}
-
         <div className="-mt-4 flex items-center justify-center gap-3 text-center font-serif text-4xl tracking-tight sm:text-6xl">
           {/* <h1>Happy late night, {name}</h1> */}
 
@@ -312,7 +312,6 @@ export default function Home() {
             </h1>
           )}
         </div>
-
         <div className="flex items-center justify-center gap-2">
           <RecordButton
             isRecording={isRecording}
