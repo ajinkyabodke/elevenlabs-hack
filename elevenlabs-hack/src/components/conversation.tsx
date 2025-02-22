@@ -1,14 +1,23 @@
 "use client";
 
+import { Button } from "@/components/ui/button";
+import { cn } from "@/lib/utils";
 import { useConversation } from "@11labs/react";
+import { Mic, MicOff } from "lucide-react";
 import { useCallback } from "react";
+
+interface Message {
+  content: string;
+  role: "user" | "assistant";
+  timestamp: number;
+}
 
 export function Conversation() {
   const conversation = useConversation({
     onConnect: () => console.log("Connected"),
     onDisconnect: () => console.log("Disconnected"),
-    onMessage: (message) => console.log("Message:", message),
-    onError: (error) => console.error("Error:", error),
+    onMessage: (message: Message) => console.log("Message:", message),
+    onError: (error: Error) => console.error("Error:", error),
   });
 
   const startConversation = useCallback(async () => {
@@ -32,23 +41,35 @@ export function Conversation() {
   return (
     <div className="flex flex-col items-center gap-4">
       <div className="flex gap-2">
-        <button
+        <Button
           onClick={startConversation}
           disabled={conversation.status === "connected"}
-          className="rounded bg-blue-500 px-4 py-2 text-white disabled:bg-gray-300"
+          variant="default"
+          size="lg"
+          className={cn(
+            "transition-all duration-200",
+            conversation.status === "connected" && "opacity-50",
+          )}
         >
-          Start Conversation
-        </button>
-        <button
+          <Mic className="mr-2 h-5 w-5" />
+          Start Recording
+        </Button>
+        <Button
           onClick={stopConversation}
           disabled={conversation.status !== "connected"}
-          className="rounded bg-red-500 px-4 py-2 text-white disabled:bg-gray-300"
+          variant="destructive"
+          size="lg"
+          className={cn(
+            "transition-all duration-200",
+            conversation.status !== "connected" && "opacity-50",
+          )}
         >
-          Stop Conversation
-        </button>
+          <MicOff className="mr-2 h-5 w-5" />
+          Stop Recording
+        </Button>
       </div>
 
-      <div className="flex flex-col items-center">
+      <div className="flex flex-col items-center text-sm text-muted-foreground">
         <p>Status: {conversation.status}</p>
         <p>Agent is {conversation.isSpeaking ? "speaking" : "listening"}</p>
       </div>

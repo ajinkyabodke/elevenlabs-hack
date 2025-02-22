@@ -6,7 +6,6 @@ import {
   Card,
   CardContent,
   CardDescription,
-  CardFooter,
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
@@ -26,6 +25,7 @@ import {
   SheetTrigger,
 } from "@/components/ui/sheet";
 import { cn } from "@/lib/utils";
+import { useConversation } from "@11labs/react";
 import {
   Brain,
   Flame,
@@ -114,15 +114,37 @@ const GROUNDING_TECHNIQUES = [
   },
 ];
 
+interface Message {
+  content: string;
+  role: "user" | "assistant";
+  timestamp: number;
+}
+
 export function VoiceJournal() {
-  const [isRecording, setIsRecording] = useState(false);
-  const [isProcessing, setIsProcessing] = useState(false);
   const [selectedMood, setSelectedMood] = useState<string>("");
   const [currentExercise, setCurrentExercise] = useState<number>(0);
   const [currentStep, setCurrentStep] = useState<number>(0);
   const [timer, setTimer] = useState<number>(0);
   const [isBreathing, setIsBreathing] = useState(false);
   const [isBurning, setIsBurning] = useState(false);
+  const [isProcessing, setIsProcessing] = useState(false);
+
+  const conversation = useConversation({
+    onConnect: () => {
+      toast.success("Ready to record");
+    },
+    onDisconnect: () => {
+      toast.info("Recording stopped");
+    },
+    onMessage: (message: Message) => {
+      console.log("Message:", message);
+      // TODO: Handle the conversation message
+    },
+    onError: (error: Error) => {
+      console.error("Error:", error);
+      toast.error("Something went wrong with the recording");
+    },
+  });
 
   const selectedMoodData = MOODS.find((mood) => mood.id === selectedMood);
 
@@ -157,10 +179,9 @@ export function VoiceJournal() {
   };
 
   const toggleRecording = async () => {
-    if (isRecording) {
-      setIsRecording(false);
+    if (conversation?.status === "connected") {
+      await conversation.endSession();
       setIsProcessing(true);
-      // TODO: Stop recording and process audio
       setTimeout(() => {
         setIsProcessing(false);
         toast.success("Journal entry saved!");
@@ -170,15 +191,22 @@ export function VoiceJournal() {
         toast.error("Please select how you're feeling first");
         return;
       }
-      setIsRecording(true);
-      // TODO: Start recording
+      try {
+        await navigator.mediaDevices.getUserMedia({ audio: true });
+        await conversation?.startSession({
+          agentId: "9O7dItLkE9z4UD6y9kwV",
+        });
+      } catch (error) {
+        console.error("Failed to start recording:", error);
+        toast.error("Failed to start recording");
+      }
     }
   };
 
   const handleBurnEntry = () => {
-    if (isRecording) {
+    if (conversation?.status === "connected") {
       setIsBurning(true);
-      setIsRecording(false);
+      void conversation.endSession();
     }
   };
 
@@ -243,43 +271,42 @@ export function VoiceJournal() {
               size="lg"
               className={cn(
                 "bg-sage-100 text-sage-700 hover:bg-sage-200 h-24 w-24 rounded-full transition-all",
-                isRecording && "bg-red-500 text-white hover:bg-red-600",
+                conversation?.status === "connected" &&
+                  "bg-red-500 text-white hover:bg-red-600",
               )}
               onClick={toggleRecording}
               disabled={isProcessing}
             >
               {isProcessing ? (
                 <Loader2 className="h-12 w-12 animate-spin" />
-              ) : isRecording ? (
+              ) : conversation?.status === "connected" ? (
                 <MicOff className="h-12 w-12" />
               ) : (
                 <Mic className="h-12 w-12" />
               )}
             </Button>
-            <p className="text-sage-600 text-sm">
-              {isProcessing
-                ? "Processing your entry..."
-                : isRecording
-                  ? "Recording... Tap to stop"
-                  : "Tap to start recording"}
-            </p>
+            <div className="text-sage-600 text-sm">
+              {conversation?.status === "connected" ? (
+                <>
+                  Recording...{" "}
+                  {conversation.isSpeaking ? "(AI speaking)" : "(Listening)"}
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    className="ml-2 text-red-500 hover:text-red-600"
+                    onClick={handleBurnEntry}
+                  >
+                    <Trash2 className="h-4 w-4" />
+                  </Button>
+                </>
+              ) : isProcessing ? (
+                "Processing..."
+              ) : (
+                "Click to start recording"
+              )}
+            </div>
           </div>
         </CardContent>
-        <CardFooter className="justify-center gap-4">
-          {isRecording && (
-            <>
-              <div className="h-2 w-full max-w-[200px] animate-pulse rounded-full bg-red-500" />
-              <Button
-                variant="ghost"
-                size="icon"
-                className="text-red-500 hover:bg-red-50 hover:text-red-600"
-                onClick={handleBurnEntry}
-              >
-                <Trash2 className="h-5 w-5" />
-              </Button>
-            </>
-          )}
-        </CardFooter>
       </Card>
 
       <div className="space-y-6">
