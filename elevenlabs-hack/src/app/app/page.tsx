@@ -21,7 +21,7 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { activeToolAtom, type ToolType } from "@/lib/atoms";
 import { cn } from "@/lib/utils";
-import { api, RouterOutputs } from "@/trpc/react";
+import { api, type RouterOutputs } from "@/trpc/react";
 import type { JournalEntry } from "@/types";
 import { useConversation } from "@11labs/react";
 import { useUser } from "@clerk/nextjs";
@@ -35,6 +35,7 @@ type Mood = {
   label: string;
   description: string;
   prompt: string;
+  icon: string;
 };
 
 const MOODS: Mood[] = [
@@ -61,15 +62,15 @@ const MOODS: Mood[] = [
   },
 ];
 
-interface Message {
+type Message = {
   source: "user" | "ai";
   message: string;
-}
+};
 
-interface ConversationTranscript {
+type ConversationTranscript = {
   messages: Message[];
   summary?: string;
-}
+};
 
 const getSystemPrompt = (
   mood: string,
