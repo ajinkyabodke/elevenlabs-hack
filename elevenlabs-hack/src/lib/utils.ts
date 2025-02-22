@@ -1,5 +1,6 @@
 // Tremor Raw cx [v0.0.0]
 
+import confetti from "canvas-confetti";
 import clsx, { type ClassValue } from "clsx";
 import { twMerge } from "tailwind-merge";
 
@@ -9,6 +10,14 @@ export function cx(...args: ClassValue[]) {
 
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
+}
+
+export function celebrate() {
+  void confetti({
+    particleCount: 100,
+    spread: 70,
+    origin: { y: 0.6 },
+  });
 }
 // Tremor Raw focusInput [v0.0.1]
 
