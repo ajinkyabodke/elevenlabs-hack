@@ -7,21 +7,33 @@ import {
   DialogDescription,
   DialogHeader,
   DialogTitle,
-  DialogTrigger,
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import { type CalendarEvent, type JournalEntry } from "@/types";
-import { addDays, format, startOfWeek, startOfMonth, endOfMonth, eachDayOfInterval, getDay, subDays, isSameDay, isSameMonth, addMonths } from "date-fns";
-import { Plus, ChevronLeft, ChevronRight } from "lucide-react";
-import { useState, useMemo } from "react";
-import { cn } from "@/lib/utils";
 import {
-  HoverCard,
-  HoverCardContent,
-  HoverCardTrigger,
-} from "@/components/ui/hover-card";
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
+import { cn } from "@/lib/utils";
+import { type CalendarEvent, type JournalEntry } from "@/types";
+import {
+  addDays,
+  addMonths,
+  eachDayOfInterval,
+  endOfMonth,
+  format,
+  getDay,
+  isSameDay,
+  isSameMonth,
+  startOfMonth,
+  startOfWeek,
+  subDays,
+} from "date-fns";
+import { ChevronLeft, ChevronRight } from "lucide-react";
+import { useMemo, useState } from "react";
 
 interface EnhancedCalendarProps {
   events: CalendarEvent[];
@@ -30,7 +42,12 @@ interface EnhancedCalendarProps {
   onEditEvent?: (event: CalendarEvent) => void;
 }
 
-export function EnhancedCalendar({ events, entries, onAddEvent, onEditEvent }: EnhancedCalendarProps) {
+export function EnhancedCalendar({
+  events,
+  entries,
+  onAddEvent,
+  onEditEvent,
+}: EnhancedCalendarProps) {
   const [currentDate, setCurrentDate] = useState(new Date());
   const [view, setView] = useState<"week" | "month">("week");
 
@@ -52,7 +69,10 @@ export function EnhancedCalendar({ events, entries, onAddEvent, onEditEvent }: E
   // Add this function to calculate average mood score
   const getAverageMoodScore = (entries: JournalEntry[]) => {
     if (entries.length === 0) return 0;
-    const sum = entries.reduce((acc, entry) => acc + parseFloat(entry.moodScore), 0);
+    const sum = entries.reduce(
+      (acc, entry) => acc + parseFloat(entry.moodScore),
+      0,
+    );
     return sum / entries.length;
   };
 
@@ -72,10 +92,10 @@ export function EnhancedCalendar({ events, entries, onAddEvent, onEditEvent }: E
   const getDayContent = (date: Date) => {
     const dateStr = format(date, "yyyy-MM-dd");
     const dayEvents = events.filter(
-      (event) => format(event.date, "yyyy-MM-dd") === dateStr
+      (event) => format(event.date, "yyyy-MM-dd") === dateStr,
     );
     const dayEntries = entries.filter(
-      (entry) => format(new Date(entry.createdAt), "yyyy-MM-dd") === dateStr
+      (entry) => format(new Date(entry.createdAt), "yyyy-MM-dd") === dateStr,
     );
 
     return { events: dayEvents, entries: dayEntries };
@@ -92,23 +112,23 @@ export function EnhancedCalendar({ events, entries, onAddEvent, onEditEvent }: E
       const start = startOfMonth(currentDate);
       const end = endOfMonth(currentDate);
       const daysInMonth = eachDayOfInterval({ start, end });
-      
+
       // Add days from previous month to start on Monday
       const startDay = getDay(start);
-      const prevDays = startDay > 0 
-        ? Array.from({ length: startDay - 1 }, (_, i) => 
-            subDays(start, startDay - 1 - i)
-          )
-        : [];
-      
+      const prevDays =
+        startDay > 0
+          ? Array.from({ length: startDay - 1 }, (_, i) =>
+              subDays(start, startDay - 1 - i),
+            )
+          : [];
+
       // Add days from next month to complete the grid
       const endDay = getDay(end);
-      const nextDays = endDay < 6
-        ? Array.from({ length: 7 - endDay }, (_, i) =>
-            addDays(end, i + 1)
-          )
-        : [];
-      
+      const nextDays =
+        endDay < 6
+          ? Array.from({ length: 7 - endDay }, (_, i) => addDays(end, i + 1))
+          : [];
+
       return [...prevDays, ...daysInMonth, ...nextDays];
     }
   }, [currentDate, view]);
@@ -167,46 +187,54 @@ export function EnhancedCalendar({ events, entries, onAddEvent, onEditEvent }: E
       </div>
 
       {/* Calendar Grid */}
-      <div className={cn(
-        "grid gap-px bg-muted",
-        view === "week" ? "grid-cols-7" : "grid-cols-7"
-      )}>
+      <div
+        className={cn(
+          "grid gap-px bg-muted",
+          view === "week" ? "grid-cols-7" : "grid-cols-7",
+        )}
+      >
         {/* Weekday Headers */}
         {["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"].map((day) => (
-          <div key={day} className="bg-background p-2 text-center text-sm font-medium">
+          <div
+            key={day}
+            className="bg-background p-2 text-center text-sm font-medium"
+          >
             {day}
           </div>
         ))}
-        
+
         {/* Calendar Days */}
         {calendarDays.map((date) => {
-          const { events: dayEvents, entries: dayEntries } = getDayContent(date);
+          const { events: dayEvents, entries: dayEntries } =
+            getDayContent(date);
           const isToday = isSameDay(date, new Date());
           const isCurrentMonth = isSameMonth(date, currentDate);
-          
+
           return (
             <div
               key={date.toISOString()}
               className={cn(
-                "group relative min-h-[120px] bg-background p-2 flex flex-col",
+                "group relative flex min-h-[120px] flex-col bg-background p-2",
                 !isCurrentMonth && "text-muted-foreground/50",
-                isToday && "bg-accent/50"
+                isToday && "bg-accent/50",
               )}
             >
               {/* Header with date and average mood emoji */}
               <div className="flex items-start justify-between">
-                <span className={cn(
-                  "flex h-6 w-6 items-center justify-center rounded-full text-sm",
-                  isToday && "bg-primary text-primary-foreground font-medium"
-                )}>
+                <span
+                  className={cn(
+                    "flex h-6 w-6 items-center justify-center rounded-full text-sm",
+                    isToday && "bg-primary font-medium text-primary-foreground",
+                  )}
+                >
                   {format(date, "d")}
                 </span>
                 {dayEntries.length > 0 && (
                   <div className="flex items-center justify-center">
-                    <span 
+                    <span
                       className={cn(
                         "text-lg",
-                        getMoodColor(getAverageMoodScore(dayEntries))
+                        getMoodColor(getAverageMoodScore(dayEntries)),
                       )}
                     >
                       {getMoodEmoji(getAverageMoodScore(dayEntries))}
@@ -220,25 +248,50 @@ export function EnhancedCalendar({ events, entries, onAddEvent, onEditEvent }: E
                 )}
               </div>
               {/* Significant Events */}
-              {dayEntries.length > 0 && dayEntries[0]?.significantEvents && dayEntries[0].significantEvents.length > 0 && (
-                <div className="mt-1 space-y-1">
-                  {dayEntries[0].significantEvents.slice(0, 2).map((event, index) => (
-                    <div
-                      key={index}
-                      className={cn(
-                        "text-xs text-muted-foreground rounded px-1 py-0.5",
-                        getEventColor(index)
-                      )}>
-                      {event}
-                    </div>
-                  ))}
-                  {dayEntries[0].significantEvents.length > 2 && (
-                    <div className="text-xs text-muted-foreground">
-                      +{dayEntries[0].significantEvents.length - 2} more
-                    </div>
-                  )}
-                </div>
-              )}
+              {dayEntries.length > 0 &&
+                dayEntries[0]?.significantEvents &&
+                dayEntries[0].significantEvents.length > 0 && (
+                  <div className="mt-1 space-y-1">
+                    {dayEntries[0].significantEvents
+                      .slice(0, 3)
+                      .map((event, index) => (
+                        <div
+                          key={index}
+                          className={cn(
+                            "rounded px-1 py-0.5 text-xs text-muted-foreground",
+                            getEventColor(index),
+                          )}
+                        >
+                          {event}
+                        </div>
+                      ))}
+                    {dayEntries[0].significantEvents.length > 2 && (
+                      <TooltipProvider>
+                        <Tooltip>
+                          <TooltipTrigger className="text-xs text-muted-foreground">
+                            +{dayEntries[0].significantEvents.length - 3} more
+                          </TooltipTrigger>
+                          <TooltipContent className="flex flex-col gap-y-1 rounded-sm border border-border bg-background p-1 text-foreground">
+                            {dayEntries[0].significantEvents.map(
+                              (event, index) => (
+                                <div
+                                  key={index}
+                                  className={cn(
+                                    "rounded px-1 py-0.5 text-xs text-muted-foreground",
+                                    getEventColor(index),
+                                    "w-full",
+                                  )}
+                                >
+                                  {event}
+                                </div>
+                              ),
+                            )}
+                          </TooltipContent>
+                        </Tooltip>
+                      </TooltipProvider>
+                    )}
+                  </div>
+                )}
 
               {/* Entry summary */}
               {/* {dayEntries.length > 0 && (
@@ -254,9 +307,9 @@ export function EnhancedCalendar({ events, entries, onAddEvent, onEditEvent }: E
                     key={event.id}
                     className={cn(
                       "truncate rounded px-2 py-1 text-xs font-medium",
-                      event.color 
+                      event.color
                         ? `bg-${event.color}/10 text-${event.color}-700 dark:text-${event.color}-400`
-                        : "bg-primary/10 text-primary-700 dark:text-primary-400"
+                        : "bg-primary/10 text-primary-700 dark:text-primary-400",
                     )}
                   >
                     {event.title}
@@ -272,7 +325,11 @@ export function EnhancedCalendar({ events, entries, onAddEvent, onEditEvent }: E
 }
 
 // Add Event Form Component
-function AddEventForm({ onSubmit }: { onSubmit?: (event: Omit<CalendarEvent, "id">) => void }) {
+function AddEventForm({
+  onSubmit,
+}: {
+  onSubmit?: (event: Omit<CalendarEvent, "id">) => void;
+}) {
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
   const [date, setDate] = useState(format(new Date(), "yyyy-MM-dd"));
@@ -295,7 +352,7 @@ function AddEventForm({ onSubmit }: { onSubmit?: (event: Omit<CalendarEvent, "id
     setDescription("");
     setDate(format(new Date(), "yyyy-MM-dd"));
     setColor("#6b8971");
-    
+
     // Close the dialog
     setIsOpen(false);
   };
@@ -347,7 +404,11 @@ function AddEventForm({ onSubmit }: { onSubmit?: (event: Omit<CalendarEvent, "id
             />
           </div>
           <div className="flex justify-end gap-2">
-            <Button type="button" variant="outline" onClick={() => setIsOpen(false)}>
+            <Button
+              type="button"
+              variant="outline"
+              onClick={() => setIsOpen(false)}
+            >
               Cancel
             </Button>
             <Button type="submit">Add Event</Button>
@@ -356,4 +417,4 @@ function AddEventForm({ onSubmit }: { onSubmit?: (event: Omit<CalendarEvent, "id
       </DialogContent>
     </Dialog>
   );
-} 
+}

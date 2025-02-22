@@ -7,21 +7,6 @@ import { generateObject } from "ai";
 import { eq } from "drizzle-orm";
 import { z } from "zod";
 
-const journalAnalysisSchema = z.object({
-  moodScore: z
-    .number()
-    .min(0)
-    .max(100)
-    .describe(
-      "A number between 0-100 representing the emotional state: 0-20 (very negative), 21-40 (negative), 41-60 (neutral), 61-80 (positive), 81-100 (very positive)",
-    ),
-  summary: z
-    .string()
-    .describe(
-      "A simple, natural journal entry written in first person, as if written by the user themselves",
-    ),
-});
-
 const journalEntrySchema = z.object({
   rawEntry: z.string().min(1),
 });
@@ -91,6 +76,7 @@ export async function POST(req: Request) {
         rawEntry,
         summarizedEntry: analysis.summary,
         moodScore: analysis.moodScore.toFixed(2),
+        significantEvents: analysis.significantEvents,
       })
       .returning();
 
@@ -109,11 +95,32 @@ export async function POST(req: Request) {
   }
 }
 
+// job phone car marriage laptop
+
 const summariseJournalEntry = async (entry: string) => {
   // Analyze the entry using Vercel AI SDK
   const { object: analysis } = await generateObject({
     model: openai("gpt-4o-mini"),
-    schema: journalAnalysisSchema,
+    schema: z.object({
+      moodScore: z
+        .number()
+        .min(0)
+        .max(100)
+        .describe(
+          "A number between 0-100 representing the emotional state: 0-20 (very negative), 21-40 (negative), 41-60 (neutral), 61-80 (positive), 81-100 (very positive)",
+        ),
+      summary: z
+        .string()
+        .describe(
+          "A simple, natural journal entry written in first person, as if written by the user themselves",
+        ),
+      significantEvents: z
+        .array(z.string())
+        .describe(
+          "A list of significant events that happened in the conversation. Max 4-5 words for each event. Don't include conjunctions like 'and', 'a' or 'but'.",
+        )
+        .max(4),
+    }),
     prompt: `Transform this conversation into a simple, natural journal entry. Write it exactly how someone would write in their personal diary - casual, honest, and straightforward.
 
 Conversation transcript:
