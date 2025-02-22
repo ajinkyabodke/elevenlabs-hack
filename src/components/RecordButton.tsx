@@ -3,6 +3,7 @@
 import { cn } from "@/lib/utils";
 import { Loader2, Mic, MicOff } from "lucide-react";
 import { useEffect, useRef } from "react";
+import { PulsatingButton } from "./ui/button";
 
 interface RecordButtonProps {
   isRecording: boolean;
@@ -111,14 +112,15 @@ export function RecordButton({
           isRecording ? "-translate-x-8" : "",
         )}
       >
-        <button
+        <PulsatingButton
+          pulseEnabled={!isRecording}
           onClick={onClick}
           disabled={disabled}
           className={cn(
             "group relative flex size-16 items-center justify-center rounded-full transition-all duration-300 ease-in-out",
             isRecording
               ? "bg-destructive text-destructive-foreground hover:bg-destructive/90"
-              : "bg-primary text-primary-foreground hover:bg-primary/90",
+              : "bg-gradient-to-r from-cyan-900 to-sky-900 text-primary-foreground hover:bg-primary/90",
             disabled && "pointer-events-none opacity-50",
           )}
         >
@@ -140,7 +142,7 @@ export function RecordButton({
               <Mic className="size-6" />
             )}
           </div>
-        </button>
+        </PulsatingButton>
 
         <div className={cn("relative ml-4", isRecording ? "flex" : "hidden")}>
           {/* Waveform canvas */}
