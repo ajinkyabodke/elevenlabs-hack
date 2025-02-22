@@ -336,7 +336,6 @@ export default function Home() {
         {lastTwoMessages.length > 0 && (
           <div className="space-y-2">
             <div className="flex items-center justify-between">
-              <h3 className="text-sm font-medium">Recent Messages</h3>
               <Dialog>
                 <DialogTrigger asChild>
                   <Button variant="ghost" size="sm">
@@ -371,7 +370,8 @@ export default function Home() {
                 </DialogContent>
               </Dialog>
             </div>
-            <div className="space-y-2 rounded-lg border bg-card p-4 text-card-foreground shadow-sm">
+
+            <div className="space-y-2 rounded-lg bg-muted p-4 font-serif text-card-foreground">
               {lastTwoMessages.map((msg, idx) => (
                 <div
                   key={idx}
