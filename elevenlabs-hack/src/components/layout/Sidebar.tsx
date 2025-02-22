@@ -29,7 +29,7 @@ const sidebarItems = [
     href: "/app",
   },
   {
-    title: "Past Entries",
+    title: "History",
     icon: BookOpen,
     href: "/journals",
   },
