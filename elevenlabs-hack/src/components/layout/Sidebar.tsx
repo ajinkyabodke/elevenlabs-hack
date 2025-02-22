@@ -14,7 +14,6 @@ import { UserButton } from "@clerk/nextjs";
 import {
   BookOpen,
   Brain,
-  Clock,
   Heart,
   LineChart,
   Menu,
@@ -39,11 +38,11 @@ const sidebarItems = [
     icon: Brain,
     href: "/memory",
   },
-  {
-    title: "Time Capsule",
-    icon: Clock,
-    href: "/time-capsule",
-  },
+  // {
+  //   title: "Time Capsule",
+  //   icon: Clock,
+  //   href: "/time-capsule",
+  // },
   {
     title: "Trends",
     icon: LineChart,

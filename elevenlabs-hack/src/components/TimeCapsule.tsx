@@ -42,7 +42,7 @@ const letterSchema = z.object({
   openDate: z.string().refine((date) => new Date(date) > new Date(), {
     message: "Open date must be in the future",
   }),
-}) as const;
+});
 
 type LetterSchema = z.infer<typeof letterSchema>;
 
@@ -90,7 +90,7 @@ function TimeCapsuleForm({ form, onSubmit }: TimeCapsuleFormProps) {
               <FormControl>
                 <Textarea
                   placeholder="Dear future me..."
-                  className="border-sand-200 min-h-[120px] bg-white/50 sm:min-h-[200px]"
+                  className="min-h-[120px] border-sand-200 bg-white/50 sm:min-h-[200px]"
                   {...field}
                 />
               </FormControl>
@@ -112,7 +112,7 @@ function TimeCapsuleForm({ form, onSubmit }: TimeCapsuleFormProps) {
                   {...field}
                 />
               </FormControl>
-              <FormDescription className="text-sand-600 text-sm">
+              <FormDescription className="text-sm text-sand-600">
                 Choose when you want to read this letter
               </FormDescription>
               <FormMessage />
@@ -121,7 +121,7 @@ function TimeCapsuleForm({ form, onSubmit }: TimeCapsuleFormProps) {
         />
         <Button
           type="submit"
-          className="bg-sand-500 hover:bg-sand-600 w-full text-white"
+          className="w-full bg-sand-500 text-white hover:bg-sand-600"
         >
           Seal Letter
         </Button>
@@ -197,22 +197,22 @@ export function TimeCapsule() {
     <div className="space-y-6">
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div>
-          <h2 className="text-sand-800 text-xl font-bold sm:text-2xl">
+          <h2 className="text-xl font-bold text-sand-800 sm:text-2xl">
             Time Capsule
           </h2>
-          <p className="text-sand-600 text-sm sm:text-base">
+          <p className="text-sm text-sand-600 sm:text-base">
             Write letters to your future self
           </p>
         </div>
 
         <Dialog>
           <DialogTrigger asChild>
-            <Button className="bg-sand-500 hover:bg-sand-600 w-full text-white sm:w-auto">
+            <Button className="w-full bg-sand-500 text-white hover:bg-sand-600 sm:w-auto">
               <PenLine className="mr-2 h-4 w-4" />
               Write Letter
             </Button>
           </DialogTrigger>
-          <DialogContent className="from-sand-50 mx-auto w-[calc(100%-2rem)] max-w-lg bg-gradient-to-br to-white sm:w-full">
+          <DialogContent className="mx-auto w-[calc(100%-2rem)] max-w-lg bg-gradient-to-br from-sand-50 to-white sm:w-full">
             <DialogHeader>
               <DialogTitle className="text-sand-800">
                 Write to Future You
@@ -230,26 +230,26 @@ export function TimeCapsule() {
         {letters.map((letter, index) => (
           <Card
             key={letter.id}
-            className={`card-hover border-sand-200 from-sand-50 bg-gradient-to-br to-white fade-in`}
+            className={`card-hover border-sand-200 bg-gradient-to-br from-sand-50 to-white fade-in`}
             style={{ animationDelay: `${index * 0.1}s` }}
           >
             <CardHeader className="space-y-3 sm:space-y-1">
               <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between sm:gap-0">
                 <div className="space-y-1.5">
                   <CardTitle
-                    className="text-sand-800 slide-up text-lg sm:text-xl"
+                    className="slide-up text-lg text-sand-800 sm:text-xl"
                     style={{ animationDelay: `${index * 0.1 + 0.2}s` }}
                   >
                     To be opened on {format(letter.openDate, "MMMM d, yyyy")}
                   </CardTitle>
-                  <CardDescription className="text-sand-600 text-sm">
+                  <CardDescription className="text-sm text-sand-600">
                     Written on {format(letter.writtenDate, "MMMM d, yyyy")}
                   </CardDescription>
                 </div>
                 <Button
                   variant="ghost"
                   size="icon"
-                  className="text-sand-500 hover:bg-sand-100 hover:text-sand-700 rotate-in self-end sm:self-start"
+                  className="rotate-in self-end text-sand-500 hover:bg-sand-100 hover:text-sand-700 sm:self-start"
                   style={{ animationDelay: `${index * 0.1 + 0.3}s` }}
                   onClick={() => handleDeleteLetter(letter.id)}
                 >
@@ -260,7 +260,7 @@ export function TimeCapsule() {
             <CardContent>
               <div className="space-y-3">
                 <div
-                  className="text-sand-700 slide-up flex items-center gap-2 text-sm sm:text-base"
+                  className="slide-up flex items-center gap-2 text-sm text-sand-700 sm:text-base"
                   style={{ animationDelay: `${index * 0.1 + 0.4}s` }}
                 >
                   <Tag className="h-4 w-4" />
@@ -268,14 +268,14 @@ export function TimeCapsule() {
                 </div>
                 {letter.isOpen ? (
                   <p
-                    className="text-sand-700 scale-in text-sm sm:text-base"
+                    className="scale-in text-sm text-sand-700 sm:text-base"
                     style={{ animationDelay: `${index * 0.1 + 0.5}s` }}
                   >
                     {letter.content}
                   </p>
                 ) : (
-                  <div className="bg-sand-100 breathing-animation flex items-center justify-center rounded-lg p-6 sm:p-8">
-                    <Lock className="text-sand-500 h-6 w-6 sm:h-8 sm:w-8" />
+                  <div className="breathing-animation flex items-center justify-center rounded-lg bg-sand-100 p-6 sm:p-8">
+                    <Lock className="h-6 w-6 text-sand-500 sm:h-8 sm:w-8" />
                   </div>
                 )}
               </div>
@@ -283,7 +283,7 @@ export function TimeCapsule() {
             <CardFooter>
               {!letter.isOpen && new Date() >= letter.openDate && (
                 <Button
-                  className="bg-ocean-500 hover:bg-ocean-600 scale-in w-full text-white sm:w-auto"
+                  className="scale-in w-full bg-ocean-500 text-white hover:bg-ocean-600 sm:w-auto"
                   style={{ animationDelay: `${index * 0.1 + 0.6}s` }}
                   onClick={() => handleOpenLetter(letter.id)}
                 >

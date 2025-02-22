@@ -160,7 +160,7 @@ export function VoiceJournal() {
       `----`,
 
       `Significant events over the last 7 days: ${promptAttributes?.significantEventsWithDays
-        .map((e) => `- ${e.day}: ${e.significantEvents}`)
+        .map((e) => `- ${e.day}: ${e.significantEvents.join(", ")}`)
         .join("\n")}`,
     ].join("\n");
 
@@ -236,7 +236,7 @@ export function VoiceJournal() {
         console.log("System prompt:", getSystemPrompt(selectedMood));
         await navigator.mediaDevices.getUserMedia({ audio: true });
         await conversation?.startSession({
-          agentId: "iJew1GA0fB9bF8IjEY85",
+          agentId: "AupMfEyUGwuMVyOywI6b",
           overrides: {
             agent: {
               firstMessage: getFirstMessage(),
@@ -266,7 +266,7 @@ export function VoiceJournal() {
 
   return (
     <div className="mx-auto max-w-2xl space-y-6">
-      <Card className="border-sage-200 from-sage-50 hover:border-sage-300 relative w-full overflow-hidden bg-gradient-to-br to-white shadow-none transition-all hover:shadow-lg">
+      <Card className="relative w-full overflow-hidden border-sage-200 bg-gradient-to-br from-sage-50 to-white shadow-none transition-all hover:border-sage-300 hover:shadow-lg">
         <CardHeader>
           <CardTitle>Voice Journal</CardTitle>
           <CardDescription>
@@ -392,7 +392,7 @@ export function VoiceJournal() {
         </CardContent>
       </Card>
 
-      <Card className="border-sage-200 from-sage-50 hover:border-sage-300 relative w-full overflow-hidden bg-gradient-to-br to-white shadow-none transition-all hover:shadow-lg">
+      <Card className="relative w-full overflow-hidden border-sage-200 bg-gradient-to-br from-sage-50 to-white shadow-none transition-all hover:border-sage-300 hover:shadow-lg">
         <CardHeader>
           <CardTitle>Need to calm down?</CardTitle>
           <CardDescription>Try these exercises</CardDescription>
