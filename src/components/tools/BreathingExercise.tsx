@@ -100,7 +100,7 @@ export function BreathingExercise() {
           </div>
         </div>
 
-        <div className="absolute -bottom-6 w-full">
+        <div className="absolute -bottom-12 w-full">
           <Progress
             value={progress}
             className={cn(
