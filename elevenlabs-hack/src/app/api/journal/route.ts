@@ -81,11 +81,6 @@ export async function POST(req: Request) {
       }),
     ]);
 
-    console.log({
-      analysis,
-      memories,
-    });
-
     // Save to database with the analysis and user ID
     const entries = await db
       .insert(journalEntries)
@@ -168,8 +163,6 @@ Always include absolute dates, and not "last week" or "last month" etc.`,
       memory: [...props.user.memory, ...memories],
     })
     .where(eq(users.id, props.user.id));
-
-  console.log(memories);
 
   return memories;
 };
