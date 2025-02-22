@@ -18,13 +18,7 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
+import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { activeToolAtom, type ToolType } from "@/lib/atoms";
 import { cn } from "@/lib/utils";
 import { api, RouterOutputs } from "@/trpc/react";
@@ -45,22 +39,25 @@ type Mood = {
 
 const MOODS: Mood[] = [
   {
-    id: "vent",
-    label: "I need to vent",
-    description: "Let it all out",
-    prompt: "I am here to listen. Tell me what is bothering you...",
+    id: "unwind",
+    icon: "😌",
+    label: "unwind",
+    description: "Relax and reflect",
+    prompt: "Let us take a moment to relax. How are you feeling right now?",
   },
   {
     id: "chat",
-    label: "Just chat",
+    icon: "💬",
+    label: "chat",
     description: "Have a casual conversation",
     prompt: "How was your day? I would love to hear about it...",
   },
   {
-    id: "unwind",
-    label: "Help me unwind",
-    description: "Relax and reflect",
-    prompt: "Let us take a moment to relax. How are you feeling right now?",
+    id: "vent",
+    icon: "😠",
+    label: "vent",
+    description: "Let it all out",
+    prompt: "I am here to listen. Tell me what is bothering you...",
   },
 ];
 
@@ -274,20 +271,18 @@ export default function Home() {
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-6">
-          <Select value={selectedMood} onValueChange={setSelectedMood}>
-            <SelectTrigger>
-              <SelectValue placeholder="How are you feeling?" />
-            </SelectTrigger>
-            <SelectContent>
+          <Tabs value={selectedMood} onValueChange={setSelectedMood}>
+            <TabsList className="mx-auto flex w-max items-center">
               {MOODS.map((mood) => (
-                <SelectItem key={mood.id} value={mood.id}>
+                <TabsTrigger key={mood.id} value={mood.id}>
                   <div className="flex items-center gap-2">
+                    <span>{mood.icon}</span>
                     <span>{mood.label}</span>
                   </div>
-                </SelectItem>
+                </TabsTrigger>
               ))}
-            </SelectContent>
-          </Select>
+            </TabsList>
+          </Tabs>
 
           {selectedMoodData && (
             <p className="text-sm text-muted-foreground">
