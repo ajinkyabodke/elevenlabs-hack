@@ -1,5 +1,6 @@
 "use client";
 
+import { Button } from "@/components/ui/button";
 import {
   Card,
   CardContent,
@@ -8,191 +9,264 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { type JournalEntry } from "@/types";
+import type { CustomTooltipProps } from "@tremor/react";
+import { AreaChart, Metric, Text, Card as TremorCard } from "@tremor/react";
 import {
-  AreaChart,
-  BarChart,
-  DonutChart,
-  Flex,
-  Grid,
-  Metric,
-  Text,
-  Card as TremorCard,
-} from "@tremor/react";
-import { endOfWeek, format, isWithinInterval, startOfWeek } from "date-fns";
+  addMonths,
+  addWeeks,
+  endOfMonth,
+  endOfWeek,
+  format,
+  isWithinInterval,
+  startOfMonth,
+  startOfWeek,
+  subMonths,
+  subWeeks,
+} from "date-fns";
+import { ChevronLeft, ChevronRight } from "lucide-react";
+import { useState } from "react";
 
 interface TrendsChartsProps {
   entries: JournalEntry[];
 }
 
 export function TrendsCharts({ entries }: TrendsChartsProps) {
-  // Prepare data for charts
-  const moodData = entries
+  const [selectedMonth, setSelectedMonth] = useState(new Date());
+  const [selectedWeek, setSelectedWeek] = useState(new Date());
+
+  // Helper function to get entries within a date range
+  const getEntriesInRange = (start: Date, end: Date) => {
+    return entries.filter((entry) =>
+      isWithinInterval(new Date(entry.createdAt), { start, end }),
+    );
+  };
+
+  // Get entries for selected month
+  const monthStart = startOfMonth(selectedMonth);
+  const monthEnd = endOfMonth(selectedMonth);
+  const monthlyEntries = getEntriesInRange(monthStart, monthEnd);
+
+  // Get entries for selected week
+  const weekStart = startOfWeek(selectedWeek);
+  const weekEnd = endOfWeek(selectedWeek);
+  const weeklyEntries = getEntriesInRange(weekStart, weekEnd);
+
+  // Calculate averages
+  const calculateAverage = (entries: JournalEntry[]) => {
+    if (entries.length === 0) return 0;
+    return (
+      entries.reduce((acc, entry) => acc + parseFloat(entry.moodScore), 0) /
+      entries.length
+    );
+  };
+
+  const weeklyAverage = calculateAverage(weeklyEntries);
+  const monthlyAverage = calculateAverage(monthlyEntries);
+  const overallAverage = calculateAverage(entries);
+
+  // Prepare monthly data for chart
+  const monthlyData = monthlyEntries
     .slice()
-    .reverse()
+    .sort(
+      (a, b) =>
+        new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime(),
+    )
     .map((entry) => ({
       date: format(new Date(entry.createdAt), "MMM dd"),
       "Mood Score": parseFloat(entry.moodScore),
     }));
 
-  // Calculate weekly averages
-  const weeklyAverages = entries.reduce(
-    (acc, entry) => {
-      const date = new Date(entry.createdAt);
-      const weekStart = format(date, "MMM dd");
-      if (!acc[weekStart]) {
-        acc[weekStart] = {
-          total: 0,
-          count: 0,
-        };
-      }
-      acc[weekStart].total += parseFloat(entry.moodScore);
-      acc[weekStart].count += 1;
-      return acc;
-    },
-    {} as Record<string, { total: number; count: number }>,
-  );
-
-  const weeklyData = Object.entries(weeklyAverages).map(([date, data]) => ({
-    date,
-    "Weekly Average": Number((data.total / data.count).toFixed(2)),
-  }));
-
-  // Calculate mood distribution
-  const moodDistribution = entries.reduce(
-    (acc, entry) => {
-      const score = parseFloat(entry.moodScore);
-      if (score >= 75) acc.Excellent++;
-      else if (score >= 50) acc.Good++;
-      else if (score >= 25) acc.Fair++;
-      else acc.Poor++;
-      return acc;
-    },
-    { Excellent: 0, Good: 0, Fair: 0, Poor: 0 },
-  );
-
-  const moodDistributionData = Object.entries(moodDistribution).map(
-    ([name, value]) => ({
-      name,
-      value,
-    }),
-  );
-
-  // Calculate current week stats
-  const now = new Date();
-  const weekStart = startOfWeek(now);
-  const weekEnd = endOfWeek(now);
-  const currentWeekEntries = entries.filter((entry) =>
-    isWithinInterval(new Date(entry.createdAt), {
-      start: weekStart,
-      end: weekEnd,
-    }),
-  );
-
-  const currentWeekAverage =
-    currentWeekEntries.reduce(
-      (acc, entry) => acc + parseFloat(entry.moodScore),
-      0,
-    ) / (currentWeekEntries.length || 1);
+  // Prepare weekly data for chart
+  const weeklyData = weeklyEntries
+    .slice()
+    .sort(
+      (a, b) =>
+        new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime(),
+    )
+    .map((entry) => ({
+      date: format(new Date(entry.createdAt), "EEE"),
+      fullDate: format(new Date(entry.createdAt), "EEE, MMM dd"),
+      "Mood Score": parseFloat(entry.moodScore),
+    }));
 
   return (
     <div className="space-y-8">
-      <Grid numItems={1} numItemsSm={2} numItemsLg={3} className="gap-6">
-        <TremorCard>
-          <Text>Current Week Average</Text>
-          <Metric>{currentWeekAverage.toFixed(1)}</Metric>
-          <Flex className="mt-4">
-            <Text>{currentWeekEntries.length} entries this week</Text>
-          </Flex>
+      <div className="grid grid-cols-1 gap-3 md:grid-cols-3">
+        {/* Overall Stats Card */}
+        <TremorCard className="relative h-full rounded-xl p-4">
+          <div className="flex h-full min-h-[120px] flex-col justify-between">
+            <div>
+              <Text className="text-sm">Overall Average</Text>
+              <Metric className="mt-1">{overallAverage.toFixed(1)}</Metric>
+            </div>
+            <div>
+              <Text className="text-sm text-muted-foreground">All time</Text>
+              <Text className="text-sm text-muted-foreground">
+                {entries.length} total entries
+              </Text>
+            </div>
+          </div>
         </TremorCard>
-        <TremorCard>
-          <Text>Total Entries</Text>
-          <Metric>{entries.length}</Metric>
-          <Flex className="mt-4">
-            <Text>All time</Text>
-          </Flex>
+
+        {/* Monthly Stats Card */}
+        <TremorCard className="relative h-full rounded-xl p-4">
+          <div className="absolute right-2 top-2 flex gap-1">
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={() => setSelectedMonth(subMonths(selectedMonth, 1))}
+            >
+              <ChevronLeft className="h-4 w-4" />
+            </Button>
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={() => setSelectedMonth(addMonths(selectedMonth, 1))}
+            >
+              <ChevronRight className="h-4 w-4" />
+            </Button>
+          </div>
+          <div className="flex h-full min-h-[120px] flex-col justify-between">
+            <div>
+              <Text className="text-sm">Monthly Average</Text>
+              <Metric className="mt-1">{monthlyAverage.toFixed(1)}</Metric>
+            </div>
+            <div>
+              <Text className="text-sm text-muted-foreground">
+                {format(monthStart, "MMMM yyyy")}
+              </Text>
+              <Text className="text-sm text-muted-foreground">
+                {monthlyEntries.length} entries this month
+              </Text>
+            </div>
+          </div>
         </TremorCard>
-        <TremorCard>
-          <Text>Average Mood</Text>
-          <Metric>
-            {(
-              entries.reduce(
-                (acc, entry) => acc + parseFloat(entry.moodScore),
-                0,
-              ) / entries.length
-            ).toFixed(1)}
-          </Metric>
-          <Flex className="mt-4">
-            <Text>All time</Text>
-          </Flex>
+
+        {/* Weekly Stats Card */}
+        <TremorCard className="relative h-full rounded-xl p-4">
+          <div className="absolute right-2 top-2 flex gap-1">
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={() => setSelectedWeek(subWeeks(selectedWeek, 1))}
+            >
+              <ChevronLeft className="h-4 w-4" />
+            </Button>
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={() => setSelectedWeek(addWeeks(selectedWeek, 1))}
+            >
+              <ChevronRight className="h-4 w-4" />
+            </Button>
+          </div>
+          <div className="flex h-full min-h-[120px] flex-col justify-between">
+            <div>
+              <Text className="text-sm">Weekly Average</Text>
+              <Metric className="mt-1">{weeklyAverage.toFixed(1)}</Metric>
+            </div>
+            <div>
+              <Text className="text-sm text-muted-foreground">
+                {format(weekStart, "MMM dd")} - {format(weekEnd, "MMM dd")}
+              </Text>
+              <Text className="text-sm text-muted-foreground">
+                {weeklyEntries.length} entries this week
+              </Text>
+            </div>
+          </div>
         </TremorCard>
-      </Grid>
+      </div>
 
       <div className="grid gap-6">
         <Card>
           <CardHeader>
-            <CardTitle>Daily Mood Scores</CardTitle>
-            <CardDescription>Your emotional journey day by day</CardDescription>
+            <CardTitle>Monthly Mood Trends</CardTitle>
+            <CardDescription>
+              {format(monthStart, "MMMM yyyy")} - Daily mood scores with trend
+            </CardDescription>
           </CardHeader>
           <CardContent>
             <AreaChart
-              className="mt-4 h-72"
-              data={moodData}
+              className="mt-4 h-80"
+              data={monthlyData}
               index="date"
               categories={["Mood Score"]}
               colors={["blue"]}
-              yAxisWidth={40}
+              yAxisWidth={65}
               showAnimation
               showLegend={false}
               showGridLines
               showTooltip
               curveType="natural"
+              valueFormatter={(value: number) => `${value.toFixed(1)}`}
+              customTooltip={(props: CustomTooltipProps) => {
+                if (!props.payload?.[0]) return null;
+                const value = props.payload[0].value as number;
+                const date = (props.payload[0].payload as { date: string })
+                  .date;
+
+                return (
+                  <div className="rounded-lg border bg-background p-2 shadow-lg">
+                    <div className="flex flex-col">
+                      <span className="text-sm font-medium">{date}</span>
+                      <span className="text-lg font-bold">
+                        Score: {value.toFixed(1)}
+                      </span>
+                    </div>
+                  </div>
+                );
+              }}
+              noDataText="No data for this month"
+              enableLegendSlider={true}
             />
           </CardContent>
         </Card>
 
-        <div className="grid gap-6 md:grid-cols-2">
-          <Card>
-            <CardHeader>
-              <CardTitle>Weekly Averages</CardTitle>
-              <CardDescription>
-                Your average mood scores by week
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              <BarChart
-                className="mt-4 h-72"
-                data={weeklyData}
-                index="date"
-                categories={["Weekly Average"]}
-                colors={["blue"]}
-                yAxisWidth={40}
-                showAnimation
-                showLegend={false}
-                showGridLines
-                showTooltip
-              />
-            </CardContent>
-          </Card>
+        <Card>
+          <CardHeader>
+            <CardTitle>Weekly Mood Details</CardTitle>
+            <CardDescription>
+              {format(weekStart, "MMM dd")} - {format(weekEnd, "MMM dd")} -
+              Daily mood progression
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <AreaChart
+              className="mt-4 h-80"
+              data={weeklyData}
+              index="date"
+              categories={["Mood Score"]}
+              colors={["blue"]}
+              yAxisWidth={65}
+              showAnimation
+              showLegend={false}
+              showGridLines
+              showTooltip
+              curveType="natural"
+              valueFormatter={(value: number) => `${value.toFixed(1)}`}
+              customTooltip={(props: CustomTooltipProps) => {
+                if (!props.payload?.[0]) return null;
+                const value = props.payload[0].value as number;
+                const fullDate = (
+                  props.payload[0].payload as { fullDate: string }
+                ).fullDate;
 
-          <Card>
-            <CardHeader>
-              <CardTitle>Mood Distribution</CardTitle>
-              <CardDescription>Breakdown of your mood scores</CardDescription>
-            </CardHeader>
-            <CardContent>
-              <DonutChart
-                className="mt-4 h-72"
-                data={moodDistributionData}
-                category="value"
-                index="name"
-                colors={["emerald", "blue", "amber", "rose"]}
-                showAnimation
-                showTooltip
-                valueFormatter={(v: number) => `${v} entries`}
-              />
-            </CardContent>
-          </Card>
-        </div>
+                return (
+                  <div className="rounded-lg border bg-background p-2 shadow-lg">
+                    <div className="flex flex-col">
+                      <span className="text-sm font-medium">{fullDate}</span>
+                      <span className="text-lg font-bold">
+                        Score: {value.toFixed(1)}
+                      </span>
+                    </div>
+                  </div>
+                );
+              }}
+              noDataText="No data for this week"
+              enableLegendSlider={true}
+            />
+          </CardContent>
+        </Card>
       </div>
     </div>
   );
