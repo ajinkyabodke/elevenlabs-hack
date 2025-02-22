@@ -42,6 +42,9 @@ export const users = createTable("user", {
   }).defaultNow(),
 });
 
+export type UserSelect = typeof users.$inferSelect;
+export type UserInsert = typeof users.$inferInsert;
+
 export const journalEntries = createTable(
   "journal_entry",
   {

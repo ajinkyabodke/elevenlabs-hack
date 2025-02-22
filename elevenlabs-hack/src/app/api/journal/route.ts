@@ -1,5 +1,5 @@
 import { db } from "@/server/db";
-import { journalEntries, users } from "@/server/db/schema";
+import { journalEntries, users, type UserSelect } from "@/server/db/schema";
 import { openai } from "@ai-sdk/openai";
 import { auth, currentUser } from "@clerk/nextjs/server";
 
@@ -28,11 +28,40 @@ type JournalEntryInput = z.infer<typeof journalEntrySchema>;
 
 export async function POST(req: Request) {
   try {
-    const user = await currentUser();
+    const { userId } = await auth();
+    if (!userId) {
+      return Response.json({ error: "User not found" }, { status: 404 });
+    }
 
-    if (!user) {
+    const [_user] = await Promise.all([currentUser(), ,]);
+
+    if (!_user) {
       return Response.json({ error: "Unauthorized" }, { status: 401 });
     }
+    const primaryEmail = _user?.emailAddresses[0]?.emailAddress ?? "";
+    const userName = _user?.fullName ?? "User";
+
+    let existingUser = await db.query.users.findFirst({
+      where: (u, { eq }) => eq(u.id, userId),
+      columns: {
+        id: true,
+        memory: true,
+        memoryEnabledAt: true,
+      },
+    });
+
+    if (!existingUser) {
+      [existingUser] = await db
+        .insert(users)
+        .values({
+          id: userId,
+          email: primaryEmail,
+          memory: [`User's name is ${userName}.`],
+        })
+        .returning();
+    }
+
+    if (!existingUser) throw new Error("User not found");
 
     const body = (await req.json()) as JournalEntryInput;
     const { rawEntry } = journalEntrySchema.parse(body);
@@ -44,40 +73,19 @@ export async function POST(req: Request) {
       );
     }
 
-    // Ensure user exists in our database
-    const existingUser = await db.query.users.findFirst({
-      where: eq(users.id, user.id),
-    });
-
-    if (!existingUser) {
-      const { userId } = await auth();
-      if (!userId) {
-        return Response.json({ error: "User not found" }, { status: 404 });
-      }
-
-      const primaryEmail = user?.emailAddresses[0]?.emailAddress ?? "";
-      await db.insert(users).values({
-        id: userId,
-        email: primaryEmail,
-      });
-    }
-
-    // Analyze the entry using Vercel AI SDK
-    const { object: analysis } = await generateObject({
-      model: openai("gpt-3.5-turbo-0125"),
-      schema: journalAnalysisSchema,
-      prompt: `Analyze this conversation and provide a summary and mood score:\n\n${rawEntry}`,
-      system:
-        "You are an expert at analyzing conversations and determining emotional states. Be concise but insightful in your analysis.",
-      temperature: 0.7,
-      maxTokens: 500,
-    });
+    const [analysis, memories] = await Promise.all([
+      summariseJournalEntry(rawEntry),
+      addMemories({
+        conversation: rawEntry,
+        user: existingUser,
+      }),
+    ]);
 
     // Save to database with the analysis and user ID
     const entries = await db
       .insert(journalEntries)
       .values({
-        userId: user.id,
+        userId,
         rawEntry,
         summarizedEntry: analysis.summary,
         moodScore: analysis.moodScore.toFixed(2),
@@ -98,3 +106,56 @@ export async function POST(req: Request) {
     );
   }
 }
+
+const summariseJournalEntry = async (entry: string) => {
+  // Analyze the entry using Vercel AI SDK
+  const { object: analysis } = await generateObject({
+    model: openai("gpt-4o-mini"),
+    schema: journalAnalysisSchema,
+    prompt: `Analyze this conversation and provide a summary and mood score:\n\n${entry}`,
+    system:
+      "You are an expert at analyzing conversations and determining emotional states. Be concise but insightful in your analysis.",
+    temperature: 0.7,
+    maxTokens: 500,
+  });
+
+  return analysis;
+};
+
+const addMemories = async (props: {
+  conversation: string;
+  user: Pick<UserSelect, "id" | "memory">;
+}) => {
+  const { object } = await generateObject({
+    model: openai("gpt-4o-mini"),
+    system: [
+      props.user.memory.length > 0 &&
+        `Existing memories in user's journal: ${props.user.memory
+          .map((m, idx) => `- ${idx + 1}. ${m}`)
+          .join("\n")}`,
+
+      `Extract new memories from the following conversation that are not already in the user's journal.
+
+Include only the most significant events in the user's life like the user saying getting a new job, getting married, or having a child.
+
+Conversation:
+${props.conversation}
+
+Don't include any memories that are already in the user's journal.`,
+    ].join("\n"),
+    schema: z.object({
+      memories: z.array(z.string()).describe("A list of memories"),
+    }),
+  });
+
+  const memories = object.memories;
+
+  await db
+    .update(users)
+    .set({
+      memory: [...props.user.memory, ...memories],
+    })
+    .where(eq(users.id, props.user.id));
+
+  return memories;
+};
