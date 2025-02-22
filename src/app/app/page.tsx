@@ -19,7 +19,7 @@ import type { JournalEntry } from "@/types";
 import { useConversation } from "@11labs/react";
 import { useUser } from "@clerk/nextjs";
 import { useAtom } from "jotai";
-import { BookOpen, LucideX } from "lucide-react";
+import { BookOpen, LucideX, Volume2, VolumeX } from "lucide-react";
 import { motion } from "motion/react";
 import { useRef, useState } from "react";
 import { toast } from "sonner";
@@ -77,6 +77,8 @@ export default function Home() {
     api.user.getPromptAttributes.useQuery();
   const [activeTool, setActiveTool] = useAtom<ToolType | null>(activeToolAtom);
   const name = user?.firstName;
+  const [isPlaying, setIsPlaying] = useState(false);
+  const audioRef = useRef<HTMLAudioElement | null>(null);
 
   const conversation = useConversation({
     onConnect: () => {
@@ -245,12 +247,39 @@ export default function Home() {
   // Get the last two messages for the preview
   const lastTwoMessages = transcript.messages.slice(-2);
 
+  const toggleAudio = () => {
+    if (!audioRef.current) {
+      audioRef.current = new Audio("/ambient.mp3");
+      audioRef.current.loop = true;
+      audioRef.current.volume = 0.3;
+    }
+
+    if (isPlaying) {
+      audioRef.current.pause();
+    } else {
+      void audioRef.current.play();
+    }
+    setIsPlaying(!isPlaying);
+  };
+
   return (
     <>
       {activeTool && <ToolDialog />}
 
       <div className="space-y-6">
         <div className="mx-auto mt-10 w-full max-w-lg">
+          <Button
+            variant="ghost"
+            size="icon"
+            className="absolute right-4 top-4 z-10"
+            onClick={toggleAudio}
+          >
+            {isPlaying ? (
+              <Volume2 className="h-4 w-4" />
+            ) : (
+              <VolumeX className="h-4 w-4 text-muted-foreground" />
+            )}
+          </Button>
           <div className="relative flex items-center rounded-full bg-secondary/30 p-1">
             {MOODS.map((mood) => (
               <button
