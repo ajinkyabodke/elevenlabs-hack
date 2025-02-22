@@ -33,6 +33,7 @@ import {
   SheetTrigger,
 } from "@/components/ui/sheet";
 import { cn } from "@/lib/utils";
+import { api } from "@/trpc/react";
 import type { JournalEntry } from "@/types";
 import { useConversation } from "@11labs/react";
 import { useUser } from "@clerk/nextjs";
@@ -40,7 +41,6 @@ import { BookOpen, Loader2, Mic, MicOff, Trash2 } from "lucide-react";
 import { useRef, useState } from "react";
 import { toast } from "sonner";
 import { BREATHING_EXERCISES, GROUNDING_TECHNIQUES } from "./CalmingExercises";
-
 type Mood = {
   id: string;
   label: string;
@@ -93,8 +93,9 @@ export function VoiceJournal() {
   const [transcript, setTranscript] = useState<ConversationTranscript>({
     messages: [],
   });
-
   const { user } = useUser();
+  const { data: memory, isPending } = api.user.getMemory.useQuery();
+
   const name = user?.firstName;
 
   const conversation = useConversation({
@@ -135,11 +136,26 @@ export function VoiceJournal() {
         "Help the user relax and decompress. Use a calming tone and gentle pacing. Guide them toward positive reflection while acknowledging any stress or tension they may be carrying. Focus on breathing and present-moment awareness if appropriate.",
     };
 
-    const moodData = MOODS.find((m) => m.id === mood);
-    const contextPrompt = `\n\nCurrent Context:\n- User's chosen mood: ${moodData?.label}\n- Session purpose: ${moodData?.description}\n- Initial approach: ${moodData?.prompt}`;
+    const moodData = MOODS.find((m) => m.id === mood) ?? MOODS[0];
+
+    const contextPrompt = [
+      `- User's chosen mood: ${moodData?.label}`,
+      `- Session purpose: ${moodData?.description}`,
+      `- Initial approach: ${moodData?.prompt}`,
+
+      `----`,
+      memory &&
+        memory.length > 0 &&
+        `Summary of previous journal entries: ${memory
+          .map((m, idx) => `- ${idx + 1}. ${m}`)
+          .join("\n")}`,
+    ].join("\n");
 
     const moodSpecificPrompt = moodPrompts[mood] ?? moodPrompts.unwind;
-    return `${basePrompt}\n\n${moodSpecificPrompt}${contextPrompt}`;
+
+    return [`${basePrompt}`, `${moodSpecificPrompt}`, `${contextPrompt}`].join(
+      "\n",
+    );
   };
 
   const getFirstMessage = () => {
@@ -203,7 +219,7 @@ export function VoiceJournal() {
       }
       try {
         console.log("Starting recording with mood:", selectedMood);
-        console.log("First message:", getFirstMessage());
+        // console.log("First message:", getFirstMessage());
         console.log("System prompt:", getSystemPrompt(selectedMood));
         await navigator.mediaDevices.getUserMedia({ audio: true });
         await conversation?.startSession({
@@ -272,7 +288,7 @@ export function VoiceJournal() {
                 conversation?.status === "connected" ? "destructive" : "default"
               }
               onClick={toggleRecording}
-              disabled={isProcessing}
+              disabled={isProcessing || isPending}
               className="flex-1"
             >
               {isProcessing ? (
