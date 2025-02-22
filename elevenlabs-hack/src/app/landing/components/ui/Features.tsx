@@ -128,9 +128,9 @@ export default function Features() {
       <div className="grid grid-cols-1 gap-12 md:grid-cols-4 md:gap-0">
         {/* Content */}
         <div className="col-span-2 my-auto px-2">
-          <h2 className="relative text-lg font-semibold tracking-tight text-orange-500">
+          <h2 className="relative text-lg font-semibold tracking-tight text-cyan-500">
             AI-Powered Journaling
-            <div className="absolute -left-[8px] top-1 h-5 w-[3px] rounded-r-sm bg-orange-500" />
+            <div className="absolute -left-[8px] top-1 h-5 w-[3px] rounded-r-sm bg-cyan-500" />
           </h2>
           <p className="mt-2 text-balance text-3xl font-semibold tracking-tighter text-gray-900 md:text-4xl">
             Transform your voice into structured reflections
@@ -300,9 +300,9 @@ export default function Features() {
         </div>
 
         <div className="col-span-2 my-auto px-2">
-          <h2 className="relative text-lg font-semibold tracking-tight text-orange-500">
+          <h2 className="relative text-lg font-semibold tracking-tight text-cyan-500">
             Emotional Intelligence
-            <div className="absolute -left-[8px] top-1 h-5 w-[3px] rounded-r-sm bg-orange-500" />
+            <div className="absolute -left-[8px] top-1 h-5 w-[3px] rounded-r-sm bg-cyan-500" />
           </h2>
           <p className="mt-2 text-balance text-3xl font-semibold tracking-tighter text-gray-900 md:text-4xl">
             Understand your emotional landscape
@@ -433,9 +433,9 @@ export default function Features() {
           </div>
         </div>
         <div className="col-span-2 my-auto px-2">
-          <h2 className="relative text-lg font-semibold tracking-tight text-orange-500">
+          <h2 className="relative text-lg font-semibold tracking-tight text-cyan-500">
             Personal Growth
-            <div className="absolute -left-[7px] top-1 h-5 w-[3px] rounded-r-sm bg-orange-500" />
+            <div className="absolute -left-[7px] top-1 h-5 w-[3px] rounded-r-sm bg-cyan-500" />
           </h2>
           <p className="mt-2 text-balance text-3xl font-semibold tracking-tighter text-gray-900 md:text-4xl">
             Track your journey with actionable insights
