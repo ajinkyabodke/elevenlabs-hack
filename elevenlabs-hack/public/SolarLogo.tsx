@@ -1,4 +1,4 @@
-import type { SVGProps } from "react"
+import type { SVGProps } from "react";
 
 export const SolarLogo = (props: SVGProps<SVGSVGElement>) => (
   <svg
@@ -18,4 +18,4 @@ export const SolarLogo = (props: SVGProps<SVGSVGElement>) => (
       fill="#F97316"
     />
   </svg>
-)
+);

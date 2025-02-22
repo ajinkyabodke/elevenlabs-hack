@@ -18,7 +18,7 @@ import ChipViz from "./ChipViz";
 export default function Features() {
   return (
     <section
-      aria-label="Solar Technologies Features for Farms"
+      aria-label="Voice Journal AI Features"
       id="solutions"
       className="relative mx-auto max-w-6xl scroll-my-24"
     >
@@ -130,16 +130,16 @@ export default function Features() {
         {/* Content */}
         <div className="col-span-2 my-auto px-2">
           <h2 className="relative text-lg font-semibold tracking-tight text-orange-500">
-            Smart Farming Solutions
+            AI-Powered Journaling
             <div className="absolute -left-[8px] top-1 h-5 w-[3px] rounded-r-sm bg-orange-500" />
           </h2>
           <p className="mt-2 text-balance text-3xl font-semibold tracking-tighter text-gray-900 md:text-4xl">
-            A network of autonomous systems for complete farm monitoring
+            Transform your voice into structured reflections
           </p>
           <p className="mt-4 text-balance text-gray-700">
-            Deploy intelligent monitoring and automated response systems across
-            your fields, irrigation networks, and aerial operations with our
-            integrated platform.
+            Simply speak your thoughts and let our AI transform them into
+            organized, searchable journal entries. Get personalized insights and
+            patterns from your daily reflections.
           </p>
         </div>
         <div className="relative col-span-2 flex items-center justify-center overflow-hidden">
@@ -298,17 +298,16 @@ export default function Features() {
 
         <div className="col-span-2 my-auto px-2">
           <h2 className="relative text-lg font-semibold tracking-tight text-orange-500">
-            Precision Agriculture
+            Emotional Intelligence
             <div className="absolute -left-[8px] top-1 h-5 w-[3px] rounded-r-sm bg-orange-500" />
           </h2>
           <p className="mt-2 text-balance text-3xl font-semibold tracking-tighter text-gray-900 md:text-4xl">
-            Turn every acre into a data-driven powerhouse
+            Understand your emotional landscape
           </p>
           <p className="mt-4 text-balance text-gray-700">
-            Revolutionize your farming operation with edge-computing AI that
-            transforms raw field data into actionable insights in real-time.
-            Make informed decisions faster, reduce resource waste, and maximize
-            yields.
+            Our advanced AI analyzes your voice patterns and content to track
+            emotional trends, provide mood insights, and help you develop
+            greater self-awareness through data-driven reflection.
           </p>
         </div>
         <div className="relative col-span-2 flex items-center justify-center overflow-hidden">
@@ -428,16 +427,16 @@ export default function Features() {
         </div>
         <div className="col-span-2 my-auto px-2">
           <h2 className="relative text-lg font-semibold tracking-tight text-orange-500">
-            Easy Expansion
+            Personal Growth
             <div className="absolute -left-[7px] top-1 h-5 w-[3px] rounded-r-sm bg-orange-500" />
           </h2>
           <p className="mt-2 text-balance text-3xl font-semibold tracking-tighter text-gray-900 md:text-4xl">
-            Scale your smart farm with plug-and-play simplicity
+            Track your journey with actionable insights
           </p>
           <p className="mt-4 text-balance text-gray-700">
-            Add new sensors and capabilities to your farm network with zero
-            setup required. Our systems automatically connect and coordinate
-            with each other.
+            Get personalized recommendations, track your progress over time, and
+            discover patterns in your thoughts and behaviors. Turn your daily
+            reflections into meaningful personal growth.
           </p>
         </div>
         <div className="relative col-span-2 flex items-center justify-center overflow-hidden">

@@ -4,9 +4,7 @@ import Features from "./landing/components/ui/Features";
 import Footer from "./landing/components/ui/Footer";
 
 import { Hero } from "./landing/components/ui/Hero";
-import { Map } from "./landing/components/ui/Map/Map";
-import { SolarAnalytics } from "./landing/components/ui/SolarAnalytics";
-import Testimonial from "./landing/components/ui/Testimonial";
+import { JournalAnalytics } from "./landing/components/ui/SolarAnalytics";
 
 export default function Home() {
   return (
@@ -17,16 +15,16 @@ export default function Home() {
       <div className="mt-52 px-4 xl:px-0">
         <Features />
       </div>
-      <div className="mt-32 px-4 xl:px-0">
+      {/* <div className="mt-32 px-4 xl:px-0">
         <Testimonial />
-      </div>
+      </div> */}
       <FeatureDivider className="my-16 max-w-6xl" />
-      <div className="px-4 xl:px-0">
+      {/* <div className="px-4 xl:px-0">
         <Map />
-      </div>
-      <FeatureDivider className="my-16 max-w-6xl" />
+      </div> */}
+      {/* <FeatureDivider className="my-16 max-w-6xl" /> */}
       <div className="mb-40 mt-12 px-4 xl:px-0">
-        <SolarAnalytics />
+        <JournalAnalytics />
       </div>
       <div className="mb-40 mt-10 px-4 xl:px-0">
         <CallToAction />

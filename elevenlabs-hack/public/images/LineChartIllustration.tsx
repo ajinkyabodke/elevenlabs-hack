@@ -1,4 +1,4 @@
-import type { SVGProps } from "react"
+import type { SVGProps } from "react";
 export const LineChartIllustration = (props: SVGProps<SVGSVGElement>) => (
   <svg
     fill="none"
@@ -144,4 +144,4 @@ export const LineChartIllustration = (props: SVGProps<SVGSVGElement>) => (
     />
     <rect x="681" y="9" width="14" height="3" rx="1.5" fill="#10B981" />
   </svg>
-)
+);

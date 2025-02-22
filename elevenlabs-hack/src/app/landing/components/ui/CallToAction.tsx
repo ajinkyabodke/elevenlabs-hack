@@ -1,6 +1,6 @@
-import Image from "next/image"
-import Link from "next/link"
-import { Button } from "../Button"
+import Image from "next/image";
+import Link from "next/link";
+import { Button } from "../Button";
 
 export function CallToAction() {
   return (
@@ -9,20 +9,17 @@ export function CallToAction() {
         <div className="sm:col-span-2">
           <h2
             id="cta-title"
-            className="scroll-my-60 text-3xl font-semibold tracking-tighter text-balance text-gray-900 md:text-4xl"
+            className="scroll-my-60 text-balance text-3xl font-semibold tracking-tighter text-gray-900 md:text-4xl"
           >
-            Ready to get started?
+            Start your journey of self-discovery
           </h2>
-          <p className="mt-3 mb-8 text-lg text-gray-600">
-            Begin your smart farming journey today or talk to our agronomists
-            about your specific needs.
+          <p className="mb-8 mt-3 text-lg text-gray-600">
+            Begin your personal growth journey today with AI-powered voice
+            journalling, or talk to our experts about how it can help you.
           </p>
           <div className="flex flex-wrap gap-4">
             <Button asChild className="text-md">
               <Link href="#">Start now</Link>
-            </Button>
-            <Button asChild className="text-md" variant="secondary">
-              <Link href="#">Find nearest dealer</Link>
             </Button>
           </div>
         </div>
@@ -45,7 +42,7 @@ export function CallToAction() {
         </div>
       </div>
     </section>
-  )
+  );
 }
 
-export default CallToAction
+export default CallToAction;

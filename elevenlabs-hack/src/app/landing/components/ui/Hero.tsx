@@ -9,7 +9,7 @@ export function Hero() {
         <FadeDiv className="mx-auto">
           <a
             aria-label="View latest update the changelog page"
-            href="#"
+            href="/app"
             target="_blank"
             rel="noopener noreferrer"
             className="mx-auto w-full"

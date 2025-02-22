@@ -1,29 +1,29 @@
 import {
-  RiDropFill,
-  RiNavigationFill,
-  RiPieChartFill,
-  RiRobot3Fill,
-} from "@remixicon/react"
-import { Divider } from "../Divider"
-import AnalyticsIllustration from "./AnalyticsIllustration"
-import { StickerCard } from "./StickerCard"
+  RiBarChartFill,
+  RiEmotionHappyFill,
+  RiMicFill,
+  RiPsychotherapyFill,
+} from "@remixicon/react";
+import { Divider } from "../Divider";
+import AnalyticsIllustration from "./AnalyticsIllustration";
+import { StickerCard } from "./StickerCard";
 
-export function SolarAnalytics() {
+export function JournalAnalytics() {
   return (
     <section
-      aria-labelledby="solar-analytics"
+      aria-labelledby="journal-analytics"
       className="relative mx-auto w-full max-w-6xl overflow-hidden"
     >
       <div>
         <h2
-          id="solar-analytics"
+          id="journal-analytics"
           className="relative scroll-my-24 text-lg font-semibold tracking-tight text-orange-500"
         >
-          Solar Analytics
-          <div className="absolute top-1 -left-[8px] h-5 w-[3px] rounded-r-sm bg-orange-500" />
+          Journal Analytics
+          <div className="absolute -left-[8px] top-1 h-5 w-[3px] rounded-r-sm bg-orange-500" />
         </h2>
-        <p className="mt-2 max-w-lg text-3xl font-semibold tracking-tighter text-balance text-gray-900 md:text-4xl">
-          Turn field data into profitable harvests with real-time insights
+        <p className="mt-2 max-w-lg text-balance text-3xl font-semibold tracking-tighter text-gray-900 md:text-4xl">
+          Transform your voice journals into meaningful insights
         </p>
       </div>
       <div className="*:pointer-events-none">
@@ -32,26 +32,26 @@ export function SolarAnalytics() {
       <Divider className="mt-0"></Divider>
       <div className="grid grid-cols-1 grid-rows-2 gap-6 md:grid-cols-4 md:grid-rows-1">
         <StickerCard
-          Icon={RiNavigationFill}
-          title="Autonomous Navigation"
-          description="Smart tractors that navigate fields independently using GPS."
+          Icon={RiMicFill}
+          title="Voice Recognition"
+          description="Advanced AI that accurately transcribes and understands your spoken thoughts."
         />
         <StickerCard
-          Icon={RiRobot3Fill}
-          title="Robotic Harvesting"
-          description="AI-powered robots that identify and harvest crops at optimal ripeness."
+          Icon={RiEmotionHappyFill}
+          title="Emotion Analysis"
+          description="Real-time analysis of emotional patterns in your voice and content."
         />
         <StickerCard
-          Icon={RiDropFill}
-          title="Smart Irrigation"
-          description="Automated irrigation systems that optimize water usage."
+          Icon={RiPsychotherapyFill}
+          title="Personal Insights"
+          description="AI-powered insights that help you understand your thought patterns."
         />
         <StickerCard
-          Icon={RiPieChartFill}
-          title="Yield Analytics"
-          description="Advanced analytics platform that predicts crop yields."
+          Icon={RiBarChartFill}
+          title="Progress Tracking"
+          description="Detailed analytics showing your personal growth journey over time."
         />
       </div>
     </section>
-  )
+  );
 }
