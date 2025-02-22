@@ -264,31 +264,32 @@ export function EnhancedCalendar({
                           {event}
                         </div>
                       ))}
-                    {dayEntries[0].significantEvents.length > 2 && (
-                      <TooltipProvider>
-                        <Tooltip>
-                          <TooltipTrigger className="text-xs text-muted-foreground">
-                            +{dayEntries[0].significantEvents.length - 3} more
-                          </TooltipTrigger>
-                          <TooltipContent className="flex flex-col gap-y-1 rounded-sm border border-border bg-background p-1 text-foreground">
-                            {dayEntries[0].significantEvents.map(
-                              (event, index) => (
-                                <div
-                                  key={index}
-                                  className={cn(
-                                    "rounded px-1 py-0.5 text-xs text-muted-foreground",
-                                    getEventColor(index),
-                                    "w-full",
-                                  )}
-                                >
-                                  {event}
-                                </div>
-                              ),
-                            )}
-                          </TooltipContent>
-                        </Tooltip>
-                      </TooltipProvider>
-                    )}
+                    {dayEntries[0].significantEvents.length - 3 > 0 &&
+                      dayEntries[0].significantEvents.length > 2 && (
+                        <TooltipProvider>
+                          <Tooltip>
+                            <TooltipTrigger className="text-xs text-muted-foreground">
+                              +{dayEntries[0].significantEvents.length - 3} more
+                            </TooltipTrigger>
+                            <TooltipContent className="flex flex-col gap-y-1 rounded-sm border border-border bg-background p-1 text-foreground">
+                              {dayEntries[0].significantEvents.map(
+                                (event, index) => (
+                                  <div
+                                    key={index}
+                                    className={cn(
+                                      "rounded px-1 py-0.5 text-xs text-muted-foreground",
+                                      getEventColor(index),
+                                      "w-full",
+                                    )}
+                                  >
+                                    {event}
+                                  </div>
+                                ),
+                              )}
+                            </TooltipContent>
+                          </Tooltip>
+                        </TooltipProvider>
+                      )}
                   </div>
                 )}
 
