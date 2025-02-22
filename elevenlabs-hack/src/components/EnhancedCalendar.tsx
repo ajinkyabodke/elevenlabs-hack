@@ -17,7 +17,6 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
-import { cn } from "@/lib/utils";
 import { type CalendarEvent, type JournalEntry } from "@/types";
 import {
   addDays,
@@ -34,7 +33,7 @@ import {
 } from "date-fns";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import { useMemo, useState } from "react";
-
+import { cn } from "tailwind-variants";
 interface EnhancedCalendarProps {
   events: CalendarEvent[];
   entries: JournalEntry[];
@@ -309,7 +308,7 @@ export function EnhancedCalendar({
                       "truncate rounded px-2 py-1 text-xs font-medium",
                       event.color
                         ? `bg-${event.color}/10 text-${event.color}-700 dark:text-${event.color}-400`
-                        : "bg-primary/10 text-primary-700 dark:text-primary-400",
+                        : "text-primary-700 dark:text-primary-400 bg-primary/10",
                     )}
                   >
                     {event.title}

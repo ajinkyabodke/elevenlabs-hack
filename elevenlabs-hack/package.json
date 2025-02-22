@@ -21,6 +21,9 @@
     "seed": "tsx src/scripts/seed.ts"
   },
   "dependencies": {
+    "motion": "12.0.1",
+    "tailwind-variants": "^0.3.1",
+    "@remixicon/react": "^4.6.0",
     "@11labs/react": "^0.0.7",
     "@ai-sdk/openai": "^1.1.13",
     "@clerk/nextjs": "^6.12.0",

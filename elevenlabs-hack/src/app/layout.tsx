@@ -1,16 +1,44 @@
+import { siteConfig } from "@/siteConfig";
 import "@/styles/globals.css";
 
-import { Sidebar } from "@/components/layout/Sidebar";
 import { TRPCReactProvider } from "@/trpc/react";
 import { ClerkProvider } from "@clerk/nextjs";
 import { GeistSans } from "geist/font/sans";
-import { Toaster } from "sonner";
+import type { Metadata } from "next/dist/lib/metadata/types/metadata-interface";
 
-export const metadata = {
-  title: "Voice Journal",
-  description:
-    "A voice-first journaling app that helps you track your mood and thoughts.",
-  icons: [{ rel: "icon", url: "/favicon.ico" }],
+import { Toaster } from "sonner";
+import Footer from "./landing/components/ui/Footer";
+import { NavBar } from "./landing/components/ui/Navbar";
+
+export const metadata: Metadata = {
+  metadataBase: new URL("https://elevenlabs-hack.vercel.app"),
+  title: siteConfig.name,
+  description: siteConfig.description,
+  keywords: ["Voice Journal", "Mood Tracking", "Thoughts"],
+  authors: [
+    {
+      name: "yourname",
+      url: "",
+    },
+  ],
+  creator: "yourname",
+  openGraph: {
+    type: "website",
+    locale: "en_US",
+    url: siteConfig.url,
+    title: siteConfig.name,
+    description: siteConfig.description,
+    siteName: siteConfig.name,
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: siteConfig.name,
+    description: siteConfig.description,
+    creator: "@yourname",
+  },
+  icons: {
+    icon: "/favicon.ico",
+  },
 };
 
 export default function RootLayout({
@@ -23,12 +51,9 @@ export default function RootLayout({
       <html lang="en">
         <TRPCReactProvider>
           <body className={GeistSans.className}>
-            <div className="flex h-screen">
-              <Sidebar />
-              <div className="flex-1 overflow-auto">
-                <main className="container mx-auto p-4">{children}</main>
-              </div>
-            </div>
+            <NavBar />
+            {children}
+            <Footer />
             <Toaster />
           </body>
         </TRPCReactProvider>

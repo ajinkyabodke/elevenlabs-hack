@@ -32,7 +32,6 @@ import {
   SheetTitle,
   SheetTrigger,
 } from "@/components/ui/sheet";
-import { cn } from "@/lib/utils";
 import { api } from "@/trpc/react";
 import type { JournalEntry } from "@/types";
 import { useConversation } from "@11labs/react";
@@ -40,6 +39,7 @@ import { useUser } from "@clerk/nextjs";
 import { BookOpen, Loader2, Mic, MicOff, Trash2 } from "lucide-react";
 import { useRef, useState } from "react";
 import { toast } from "sonner";
+import { cn } from "tailwind-variants";
 import { BREATHING_EXERCISES, GROUNDING_TECHNIQUES } from "./CalmingExercises";
 type Mood = {
   id: string;
@@ -266,7 +266,7 @@ export function VoiceJournal() {
 
   return (
     <div className="mx-auto max-w-2xl space-y-6">
-      <Card className="relative w-full overflow-hidden border-sage-200 bg-gradient-to-br from-sage-50 to-white shadow-none transition-all hover:border-sage-300 hover:shadow-lg">
+      <Card className="border-sage-200 from-sage-50 hover:border-sage-300 relative w-full overflow-hidden bg-gradient-to-br to-white shadow-none transition-all hover:shadow-lg">
         <CardHeader>
           <CardTitle>Voice Journal</CardTitle>
           <CardDescription>
@@ -392,7 +392,7 @@ export function VoiceJournal() {
         </CardContent>
       </Card>
 
-      <Card className="relative w-full overflow-hidden border-sage-200 bg-gradient-to-br from-sage-50 to-white shadow-none transition-all hover:border-sage-300 hover:shadow-lg">
+      <Card className="border-sage-200 from-sage-50 hover:border-sage-300 relative w-full overflow-hidden bg-gradient-to-br to-white shadow-none transition-all hover:shadow-lg">
         <CardHeader>
           <CardTitle>Need to calm down?</CardTitle>
           <CardDescription>Try these exercises</CardDescription>
