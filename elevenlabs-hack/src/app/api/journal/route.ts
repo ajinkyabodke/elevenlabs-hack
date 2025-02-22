@@ -1,5 +1,5 @@
 import { db } from "@/server/db";
-import { journalEntries, users } from "@/server/db/schema";
+import { journalEntries, users, type UserSelect } from "@/server/db/schema";
 import { openai } from "@ai-sdk/openai";
 import { auth, currentUser } from "@clerk/nextjs/server";
 
@@ -30,13 +30,40 @@ type JournalEntryInput = z.infer<typeof journalEntrySchema>;
 
 export async function POST(req: Request) {
   try {
-    const user = await currentUser();
-
-    if (!user) {
-      return Response.json({ error: "Unauthorized" }, { status: 401 });
+    const { userId } = await auth();
+    if (!userId) {
+      return Response.json({ error: "User not found" }, { status: 404 });
     }
 
-    const primaryEmail = user.emailAddresses[0]?.emailAddress ?? "";
+    const [_user] = await Promise.all([currentUser(), ,]);
+
+    if (!_user) {
+      return Response.json({ error: "Unauthorized" }, { status: 401 });
+    }
+    const primaryEmail = _user?.emailAddresses[0]?.emailAddress ?? "";
+    const userName = _user?.fullName ?? "User";
+
+    let existingUser = await db.query.users.findFirst({
+      where: (u, { eq }) => eq(u.id, userId),
+      columns: {
+        id: true,
+        memory: true,
+        memoryEnabledAt: true,
+      },
+    });
+
+    if (!existingUser) {
+      [existingUser] = await db
+        .insert(users)
+        .values({
+          id: userId,
+          email: primaryEmail,
+          memory: [`User's name is ${userName}.`],
+        })
+        .returning();
+    }
+
+    if (!existingUser) throw new Error("User not found");
 
     const body = (await req.json()) as JournalEntryInput;
     const { rawEntry } = journalEntrySchema.parse(body);
@@ -48,60 +75,19 @@ export async function POST(req: Request) {
       );
     }
 
-    // Ensure user exists in our database
-    const existingUser = await db.query.users.findFirst({
-      where: eq(users.id, user.id),
-    });
-
-    if (!existingUser) {
-      const { userId } = await auth();
-      if (!userId) {
-        return Response.json({ error: "User not found" }, { status: 404 });
-      }
-
-      const primaryEmail = user?.emailAddresses[0]?.emailAddress ?? "";
-      await db.insert(users).values({
-        id: userId,
-        email: primaryEmail,
-      });
-    }
-
-    // Analyze the entry using Vercel AI SDK
-    const { object: analysis } = await generateObject({
-      model: openai("gpt-4o-mini"),
-      schema: journalAnalysisSchema,
-      prompt: `Transform this conversation into a simple, natural journal entry. Write it exactly how someone would write in their personal diary - casual, honest, and straightforward.
-
-Conversation transcript:
-${rawEntry}
-
-Guidelines:
-1. Use simple, everyday language
-2. Write in first person, present tense
-3. Focus on feelings and thoughts
-4. Keep it brief and natural
-5. Remove all AI interactions
-6. Write as if you're writing in a personal diary
-
-Example style:
-"I'm feeling down today. Work was really stressful and I couldn't focus. My mind kept wandering to the argument I had with Sarah. I just need some time to process everything."`,
-      system: `You are helping someone write in their personal diary. Write exactly how they would write - simple, honest, and natural. No fancy words, no complex analysis. Just their thoughts and feelings in their own voice.
-
-Remember:
-- Write like you're writing in a diary
-- Use everyday language
-- Keep it short and simple
-- Focus on their feelings
-- Remove any trace of AI conversation`,
-      temperature: 0.7,
-      maxTokens: 500,
-    });
+    const [analysis, memories] = await Promise.all([
+      summariseJournalEntry(rawEntry),
+      addMemories({
+        conversation: rawEntry,
+        user: existingUser,
+      }),
+    ]);
 
     // Save to database with the analysis and user ID
     const entries = await db
       .insert(journalEntries)
       .values({
-        userId: user.id,
+        userId,
         rawEntry,
         summarizedEntry: analysis.summary,
         moodScore: analysis.moodScore.toFixed(2),
@@ -122,3 +108,82 @@ Remember:
     );
   }
 }
+
+const summariseJournalEntry = async (entry: string) => {
+  // Analyze the entry using Vercel AI SDK
+  const { object: analysis } = await generateObject({
+    model: openai("gpt-4o-mini"),
+    schema: journalAnalysisSchema,
+    prompt: `Transform this conversation into a simple, natural journal entry. Write it exactly how someone would write in their personal diary - casual, honest, and straightforward.
+
+Conversation transcript:
+${entry}
+
+Guidelines:
+1. Use simple, everyday language
+2. Write in first person, present tense
+3. Focus on feelings and thoughts
+4. Keep it brief and natural
+5. Remove all AI interactions
+6. Write as if you're writing in a personal diary
+
+Example style:
+"I'm feeling down today. Work was really stressful and I couldn't focus. My mind kept wandering to the argument I had with Sarah. I just need some time to process everything."`,
+    system: `You are helping someone write in their personal diary. Write exactly how they would write - simple, honest, and natural. No fancy words, no complex analysis. Just their thoughts and feelings in their own voice.
+
+Remember:
+- Write like you're writing in a diary
+- Use everyday language
+- Keep it short and simple
+- Focus on their feelings
+- Remove any trace of AI conversation`,
+    temperature: 0.7,
+    maxTokens: 500,
+  });
+  return analysis;
+};
+
+const addMemories = async (props: {
+  conversation: string;
+  user: Pick<UserSelect, "id" | "memory">;
+}) => {
+  const { object } = await generateObject({
+    model: openai("gpt-4o-mini"),
+    prompt: [
+      `Today is ${new Date().toLocaleDateString("en-US", {
+        year: "numeric",
+        month: "long",
+        day: "numeric",
+      })}.`,
+
+      props.user.memory.length > 0 &&
+        `Existing memories in user's journal: ${props.user.memory
+          .map((m, idx) => `- ${idx + 1}. ${m}`)
+          .join("\n")}`,
+
+      `Extract new memories from the following conversation that are not already in the user's journal.
+
+Include only the most significant events in the user's life like the user saying getting a new job, getting married, or having a child.
+
+Conversation:
+${props.conversation}
+
+Don't include any memories that are already in the user's journal.
+Always include absolute dates, and not "last week" or "last month" etc.`,
+    ].join("\n"),
+    schema: z.object({
+      memories: z.array(z.string()).describe("A list of memories"),
+    }),
+  });
+
+  const memories = object.memories;
+
+  await db
+    .update(users)
+    .set({
+      memory: [...props.user.memory, ...memories],
+    })
+    .where(eq(users.id, props.user.id));
+
+  return memories;
+};

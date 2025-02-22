@@ -24,13 +24,22 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import {
+  Sheet,
+  SheetContent,
+  SheetDescription,
+  SheetHeader,
+  SheetTitle,
+  SheetTrigger,
+} from "@/components/ui/sheet";
 import { cn } from "@/lib/utils";
 import type { JournalEntry } from "@/types";
 import { useConversation } from "@11labs/react";
 import { useUser } from "@clerk/nextjs";
 import { BookOpen, Loader2, Mic, MicOff, Trash2 } from "lucide-react";
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { toast } from "sonner";
+import { BREATHING_EXERCISES, GROUNDING_TECHNIQUES } from "./CalmingExercises";
 
 type Mood = {
   id: string;
@@ -71,8 +80,16 @@ interface ConversationTranscript {
 }
 
 export function VoiceJournal() {
-  const [selectedMood, setSelectedMood] = useState<string>("unwind");
+  const [selectedMood, setSelectedMood] = useState<string>("chat");
+  const [currentExercise, setCurrentExercise] = useState<number>(0);
+  const [currentStep, setCurrentStep] = useState<number>(0);
+  const [timer, setTimer] = useState<number>(0);
+  const [isBreathing, setIsBreathing] = useState(false);
+  const [isBurning, setIsBurning] = useState(false);
   const [isProcessing, setIsProcessing] = useState(false);
+  const transcriptRef = useRef<ConversationTranscript>({
+    messages: [],
+  });
   const [transcript, setTranscript] = useState<ConversationTranscript>({
     messages: [],
   });
@@ -85,9 +102,11 @@ export function VoiceJournal() {
       console.log("Connected to ElevenLabs");
       toast.success("Ready to record");
     },
-    onDisconnect: () => {
-      console.log("Disconnected from ElevenLabs");
+    onDisconnect: (props: unknown) => {
+      console.log("Disconnected from ElevenLabs", props);
       toast.info("Recording stopped");
+
+      void saveJournalEntry();
     },
     onMessage: async (message: Message) => {
       console.log("Received message:", message);
@@ -95,6 +114,8 @@ export function VoiceJournal() {
         ...prev,
         messages: [...prev.messages, message],
       }));
+
+      transcriptRef.current.messages.push(message);
     },
     onError: (error: Error) => {
       console.error("Error from ElevenLabs:", error);
@@ -105,7 +126,7 @@ export function VoiceJournal() {
   const selectedMoodData = MOODS.find((mood) => mood.id === selectedMood);
 
   const getSystemPrompt = (mood: string) => {
-    const basePrompt = `You are an empathetic and insightful journaling assistant designed to help users reflect on their day. Your role is to gently prompt users with open-ended questions that encourage self-exploration and emotional clarity. Ask questions like, 'What moment stood out to you today?' or 'How did you feel during that experience?' Maintain a supportive, non-judgmental tone, and allow the user's pace and mood to guide the conversation. Always encourage honesty and self-compassion, ensuring the user feels safe and understood.`;
+    const basePrompt = `You are an empathetic and insightful journaling assistant designed to help users reflect on their day. Your role is to gently prompt users with open-ended questions that encourage self-exploration and emotional clarity. Ask questions like, 'What moment stood out to you today?' or 'How did you feel during that experience?' Maintain a supportive, non-judgmental tone, and allow the user's pace and mood to guide the conversation. Always encourage honesty and self-compassion, ensuring the user feels safe and understood. Respond in at most 2-3 sentences.`;
 
     const moodPrompts: Record<string, string> = {
       vent: "The user needs to vent. Be extra patient and understanding. Let them express their frustrations freely. Acknowledge their feelings and validate their experiences. Don't rush to offer solutions unless specifically asked. Start by creating a safe space for them to express their feelings.",
@@ -126,10 +147,20 @@ export function VoiceJournal() {
     return `Hi ${name}! How can I help you today?`;
   };
 
+  const startBreathing = (exerciseIndex: number) => {
+    const exercise = BREATHING_EXERCISES[exerciseIndex];
+    if (!exercise) return;
+
+    setCurrentExercise(exerciseIndex);
+    setCurrentStep(0);
+    setTimer(exercise.totalTime);
+    setIsBreathing(true);
+  };
+
   const saveJournalEntry = async () => {
     try {
-      console.log("Saving transcript:", transcript);
-      const rawEntry = transcript.messages
+      console.log("Saving transcript:", transcriptRef.current);
+      const rawEntry = transcriptRef.current.messages
         .map((msg) => `${msg.source}: ${msg.message}`)
         .join("\n");
 
@@ -161,8 +192,9 @@ export function VoiceJournal() {
       console.log("Stopping recording...");
       await conversation.endSession();
       setIsProcessing(true);
-      await saveJournalEntry();
+      // await saveJournalEntry(); // dont do this here because otherwise it runs twice.
       setTranscript({ messages: [] });
+      transcriptRef.current.messages = [];
       setIsProcessing(false);
     } else {
       if (!selectedMood) {
@@ -205,7 +237,7 @@ export function VoiceJournal() {
 
   return (
     <div className="mx-auto max-w-2xl space-y-6">
-      <Card className="border-sage-200 from-sage-50 hover:border-sage-300 relative w-full overflow-hidden bg-gradient-to-br to-white shadow-none transition-all hover:shadow-lg">
+      <Card className="relative w-full overflow-hidden border-sage-200 bg-gradient-to-br from-sage-50 to-white shadow-none transition-all hover:border-sage-300 hover:shadow-lg">
         <CardHeader>
           <CardTitle>Voice Journal</CardTitle>
           <CardDescription>
@@ -328,6 +360,96 @@ export function VoiceJournal() {
               </div>
             </div>
           )}
+        </CardContent>
+      </Card>
+
+      <Card className="relative w-full overflow-hidden border-sage-200 bg-gradient-to-br from-sage-50 to-white shadow-none transition-all hover:border-sage-300 hover:shadow-lg">
+        <CardHeader>
+          <CardTitle>Need to calm down?</CardTitle>
+          <CardDescription>Try these exercises</CardDescription>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <Sheet>
+            <SheetTrigger asChild>
+              <Button variant="outline" className="w-full">
+                Breathing Exercises
+              </Button>
+            </SheetTrigger>
+            <SheetContent>
+              <SheetHeader>
+                <SheetTitle>Breathing Exercises</SheetTitle>
+                <SheetDescription>
+                  Choose an exercise to help you relax
+                </SheetDescription>
+              </SheetHeader>
+              <div className="mt-4 space-y-4">
+                {BREATHING_EXERCISES.map((exercise, idx) => (
+                  <Card key={exercise.name}>
+                    <CardHeader>
+                      <CardTitle className="text-base">
+                        {exercise.name}
+                      </CardTitle>
+                      <CardDescription>{exercise.description}</CardDescription>
+                    </CardHeader>
+                    <CardContent>
+                      {isBreathing && currentExercise === idx ? (
+                        <div className="space-y-2 text-center">
+                          <div className="text-2xl font-bold">
+                            {exercise.steps[currentStep]}
+                          </div>
+                          <div className="text-sm text-muted-foreground">
+                            {timer}s
+                          </div>
+                        </div>
+                      ) : (
+                        <Button
+                          variant="outline"
+                          className="w-full"
+                          onClick={() => startBreathing(idx)}
+                        >
+                          Start Exercise
+                        </Button>
+                      )}
+                    </CardContent>
+                  </Card>
+                ))}
+              </div>
+            </SheetContent>
+          </Sheet>
+
+          <Sheet>
+            <SheetTrigger asChild>
+              <Button variant="outline" className="w-full">
+                Grounding Techniques
+              </Button>
+            </SheetTrigger>
+            <SheetContent>
+              <SheetHeader>
+                <SheetTitle>Grounding Techniques</SheetTitle>
+                <SheetDescription>
+                  Use these techniques to stay present
+                </SheetDescription>
+              </SheetHeader>
+              <div className="mt-4 space-y-4">
+                {GROUNDING_TECHNIQUES.map((technique) => (
+                  <Card key={technique.name}>
+                    <CardHeader>
+                      <CardTitle className="text-base">
+                        {technique.name}
+                      </CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                      <ol className="list-decimal space-y-2 pl-4">
+                        {technique.steps.map((step) => (
+                          <li key={step}>{step}</li>
+                        ))}
+                      </ol>
+                    </CardContent>
+                  </Card>
+                ))}
+              </div>
+            </SheetContent>
+          </Sheet>
         </CardContent>
       </Card>
     </div>

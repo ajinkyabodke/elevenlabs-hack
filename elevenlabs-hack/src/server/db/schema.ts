@@ -29,7 +29,21 @@ export const users = createTable("user", {
   updatedAt: timestamp("updated_at", { withTimezone: true })
     .default(sql`CURRENT_TIMESTAMP`)
     .notNull(),
+
+  memory: text("memory")
+    .array()
+    .notNull()
+    .$type<string[]>()
+    // empty array as default
+    .default(sql`ARRAY[]::text[]`),
+
+  memoryEnabledAt: timestamp("memoryEnabledAt", {
+    withTimezone: true,
+  }).defaultNow(),
 });
+
+export type UserSelect = typeof users.$inferSelect;
+export type UserInsert = typeof users.$inferInsert;
 
 export const journalEntries = createTable(
   "journal_entry",
