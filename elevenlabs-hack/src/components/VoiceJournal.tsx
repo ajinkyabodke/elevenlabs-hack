@@ -27,6 +27,7 @@ import {
 import { cn } from "@/lib/utils";
 import type { JournalEntry } from "@/types";
 import { useConversation } from "@11labs/react";
+import { SignInButton, SignedIn, SignedOut } from "@clerk/nextjs";
 import {
   Brain,
   Flame,
@@ -272,204 +273,202 @@ export function VoiceJournal() {
 
   return (
     <div className="grid gap-6 md:grid-cols-2">
-      <Card className="border-sage-200 from-sage-50 hover:border-sage-300 relative w-full overflow-hidden bg-gradient-to-br to-white shadow-none transition-all hover:shadow-lg">
-        {isBurning && <BurnEffect onComplete={handleBurnComplete} />}
-        <CardHeader>
-          <CardTitle className="text-sage-800 text-center">
-            Voice Journal
-          </CardTitle>
-          <CardDescription className="text-sage-600 text-center">
-            Select how you are feeling and start talking
-          </CardDescription>
-        </CardHeader>
-        <CardContent className="space-y-8">
-          <Select value={selectedMood} onValueChange={setSelectedMood}>
-            <SelectTrigger className="border-sage-200 text-sage-700 bg-white/50 hover:bg-white/80">
-              <SelectValue placeholder="How are you feeling today?" />
-            </SelectTrigger>
-            <SelectContent>
-              {MOODS.map((mood) => {
-                const Icon = mood.icon;
-                return (
-                  <SelectItem
-                    key={mood.id}
-                    value={mood.id}
-                    className="hover:bg-sage-50 flex flex-col items-start py-3"
-                  >
-                    <div className="flex items-center gap-2">
-                      <Icon className="text-sage-600 h-4 w-4" />
-                      <div>
-                        <div className="text-sage-800 font-medium">
-                          {mood.label}
-                        </div>
-                        <div className="text-sage-600 text-xs">
-                          {mood.description}
-                        </div>
-                      </div>
-                    </div>
-                  </SelectItem>
-                );
-              })}
-            </SelectContent>
-          </Select>
-
-          {selectedMoodData && (
-            <p className="text-sage-600 text-center">
-              {selectedMoodData.prompt}
-            </p>
-          )}
-
-          <div className="flex flex-col items-center gap-4">
-            <Button
-              size="lg"
-              className={cn(
-                "bg-sage-100 text-sage-700 hover:bg-sage-200 h-24 w-24 rounded-full transition-all",
-                conversation?.status === "connected" &&
-                  "bg-red-500 text-white hover:bg-red-600",
-              )}
-              onClick={toggleRecording}
-              disabled={isProcessing}
-            >
-              {isProcessing ? (
-                <Loader2 className="h-12 w-12 animate-spin" />
-              ) : conversation?.status === "connected" ? (
-                <MicOff className="h-12 w-12" />
-              ) : (
-                <Mic className="h-12 w-12" />
-              )}
-            </Button>
-            <div className="text-sage-600 text-sm">
-              {conversation?.status === "connected" ? (
-                <>
-                  Recording...{" "}
-                  {conversation.isSpeaking ? "(AI speaking)" : "(Listening)"}
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    className="ml-2 text-red-500 hover:text-red-600"
-                    onClick={handleBurnEntry}
-                  >
-                    <Trash2 className="h-4 w-4" />
-                  </Button>
-                </>
-              ) : isProcessing ? (
-                "Processing..."
-              ) : (
-                "Click to start recording"
-              )}
-            </div>
-          </div>
-        </CardContent>
-      </Card>
-
-      <div className="space-y-6">
-        <Card className="border-ocean-200 from-ocean-50 hover:border-ocean-300 bg-gradient-to-br to-white shadow-none transition-all hover:shadow-lg">
+      <SignedIn>
+        <Card className="border-sage-200 from-sage-50 hover:border-sage-300 relative w-full overflow-hidden bg-gradient-to-br to-white shadow-none transition-all hover:shadow-lg">
+          {isBurning && <BurnEffect onComplete={handleBurnComplete} />}
           <CardHeader>
-            <CardTitle className="text-ocean-800">Need to calm down?</CardTitle>
-            <CardDescription className="text-ocean-600">
-              Try these breathing exercises and grounding techniques
+            <CardTitle>How are you feeling?</CardTitle>
+            <CardDescription>
+              Select your mood and start recording your thoughts
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
-            <div className="space-y-2">
-              <h3 className="text-ocean-700 font-medium">
-                Breathing Exercises
-              </h3>
-              <div className="grid gap-2">
-                {BREATHING_EXERCISES.map((exercise, index) => (
-                  <Sheet key={exercise.name}>
-                    <SheetTrigger asChild>
-                      <Button
-                        variant="outline"
-                        className="border-ocean-200 text-ocean-700 w-full justify-start bg-white/50 hover:bg-white/80"
-                        onClick={() => startBreathing(index)}
-                      >
-                        <Timer className="mr-2 h-4 w-4" />
-                        {exercise.name}
-                      </Button>
-                    </SheetTrigger>
-                    <SheetContent>
-                      <SheetHeader>
-                        <SheetTitle className="text-ocean-800">
+            <Select value={selectedMood} onValueChange={setSelectedMood}>
+              <SelectTrigger>
+                <SelectValue placeholder="Select your mood" />
+              </SelectTrigger>
+              <SelectContent>
+                {MOODS.map((mood) => (
+                  <SelectItem key={mood.id} value={mood.id}>
+                    <div className="flex items-center gap-2">
+                      {mood.icon && (
+                        <mood.icon className="h-4 w-4 text-muted-foreground" />
+                      )}
+                      <span>{mood.label}</span>
+                    </div>
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+
+            <div className="flex gap-2">
+              <Button
+                variant={
+                  conversation?.status === "connected"
+                    ? "destructive"
+                    : "default"
+                }
+                onClick={toggleRecording}
+                disabled={isProcessing}
+                className="flex-1"
+              >
+                {isProcessing ? (
+                  <>
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                    Processing...
+                  </>
+                ) : conversation?.status === "connected" ? (
+                  <>
+                    <MicOff className="mr-2 h-4 w-4" />
+                    Stop Recording
+                  </>
+                ) : (
+                  <>
+                    <Mic className="mr-2 h-4 w-4" />
+                    Start Recording
+                  </>
+                )}
+              </Button>
+
+              {conversation?.status === "connected" && (
+                <Button
+                  variant="outline"
+                  size="icon"
+                  onClick={handleBurnEntry}
+                  disabled={isProcessing}
+                >
+                  <Trash2 className="h-4 w-4" />
+                </Button>
+              )}
+            </div>
+
+            {transcript.messages.length > 0 && (
+              <div className="space-y-4 rounded-lg border bg-card p-4 text-card-foreground shadow-sm">
+                {transcript.messages.map((msg, idx) => (
+                  <div
+                    key={idx}
+                    className={cn(
+                      "text-sm",
+                      msg.source === "user"
+                        ? "text-primary"
+                        : "text-muted-foreground",
+                    )}
+                  >
+                    {msg.message}
+                  </div>
+                ))}
+              </div>
+            )}
+          </CardContent>
+        </Card>
+
+        <Card className="border-sage-200 from-sage-50 hover:border-sage-300 relative w-full overflow-hidden bg-gradient-to-br to-white shadow-none transition-all hover:shadow-lg">
+          <CardHeader>
+            <CardTitle>Need to calm down?</CardTitle>
+            <CardDescription>Try these exercises</CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <Sheet>
+              <SheetTrigger asChild>
+                <Button variant="outline" className="w-full">
+                  Breathing Exercises
+                </Button>
+              </SheetTrigger>
+              <SheetContent>
+                <SheetHeader>
+                  <SheetTitle>Breathing Exercises</SheetTitle>
+                  <SheetDescription>
+                    Choose an exercise to help you relax
+                  </SheetDescription>
+                </SheetHeader>
+                <div className="mt-4 space-y-4">
+                  {BREATHING_EXERCISES.map((exercise, idx) => (
+                    <Card key={exercise.name}>
+                      <CardHeader>
+                        <CardTitle className="text-base">
                           {exercise.name}
-                        </SheetTitle>
-                        <SheetDescription className="text-ocean-600">
+                        </CardTitle>
+                        <CardDescription>
                           {exercise.description}
-                        </SheetDescription>
-                      </SheetHeader>
-                      <div className="mt-8 space-y-6">
-                        {isBreathing && currentExercise === index ? (
-                          <div className="text-center">
-                            <div className="text-ocean-700 breathing-animation mb-4 text-4xl font-bold">
+                        </CardDescription>
+                      </CardHeader>
+                      <CardContent>
+                        {isBreathing && currentExercise === idx ? (
+                          <div className="space-y-2 text-center">
+                            <div className="text-2xl font-bold">
                               {exercise.steps[currentStep]}
                             </div>
-                            <div className="text-ocean-600 text-2xl font-medium">
+                            <div className="text-sm text-muted-foreground">
                               {timer}s
                             </div>
                           </div>
                         ) : (
                           <Button
-                            className="bg-ocean-500 hover:bg-ocean-600 w-full text-white"
-                            onClick={() => startBreathing(index)}
+                            variant="outline"
+                            className="w-full"
+                            onClick={() => startBreathing(idx)}
                           >
                             Start Exercise
                           </Button>
                         )}
-                      </div>
-                    </SheetContent>
-                  </Sheet>
-                ))}
-              </div>
-            </div>
+                      </CardContent>
+                    </Card>
+                  ))}
+                </div>
+              </SheetContent>
+            </Sheet>
 
-            <div className="space-y-2">
-              <h3 className="text-ocean-700 font-medium">
-                Grounding Techniques
-              </h3>
-              <div className="grid gap-2">
-                {GROUNDING_TECHNIQUES.map((technique) => (
-                  <Sheet key={technique.name}>
-                    <SheetTrigger asChild>
-                      <Button
-                        variant="outline"
-                        className="border-ocean-200 text-ocean-700 w-full justify-start bg-white/50 hover:bg-white/80"
-                      >
-                        <Brain className="mr-2 h-4 w-4" />
-                        {technique.name}
-                      </Button>
-                    </SheetTrigger>
-                    <SheetContent>
-                      <SheetHeader>
-                        <SheetTitle className="text-ocean-800">
+            <Sheet>
+              <SheetTrigger asChild>
+                <Button variant="outline" className="w-full">
+                  Grounding Techniques
+                </Button>
+              </SheetTrigger>
+              <SheetContent>
+                <SheetHeader>
+                  <SheetTitle>Grounding Techniques</SheetTitle>
+                  <SheetDescription>
+                    Use these techniques to stay present
+                  </SheetDescription>
+                </SheetHeader>
+                <div className="mt-4 space-y-4">
+                  {GROUNDING_TECHNIQUES.map((technique) => (
+                    <Card key={technique.name}>
+                      <CardHeader>
+                        <CardTitle className="text-base">
                           {technique.name}
-                        </SheetTitle>
-                        <SheetDescription className="text-ocean-600">
-                          Take your time with each step
-                        </SheetDescription>
-                      </SheetHeader>
-                      <div className="mt-8">
-                        <ol className="space-y-4">
-                          {technique.steps.map((step, index) => (
-                            <li
-                              key={index}
-                              className="text-ocean-700 flex gap-4"
-                            >
-                              <span className="text-ocean-800 font-medium">
-                                {index + 1}.
-                              </span>
-                              {step}
-                            </li>
+                        </CardTitle>
+                      </CardHeader>
+                      <CardContent>
+                        <ol className="list-decimal space-y-2 pl-4">
+                          {technique.steps.map((step) => (
+                            <li key={step}>{step}</li>
                           ))}
                         </ol>
-                      </div>
-                    </SheetContent>
-                  </Sheet>
-                ))}
-              </div>
-            </div>
+                      </CardContent>
+                    </Card>
+                  ))}
+                </div>
+              </SheetContent>
+            </Sheet>
           </CardContent>
         </Card>
-      </div>
+      </SignedIn>
+      <SignedOut>
+        <Card className="col-span-2">
+          <CardHeader>
+            <CardTitle>Welcome to Voice Journal</CardTitle>
+            <CardDescription>
+              Please sign in to start journaling
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <SignInButton mode="modal">
+              <Button>Sign In</Button>
+            </SignInButton>
+          </CardContent>
+        </Card>
+      </SignedOut>
     </div>
   );
 }

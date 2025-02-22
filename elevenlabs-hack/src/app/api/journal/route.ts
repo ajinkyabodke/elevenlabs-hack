@@ -1,7 +1,10 @@
 import { db } from "@/server/db";
-import { journalEntries } from "@/server/db/schema";
+import { journalEntries, users } from "@/server/db/schema";
 import { openai } from "@ai-sdk/openai";
+import { auth, currentUser } from "@clerk/nextjs/server";
+
 import { generateObject } from "ai";
+import { eq } from "drizzle-orm";
 import { z } from "zod";
 
 const journalAnalysisSchema = z.object({
@@ -25,6 +28,14 @@ type JournalEntryInput = z.infer<typeof journalEntrySchema>;
 
 export async function POST(req: Request) {
   try {
+    const user = await currentUser();
+
+    if (!user) {
+      return Response.json({ error: "Unauthorized" }, { status: 401 });
+    }
+
+    const primaryEmail = user.emailAddresses[0]?.emailAddress ?? "";
+
     const body = (await req.json()) as JournalEntryInput;
     const { rawEntry } = journalEntrySchema.parse(body);
 
@@ -33,6 +44,24 @@ export async function POST(req: Request) {
         { error: "Journal entry is required" },
         { status: 400 },
       );
+    }
+
+    // Ensure user exists in our database
+    const existingUser = await db.query.users.findFirst({
+      where: eq(users.id, user.id),
+    });
+
+    if (!existingUser) {
+      const { userId } = await auth();
+      if (!userId) {
+        return Response.json({ error: "User not found" }, { status: 404 });
+      }
+
+      const primaryEmail = user?.emailAddresses[0]?.emailAddress ?? "";
+      await db.insert(users).values({
+        id: userId,
+        email: primaryEmail,
+      });
     }
 
     // Analyze the entry using Vercel AI SDK
@@ -46,10 +75,11 @@ export async function POST(req: Request) {
       maxTokens: 500,
     });
 
-    // Save to database with the analysis
+    // Save to database with the analysis and user ID
     const entries = await db
       .insert(journalEntries)
       .values({
+        userId: user.id,
         rawEntry,
         summarizedEntry: analysis.summary,
         moodScore: analysis.moodScore.toFixed(2),

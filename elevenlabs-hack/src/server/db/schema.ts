@@ -9,6 +9,7 @@ import {
   pgTableCreator,
   text,
   timestamp,
+  varchar,
 } from "drizzle-orm/pg-core";
 
 /**
@@ -19,10 +20,24 @@ import {
  */
 export const createTable = pgTableCreator((name) => `elevenlabs-hack_${name}`);
 
+export const users = createTable("user", {
+  id: varchar("id", { length: 255 }).primaryKey(), // Clerk user id
+  email: varchar("email", { length: 255 }).notNull(),
+  createdAt: timestamp("created_at", { withTimezone: true })
+    .default(sql`CURRENT_TIMESTAMP`)
+    .notNull(),
+  updatedAt: timestamp("updated_at", { withTimezone: true })
+    .default(sql`CURRENT_TIMESTAMP`)
+    .notNull(),
+});
+
 export const journalEntries = createTable(
   "journal_entry",
   {
     id: integer("id").primaryKey().generatedByDefaultAsIdentity(),
+    userId: varchar("user_id", { length: 255 })
+      .notNull()
+      .references(() => users.id, { onDelete: "cascade" }),
     rawEntry: text("raw_entry").notNull(), // Original user input
     summarizedEntry: text("summarized_entry").notNull(), // AI-generated summary
     moodScore: decimal("mood_score", { precision: 5, scale: 2 }).notNull(), // Score between 0-100
@@ -32,5 +47,6 @@ export const journalEntries = createTable(
   },
   (table) => ({
     createdAtIndex: index("created_at_idx").on(table.createdAt),
+    userIdIndex: index("user_id_idx").on(table.userId),
   }),
 );
