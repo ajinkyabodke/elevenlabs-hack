@@ -8,7 +8,7 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { format } from "date-fns";
-import { ArrowLeft, CheckCircle2 } from "lucide-react";
+import { ArrowLeft, LightbulbIcon } from "lucide-react";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 
@@ -61,71 +61,80 @@ export default async function JournalEntryPage({
 
   return (
     <div className="space-y-8">
-      <div className="flex items-center gap-4">
-        <Button variant="ghost" size="icon" asChild>
-          <Link href="/journals">
-            <ArrowLeft className="h-4 w-4" />
-          </Link>
-        </Button>
-        <div>
-          <h1 className="text-2xl font-bold">Journal Entry</h1>
-          <p className="text-sm text-muted-foreground">
-            {format(new Date(entry.createdAt), "MMMM d, yyyy 'at' h:mm a")}
-          </p>
+      <div className="rounded-lg border bg-card text-card-foreground shadow-sm">
+        <div className="flex flex-col space-y-4 p-6">
+          <div className="flex items-center gap-4">
+            <Button variant="ghost" size="icon" asChild>
+              <Link href="/journals">
+                <ArrowLeft className="h-4 w-4" />
+              </Link>
+            </Button>
+            <div className="flex-1">
+              <h1 className="text-2xl font-bold">Journal Entry</h1>
+              <div className="mt-1 flex items-center gap-3">
+                <p className="text-sm text-muted-foreground">
+                  {format(
+                    new Date(entry.createdAt),
+                    "MMMM d, yyyy 'at' h:mm a",
+                  )}
+                </p>
+                <div className="flex items-center gap-2 rounded-full bg-muted px-3 py-1">
+                  <span className="text-xl">{moodEmoji}</span>
+                  <span className={`font-medium ${moodColor}`}>
+                    {moodScore.toFixed(1)}
+                  </span>
+                </div>
+                <span className="text-sm text-muted-foreground">
+                  {moodDescription}
+                </span>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
 
-      <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
-        {/* Mood Score Card */}
-        <Card className="flex flex-col md:h-[250px]">
-          <CardHeader>
-            <CardTitle>Current Mood</CardTitle>
-            <CardDescription>How you were feeling at the time</CardDescription>
-          </CardHeader>
-          <CardContent className="flex flex-1 items-center justify-center">
-            <div className="flex flex-col items-center gap-2 text-center">
-              <span className="text-7xl">{moodEmoji}</span>
-              <p className={`text-3xl font-bold ${moodColor}`}>
-                {moodScore.toFixed(1)}
-              </p>
-              <p className="text-sm text-muted-foreground">{moodDescription}</p>
-            </div>
-          </CardContent>
-        </Card>
-
+      <div className="grid grid-cols-1 gap-6">
         {/* Key Insights Card */}
-        <Card className="flex flex-col md:h-[250px]">
+        <Card>
           <CardHeader>
-            <CardTitle>Key Insights</CardTitle>
+            <div className="flex items-center gap-2">
+              <LightbulbIcon className="h-5 w-5 text-yellow-500" />
+              <CardTitle>Key Insights</CardTitle>
+            </div>
             <CardDescription>
               Important points from your journal entry
             </CardDescription>
           </CardHeader>
-          <CardContent className="flex-1 overflow-auto">
-            <ul className="space-y-2">
+          <CardContent>
+            <ul className="grid gap-4 sm:grid-cols-2">
               {keyInsights.map((insight, index) => (
-                <li key={index} className="flex items-start gap-2">
-                  <CheckCircle2 className="mt-0.5 h-5 w-5 flex-shrink-0 text-green-500" />
-                  <span className="text-sm">{insight}</span>
+                <li
+                  key={index}
+                  className="flex items-start gap-3 rounded-lg border p-4 transition-colors hover:bg-muted/50"
+                >
+                  <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-primary/10 text-sm font-medium">
+                    {index + 1}
+                  </span>
+                  <p className="text-sm leading-relaxed">{insight}</p>
                 </li>
               ))}
             </ul>
           </CardContent>
         </Card>
-      </div>
 
-      {/* Journal Summary Card */}
-      <Card>
-        <CardHeader>
-          <CardTitle>Journal Entry</CardTitle>
-          <CardDescription>Your thoughts and reflections</CardDescription>
-        </CardHeader>
-        <CardContent>
-          <p className="whitespace-pre-wrap text-lg leading-relaxed">
-            {entry.summarizedEntry}
-          </p>
-        </CardContent>
-      </Card>
+        {/* Journal Summary Card */}
+        <Card>
+          <CardHeader>
+            <CardTitle>Journal Entry</CardTitle>
+            <CardDescription>Your thoughts and reflections</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <div className="prose prose-zinc dark:prose-invert max-w-none">
+              <p className="text-lg leading-relaxed">{entry.summarizedEntry}</p>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
     </div>
   );
 }

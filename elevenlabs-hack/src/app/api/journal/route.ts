@@ -75,6 +75,7 @@ export async function POST(req: Request) {
         userId,
         rawEntry,
         summarizedEntry: analysis.summary,
+        title: analysis.title,
         moodScore: analysis.moodScore.toFixed(2),
         significantEvents: analysis.significantEvents,
       })
@@ -114,6 +115,9 @@ const summariseJournalEntry = async (entry: string) => {
         .describe(
           "A simple, natural journal entry written in first person, as if written by the user themselves",
         ),
+      title: z
+        .string()
+        .describe("A short title for the journal entry. Max 15-20 words."),
       significantEvents: z
         .array(z.string())
         .describe(
