@@ -118,6 +118,7 @@ export default function Home() {
       },
       end_session: async () => {
         console.log("Stopping recording...");
+        setIsRecording(false);
         setIsProcessing(true);
         await conversation.endSession();
         setTranscript({ messages: [] });
