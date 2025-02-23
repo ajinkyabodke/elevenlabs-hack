@@ -279,18 +279,18 @@ export default function Home() {
     <>
       {activeTool && <ToolDialog />}
 
-      <div className="relative min-h-screen space-y-6 bg-gradient-to-br from-blue-50 via-white to-blue-100/50 p-6">
+      <div className="relative min-h-screen space-y-6 bg-gradient-to-br from-zinc-50 via-white to-zinc-100/50 p-6">
         <div className="mx-auto mt-10 w-full max-w-lg">
           <Button
             variant="ghost"
             size="icon"
-            className="absolute right-4 top-4 z-10 text-blue-500 hover:text-blue-600"
+            className="absolute right-4 top-4 z-10 text-zinc-500 hover:text-zinc-600"
             onClick={toggleAudio}
           >
             {isPlaying ? (
               <Volume2 className="h-4 w-4" />
             ) : (
-              <VolumeX className="h-4 w-4 text-blue-400/70" />
+              <VolumeX className="h-4 w-4 text-zinc-400/70" />
             )}
           </Button>
           <div className="relative flex items-center rounded-xl bg-white/50 p-1 shadow-lg backdrop-blur-sm">
@@ -300,10 +300,10 @@ export default function Home() {
                 onClick={() => setSelectedMood(mood.id)}
                 className={cn(
                   "relative z-10 flex w-full items-center justify-center gap-2 rounded-lg py-3 text-sm font-medium transition-all duration-200",
-                  "hover:text-blue-600",
+                  "hover:text-zinc-600",
                   selectedMood === mood.id
                     ? "text-white"
-                    : "text-blue-500/70 hover:text-blue-600",
+                    : "text-zinc-500/70 hover:text-zinc-600",
                 )}
               >
                 <motion.span
@@ -343,7 +343,7 @@ export default function Home() {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.2 }}
-            className="flex w-full justify-center gap-3 text-center font-serif text-6xl text-blue-900"
+            className="flex w-full justify-center gap-3 text-center font-serif text-6xl text-zinc-900"
           >
             <span>{selectedMoodData.description}</span>
           </motion.h4>
@@ -354,7 +354,7 @@ export default function Home() {
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.3 }}
-              className="flex items-center gap-3 text-center text-2xl tracking-normal text-blue-600/80"
+              className="flex items-center gap-3 text-center text-2xl tracking-normal text-zinc-600/80"
             >
               <span className="text-orange-400">✱</span>
               {selectedMoodData.prompt}
@@ -378,7 +378,7 @@ export default function Home() {
             <Button
               variant="ghost"
               size="icon"
-              className="rounded-full text-blue-500 hover:bg-blue-50 hover:text-blue-600"
+              className="rounded-full text-zinc-500 hover:bg-zinc-50 hover:text-zinc-600"
               onClick={handleDeleteTranscript}
               disabled={isProcessing}
             >
@@ -400,18 +400,18 @@ export default function Home() {
                   <Button
                     variant="ghost"
                     size="sm"
-                    className="text-blue-600 hover:bg-blue-50 hover:text-blue-700"
+                    className="text-zinc-600 hover:bg-zinc-50 hover:text-zinc-700"
                   >
                     <BookOpen className="mr-2 h-4 w-4" />
                     View Full Conversation
                   </Button>
                 </DialogTrigger>
-                <DialogContent className="max-w-2xl bg-gradient-to-br from-blue-50 via-white to-blue-50">
+                <DialogContent className="max-w-2xl bg-gradient-to-br from-zinc-50 via-white to-zinc-50">
                   <DialogHeader>
-                    <DialogTitle className="text-blue-900">
+                    <DialogTitle className="text-zinc-900">
                       Conversation History
                     </DialogTitle>
-                    <DialogDescription className="text-blue-600">
+                    <DialogDescription className="text-zinc-600">
                       Full transcript of your current session
                     </DialogDescription>
                   </DialogHeader>
@@ -423,8 +423,8 @@ export default function Home() {
                           className={cn(
                             "rounded-lg p-3 shadow-sm backdrop-blur-sm",
                             msg.source === "user"
-                              ? "bg-gradient-to-r from-blue-500/10 to-violet-400/5 text-blue-700"
-                              : "bg-white/50 text-blue-600",
+                              ? "bg-gradient-to-r from-zinc-500/10 to-zinc-400/5 text-zinc-700"
+                              : "bg-white/50 text-zinc-600",
                           )}
                         >
                           {msg.message}
@@ -436,13 +436,13 @@ export default function Home() {
               </Dialog>
             </div>
 
-            <div className="space-y-2 rounded-lg bg-white/50 p-4 font-serif text-blue-900 shadow-lg backdrop-blur-sm">
+            <div className="space-y-2 rounded-lg bg-white/50 p-4 font-serif text-zinc-900 shadow-lg backdrop-blur-sm">
               {lastTwoMessages.map((msg, idx) => (
                 <div
                   key={idx}
                   className={cn(
                     "text-sm",
-                    msg.source === "user" ? "text-blue-700" : "text-blue-600",
+                    msg.source === "user" ? "text-zinc-700" : "text-zinc-600",
                   )}
                 >
                   {msg.message}
