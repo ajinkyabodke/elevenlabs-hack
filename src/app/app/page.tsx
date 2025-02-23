@@ -84,7 +84,7 @@ export default function Home() {
   const [activeTool, setActiveTool] = useAtom<ToolType | null>(activeToolAtom);
   const name = user?.firstName;
   const [isPlaying, setIsPlaying] = useState(true);
-  const audioRef = useRef<HTMLAudioElement | null>(null);
+  const audioRef = useRef<HTMLAudioElement>(oneTimeMountedAudio);
 
   useEffect(() => {
     audioRef.current = oneTimeMountedAudio;
@@ -300,16 +300,10 @@ export default function Home() {
   const lastTwoMessages = transcript.messages.slice(-2);
 
   const toggleAudio = () => {
-    if (!audioRef.current) {
-      audioRef.current = oneTimeMountedAudio;
-      audioRef.current.loop = true;
-      audioRef.current.volume = 0.3;
-    }
-
     if (isPlaying) {
-      audioRef.current.pause();
+      audioRef.current?.pause();
     } else {
-      void audioRef.current.play();
+      void audioRef.current?.play();
     }
 
     setIsPlaying(!isPlaying);
