@@ -5,7 +5,7 @@ import GameOfLife from "./HeroBackground";
 export function Hero() {
   return (
     <section aria-label="hero">
-      <FadeContainer className="relative flex flex-col items-center justify-center">
+      <FadeContainer className="relative z-50 flex flex-col items-center justify-center">
         <FadeDiv className="mx-auto">
           <a
             aria-label="View latest update the changelog page"
@@ -19,20 +19,24 @@ export function Hero() {
                 News
               </span>
               <span className="flex items-center gap-1 truncate">
-                <span className="w-full truncate">Echo Beta Launch</span>
+                <span className="w-full truncate bg-neutral-50">
+                  Echo Beta Launch
+                </span>
 
                 <RiArrowRightUpLine className="size-4 shrink-0 text-gray-700" />
               </span>
             </div>
           </a>
         </FadeDiv>
-        <h1 className="mt-8 text-center text-5xl font-semibold tracking-tighter text-gray-900 sm:text-8xl sm:leading-[5.5rem]">
-          <FadeSpan>Transform</FadeSpan> <FadeSpan>your</FadeSpan>
+        <h1 className="mt-8 text-center text-5xl font-bold tracking-tighter text-gray-900 sm:text-8xl sm:leading-[5.5rem]">
+          <FadeSpan>Transform</FadeSpan>{" "}
+          <FadeSpan className="text-7xl font-normal">your</FadeSpan>
           <br />
-          <FadeSpan>thoughts</FadeSpan> <FadeSpan>into</FadeSpan>{" "}
-          <FadeSpan>Insights</FadeSpan>
+          <FadeSpan>Thoughts</FadeSpan>{" "}
+          <FadeSpan className="text-7xl font-normal">into</FadeSpan>{" "}
+          <FadeSpan>Memories</FadeSpan>
         </h1>
-        <p className="mt-5 max-w-xl text-balance text-center text-base text-gray-700 sm:mt-8 sm:text-xl">
+        <p className="mt-5 max-w-2xl text-center text-base text-gray-700 sm:mt-8 sm:text-xl">
           <FadeSpan>Your AI-powered voice journal that turns</FadeSpan>{" "}
           <FadeSpan>
             daily reflections into meaningful insights over time
