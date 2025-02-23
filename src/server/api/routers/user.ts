@@ -1,4 +1,6 @@
+import { db } from "@/server/db";
 import { users } from "@/server/db/schema";
+import { currentUser } from "@clerk/nextjs/server";
 import { TRPCError } from "@trpc/server";
 import { eq } from "drizzle-orm";
 import { z } from "zod";
@@ -6,17 +8,32 @@ import { createTRPCRouter, protectedProcedure } from "../trpc";
 
 export const userRouter = createTRPCRouter({
   getPromptAttributes: protectedProcedure.query(async ({ ctx }) => {
-    const user = await ctx.db.query.users.findFirst({
+    const _user = await currentUser();
+    const primaryEmail = _user?.emailAddresses[0]?.emailAddress ?? "";
+
+    let existingUser = await db.query.users.findFirst({
       where: (u, { eq }) => eq(u.id, ctx.session.userId),
       columns: {
+        id: true,
         memory: true,
+        memoryEnabledAt: true,
         details: true,
       },
     });
 
-    if (!user) {
-      throw new TRPCError({ code: "UNAUTHORIZED" });
+    if (!existingUser) {
+      [existingUser] = await db
+        .insert(users)
+        .values({
+          id: ctx.session.userId,
+          email: primaryEmail,
+          details: "",
+          memory: [`User's name is ${_user?.fullName}.`],
+        })
+        .returning();
     }
+
+    if (!existingUser) throw new TRPCError({ code: "UNAUTHORIZED" });
 
     const last7DaysJournalEntries = await ctx.db.query.journalEntries.findMany({
       where: (j, { and, gte }) =>
@@ -52,8 +69,8 @@ export const userRouter = createTRPCRouter({
     }));
 
     return {
-      memory: user.memory,
-      details: user.details ?? "",
+      memory: existingUser.memory,
+      details: existingUser.details ?? "",
       moodScoresWithDays,
       significantEventsWithDays,
     };
