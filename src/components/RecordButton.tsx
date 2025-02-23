@@ -11,13 +11,16 @@ interface RecordButtonProps {
   onClick?: () => void;
   onMouseDown?: () => void;
   disabled?: boolean;
+  onRecordingStart?: () => void;
+  onRecordingEnd?: () => void;
 }
 
 export function RecordButton({
   isRecording,
   isProcessing,
   disabled,
-
+  onRecordingStart,
+  onRecordingEnd,
   ...props
 }: RecordButtonProps) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
@@ -116,7 +119,32 @@ export function RecordButton({
       >
         <PulsatingButton
           pulseEnabled={!isRecording}
-          {...props}
+          onClick={async () => {
+            if (!isRecording) {
+              onRecordingStart?.();
+            }
+
+            if (props.onClick) {
+              await Promise.resolve(props.onClick());
+            }
+
+            if (isRecording) {
+              onRecordingEnd?.();
+            }
+          }}
+          onMouseDown={async () => {
+            if (!isRecording) {
+              onRecordingStart?.();
+            }
+
+            if (props.onMouseDown) {
+              await Promise.resolve(props.onMouseDown());
+            }
+
+            if (isRecording) {
+              onRecordingEnd?.();
+            }
+          }}
           disabled={disabled}
           className={cn(
             "group relative flex size-16 items-center justify-center rounded-full transition-all duration-300 ease-in-out",

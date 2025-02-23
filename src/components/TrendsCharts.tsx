@@ -23,7 +23,6 @@ import {
   subMonths,
   subWeeks,
 } from "date-fns";
-import { motion } from "framer-motion";
 import {
   Calendar,
   ChevronLeft,
@@ -31,6 +30,7 @@ import {
   Clock,
   LineChart,
 } from "lucide-react";
+import { motion } from "motion/react";
 import { useState } from "react";
 
 interface TrendsChartsProps {

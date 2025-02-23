@@ -2,7 +2,6 @@ import CallToAction from "./landing/components/ui/CallToAction";
 import FeatureDivider from "./landing/components/ui/FeatureDivider";
 import Features from "./landing/components/ui/Features";
 import Footer from "./landing/components/ui/Footer";
-
 import { Hero } from "./landing/components/ui/Hero";
 import { JournalAnalytics } from "./landing/components/ui/SolarAnalytics";
 

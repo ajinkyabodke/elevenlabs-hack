@@ -55,8 +55,8 @@ export default async function RootLayout({
           <body className={GeistSans.className}>
             <div className="flex h-screen">
               {isAuthenticated && <Sidebar />}
-              <div className="flex-1 overflow-auto">
-                <main className="container mx-auto p-4">{children}</main>
+              <div className="w-full overflow-auto bg-gradient-to-br from-zinc-50 via-white to-zinc-100/50">
+                <main className="container mx-auto px-6 py-6">{children}</main>
               </div>
               <Toaster />
             </div>

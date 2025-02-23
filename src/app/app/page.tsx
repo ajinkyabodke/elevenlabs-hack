@@ -22,7 +22,7 @@ import { useUser } from "@clerk/nextjs";
 import { useAtom } from "jotai";
 import { BookOpen, LucideX, Volume2, VolumeX } from "lucide-react";
 import { motion } from "motion/react";
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { toast } from "sonner";
 
 type Mood = {
@@ -31,6 +31,8 @@ type Mood = {
   description: string;
   prompt: string;
 };
+
+type MoodValue = (typeof MOODS)[number]["id"];
 
 const MOODS: Mood[] = [
   {
@@ -63,8 +65,11 @@ interface ConversationTranscript {
   summary?: string;
 }
 
+const oneTimeMountedAudio = new Audio("/ambient-trimmed.mp3");
+let startedPlayingFirstTime = false;
+
 export default function Home() {
-  const [selectedMood, setSelectedMood] = useState<string>("chat");
+  const [selectedMood, setSelectedMood] = useState<MoodValue>("chat");
   const [isProcessing, setIsProcessing] = useState(false);
   const [isRecording, setIsRecording] = useState(false);
   const transcriptRef = useRef<ConversationTranscript>({
@@ -78,8 +83,25 @@ export default function Home() {
     api.user.getPromptAttributes.useQuery();
   const [activeTool, setActiveTool] = useAtom<ToolType | null>(activeToolAtom);
   const name = user?.firstName;
-  const [isPlaying, setIsPlaying] = useState(false);
-  const audioRef = useRef<HTMLAudioElement | null>(null);
+  const [isPlaying, setIsPlaying] = useState(true);
+  const audioRef = useRef<HTMLAudioElement>(oneTimeMountedAudio);
+
+  useEffect(() => {
+    audioRef.current = oneTimeMountedAudio;
+
+    window.addEventListener("click", () => {
+      if (!startedPlayingFirstTime) {
+        startedPlayingFirstTime = true;
+        setTimeout(() => {
+          void oneTimeMountedAudio.play();
+        }, 500);
+      }
+    });
+
+    return () => {
+      audioRef.current?.pause();
+    };
+  }, []);
 
   const conversation = useConversation({
     onConnect: () => {
@@ -178,6 +200,20 @@ export default function Home() {
   };
 
   const getFirstMessage = () => {
+    console.log("selectedMood", selectedMood);
+    if (selectedMood === "vent") {
+      return `Hi ${name}! I'm here to listen. What's bothering you?`;
+    }
+
+    if (selectedMood === "chat") {
+      return `Hi ${name}! How was your day?`;
+    }
+
+    if (selectedMood === "unwind") {
+      return `Hi ${name}! How can I help you unwind today?`;
+    }
+
+    // Simple greeting that works for all moods
     return `Hi ${name}! How can I help you today?`;
   };
 
@@ -246,6 +282,8 @@ export default function Home() {
         toast.error("Failed to start recording");
       }
     }
+
+    toggleAudio();
   };
 
   const handleDeleteTranscript = () => {
@@ -255,23 +293,19 @@ export default function Home() {
       void conversation.endSession();
     }
     setTranscript({ messages: [] });
+    toggleAudio();
   };
 
   // Get the last two messages for the preview
   const lastTwoMessages = transcript.messages.slice(-2);
 
   const toggleAudio = () => {
-    if (!audioRef.current) {
-      audioRef.current = new Audio("/ambient-trimmed.mp3");
-      audioRef.current.loop = true;
-      audioRef.current.volume = 0.3;
+    if (isPlaying) {
+      audioRef.current?.pause();
+    } else {
+      void audioRef.current?.play();
     }
 
-    if (isPlaying) {
-      audioRef.current.pause();
-    } else {
-      void audioRef.current.play();
-    }
     setIsPlaying(!isPlaying);
   };
 
@@ -293,17 +327,15 @@ export default function Home() {
               <VolumeX className="h-4 w-4 text-zinc-400/70" />
             )}
           </Button>
-          <div className="relative flex items-center rounded-xl bg-white/50 p-1 shadow-lg backdrop-blur-sm">
+          <div className="relative flex items-center rounded-full border border-neutral-100 bg-white/50 p-1 shadow-xl backdrop-blur-sm">
             {MOODS.map((mood) => (
               <button
                 key={mood.id}
                 onClick={() => setSelectedMood(mood.id)}
                 className={cn(
-                  "relative z-10 flex w-full items-center justify-center gap-2 rounded-lg py-3 text-sm font-medium transition-all duration-200",
-                  "hover:text-zinc-600",
-                  selectedMood === mood.id
-                    ? "text-white"
-                    : "text-zinc-500/70 hover:text-zinc-600",
+                  "relative z-10 flex w-full items-center justify-center gap-2 rounded-full py-3 text-sm font-medium transition-all duration-200",
+                  "",
+                  selectedMood === mood.id ? "text-white" : "text-zinc-500/70",
                 )}
               >
                 <motion.span
@@ -333,7 +365,7 @@ export default function Home() {
               }}
               transition={{ type: "spring", stiffness: 300, damping: 30 }}
             >
-              <div className="h-full w-[calc(100%/3)] rounded-lg bg-gradient-to-r from-blue-500 to-violet-400 shadow-lg" />
+              <div className="h-full w-[calc(100%/3)] rounded-full bg-gradient-to-r from-blue-500 to-violet-400 shadow-lg hover:text-white" />
             </motion.div>
           </div>
         </div>
@@ -372,6 +404,8 @@ export default function Home() {
             isProcessing={isProcessing}
             onMouseDown={toggleRecording}
             disabled={isProcessing || isPending}
+            // onRecordingStart={toggleAudio}
+            // onRecordingEnd={toggleAudio}
           />
 
           {isRecording && (
