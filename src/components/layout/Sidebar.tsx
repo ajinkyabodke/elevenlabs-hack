@@ -11,14 +11,7 @@ import {
 
 import { cn } from "@/lib/utils";
 import { UserButton } from "@clerk/nextjs";
-import {
-  BookOpen,
-  Brain,
-  Heart,
-  LineChart,
-  Menu,
-  MessageSquare,
-} from "lucide-react";
+import { BookOpen, Brain, LineChart, Menu, MessageSquare } from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 
@@ -33,11 +26,6 @@ const sidebarItems = [
     icon: BookOpen,
     href: "/journals",
   },
-  {
-    title: "Memory Bank",
-    icon: Brain,
-    href: "/memory",
-  },
   // {
   //   title: "Time Capsule",
   //   icon: Clock,
@@ -45,14 +33,14 @@ const sidebarItems = [
   // },
 
   {
-    title: "Trends",
+    title: "Mood Analysis",
     icon: LineChart,
     href: "/trends",
   },
   {
-    title: "Calming Exercises",
-    icon: Heart,
-    href: "/calm",
+    title: "Long Term Memory",
+    icon: Brain,
+    href: "/memory",
   },
 ] as const;
 
@@ -67,11 +55,18 @@ export function Sidebar() {
             <Button
               variant="ghost"
               className={cn(
-                "w-full justify-start gap-2",
-                pathname === item.href && "bg-muted",
+                "w-full justify-start gap-2 transition-all",
+                pathname === item.href
+                  ? "bg-white/20 text-white hover:bg-white/30 hover:text-white"
+                  : "text-black/80 hover:bg-white/10 hover:text-white",
               )}
             >
-              <item.icon className="h-4 w-4" />
+              <item.icon
+                className={cn(
+                  "h-4 w-4",
+                  pathname === item.href ? "text-black" : "text-black/80",
+                )}
+              />
               {item.title}
             </Button>
           </Link>
@@ -87,13 +82,20 @@ export function Sidebar() {
       {/* Mobile Sidebar */}
       <Sheet>
         <SheetTrigger asChild>
-          <Button variant="ghost" size="icon" className="md:hidden">
+          <Button
+            variant="ghost"
+            size="icon"
+            className="hover:text-violet-400 md:hidden"
+          >
             <Menu className="h-5 w-5" />
           </Button>
         </SheetTrigger>
-        <SheetContent side="left" className="w-64">
+        <SheetContent
+          side="left"
+          className="w-64 bg-gradient-to-br from-violet-400 to-blue-400 text-black backdrop-blur-sm"
+        >
           <SheetHeader>
-            <SheetTitle>
+            <SheetTitle className="flex items-center gap-3 text-black">
               <UserButton
                 appearance={{
                   elements: {
@@ -101,7 +103,7 @@ export function Sidebar() {
                   },
                 }}
               />
-              Voice Journal
+              <span>Voice Journal</span>
             </SheetTitle>
           </SheetHeader>
           <SidebarContent />
@@ -109,8 +111,8 @@ export function Sidebar() {
       </Sheet>
 
       {/* Desktop Sidebar */}
-      <div className="hidden h-screen w-64 border-r md:block">
-        <div className="flex h-14 items-center border-b px-4">
+      <div className="hidden h-screen w-64 border-r border-white/20 bg-gradient-to-br from-violet-400 to-blue-400 text-black md:block">
+        <div className="flex h-14 items-center gap-3 border-b border-white/20 px-4">
           <UserButton
             appearance={{
               elements: {
@@ -118,7 +120,7 @@ export function Sidebar() {
               },
             }}
           />
-          <h2 className="font-semibold">Voice Journal</h2>
+          <h2 className="font-semibold">Echo</h2>
         </div>
         <div className="px-4">
           <SidebarContent />

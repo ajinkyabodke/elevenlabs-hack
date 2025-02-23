@@ -101,7 +101,7 @@ export async function POST(req: Request) {
 const summariseJournalEntry = async (entry: string) => {
   // Analyze the entry using Vercel AI SDK
   const { object: analysis } = await generateObject({
-    model: openai("gpt-4o-mini"),
+    model: openai("gpt-4o"),
     schema: z.object({
       moodScore: z
         .number()
@@ -113,7 +113,7 @@ const summariseJournalEntry = async (entry: string) => {
       summary: z
         .string()
         .describe(
-          "A simple, natural journal entry written in first person, as if written by the user themselves",
+          "A simple, natural journal entry written in first person, as if written by the user themselves. Dont make it too concise. It's not actually a summary. It's just a rewrite of the conversation to make it sound like a diary entry. Try to include as much as possible from the conversation.",
         ),
       title: z
         .string()
@@ -121,7 +121,7 @@ const summariseJournalEntry = async (entry: string) => {
       significantEvents: z
         .array(z.string())
         .describe(
-          "A list of significant events that happened in the conversation. Max 4-5 words for each event. Don't include conjunctions like 'and', 'a' or 'but'.",
+          "A list of significant events that happened in the conversation. It has to be actually signicant. Max 4-5 words for each event. Don't include conjunctions like 'and', 'a' or 'but'. Dont add any significant events if its not there in that session. Dont give more than 1/2 for each session. MAX 2. itll mostly be just 1. Make sure they are happy significant events",
         )
         .max(4),
     }),

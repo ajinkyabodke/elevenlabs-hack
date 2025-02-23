@@ -15,6 +15,27 @@
       "when": 1740237794256,
       "tag": "0001_ancient_leo",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1740269654703,
+      "tag": "0002_wealthy_silver_centurion",
+      "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "7",
+      "when": 1740269888431,
+      "tag": "0003_daffy_solo",
+      "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "7",
+      "when": 1740270938333,
+      "tag": "0004_tiresome_ultimo",
+      "breakpoints": true
     }
   ]
 }

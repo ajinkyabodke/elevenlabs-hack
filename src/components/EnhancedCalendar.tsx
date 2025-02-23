@@ -80,11 +80,34 @@ export function EnhancedCalendar({
   // Add this function to get a color for each event
   const getEventColor = (index: number) => {
     const colors = [
-      "bg-blue-100 dark:bg-blue-900/30",
-      "bg-green-100 dark:bg-green-900/30",
-      "bg-purple-100 dark:bg-purple-900/30",
-      "bg-orange-100 dark:bg-orange-900/30",
-      "bg-pink-100 dark:bg-pink-900/30",
+      {
+        bg: "bg-violet-100 dark:bg-violet-900/30",
+        text: "text-violet-700 dark:text-violet-300",
+      },
+      {
+        bg: "bg-blue-100 dark:bg-blue-900/30",
+        text: "text-blue-700 dark:text-blue-300",
+      },
+      {
+        bg: "bg-indigo-100 dark:bg-indigo-900/30",
+        text: "text-indigo-700 dark:text-indigo-300",
+      },
+      {
+        bg: "bg-fuchsia-100 dark:bg-fuchsia-900/30",
+        text: "text-fuchsia-700 dark:text-fuchsia-300",
+      },
+      {
+        bg: "bg-sky-100 dark:bg-sky-900/30",
+        text: "text-sky-700 dark:text-sky-300",
+      },
+      {
+        bg: "bg-purple-100 dark:bg-purple-900/30",
+        text: "text-purple-700 dark:text-purple-300",
+      },
+      {
+        bg: "bg-periwinkle-100 dark:bg-periwinkle-900/30",
+        text: "text-periwinkle-700 dark:text-periwinkle-300",
+      },
     ];
     return colors[index % colors.length];
   };
@@ -269,7 +292,9 @@ export function EnhancedCalendar({
                           key={index}
                           className={cn(
                             "rounded px-1 py-0.5 text-xs text-muted-foreground",
-                            getEventColor(index),
+                            getEventColor(index)!.bg +
+                              " " +
+                              getEventColor(index)!.text,
                           )}
                         >
                           {event}
@@ -289,7 +314,9 @@ export function EnhancedCalendar({
                                     key={index}
                                     className={cn(
                                       "rounded px-1 py-0.5 text-xs text-muted-foreground",
-                                      getEventColor(index),
+                                      getEventColor(index)!.bg +
+                                        " " +
+                                        getEventColor(index)!.text,
                                       "w-full",
                                     )}
                                   >
@@ -313,14 +340,16 @@ export function EnhancedCalendar({
 
               {/* Events list at bottom */}
               <div className="mt-auto space-y-1">
-                {dayEvents.map((event) => (
+                {dayEvents.map((event, index) => (
                   <div
                     key={event.id}
                     className={cn(
                       "truncate rounded px-2 py-1 text-xs font-medium",
                       event.color
                         ? `bg-${event.color}/10 text-${event.color}-700 dark:text-${event.color}-400`
-                        : "text-primary-700 dark:text-primary-400 bg-primary/10",
+                        : getEventColor(index)!.bg +
+                            " " +
+                            getEventColor(index)!.text,
                     )}
                   >
                     {event.title}

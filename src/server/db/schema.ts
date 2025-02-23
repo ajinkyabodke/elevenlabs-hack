@@ -37,6 +37,8 @@ export const users = createTable("user", {
     // empty array as default
     .default(sql`ARRAY[]::text[]`),
 
+  details: text("details"),
+
   memoryEnabledAt: timestamp("memoryEnabledAt", {
     withTimezone: true,
   }).defaultNow(),

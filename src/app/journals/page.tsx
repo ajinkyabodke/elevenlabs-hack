@@ -9,9 +9,11 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { auth } from "@clerk/nextjs/server";
 import { format, formatDistanceToNow } from "date-fns";
 import { ArrowRight, CalendarIcon, ListIcon } from "lucide-react";
 import Link from "next/link";
+import { redirect } from "next/navigation";
 
 function getMoodEmoji(score: number) {
   if (score >= 75) return "🌟";
@@ -35,7 +37,13 @@ function getMoodDescription(score: number) {
 }
 
 export default async function JournalsPage() {
-  const entries = await getJournalEntries();
+  const session = await auth();
+
+  if (!session.userId) {
+    redirect("/");
+  }
+
+  const entries = await getJournalEntries(session.userId);
 
   // Group entries by month
   const entriesByMonth = entries.reduce(
@@ -59,7 +67,9 @@ export default async function JournalsPage() {
     <div className="space-y-8">
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div>
-          <h1 className="text-4xl font-bold">Journal Entries</h1>
+          <h1 className="bg-gradient-to-r from-violet-500 to-blue-500 bg-clip-text text-4xl font-bold text-transparent">
+            Journal Entries
+          </h1>
           <p className="text-lg text-muted-foreground">
             Your journey of thoughts and reflections
           </p>
@@ -68,7 +78,7 @@ export default async function JournalsPage() {
       </div>
 
       <Tabs defaultValue="list" className="space-y-4">
-        <TabsList>
+        <TabsList className="bg-gradient-to-br from-violet-500/10 via-card to-blue-500/10">
           <TabsTrigger value="list" className="flex items-center gap-2">
             <ListIcon className="h-4 w-4" />
             List View
@@ -81,10 +91,15 @@ export default async function JournalsPage() {
 
         <TabsContent value="list" className="space-y-8">
           {Object.entries(entriesByMonth).map(([month, monthEntries]) => (
-            <Card key={month}>
+            <Card
+              key={month}
+              className="overflow-hidden bg-gradient-to-br from-violet-500/5 via-card to-blue-500/5"
+            >
               <CardHeader>
                 <CardTitle className="flex items-center justify-between">
-                  {month}
+                  <span className="bg-gradient-to-r from-violet-500 to-blue-500 bg-clip-text text-transparent">
+                    {month}
+                  </span>
                   <span className="text-sm font-normal text-muted-foreground">
                     {monthEntries.length} entries
                   </span>
@@ -101,10 +116,10 @@ export default async function JournalsPage() {
                     <Link
                       key={entry.id}
                       href={`/journals/${entry.id}`}
-                      className="group relative flex items-center gap-4 rounded-lg border p-4 transition-colors hover:bg-muted/50"
+                      className="group relative flex items-center gap-4 rounded-lg border bg-gradient-to-br from-violet-500/5 via-transparent to-blue-500/5 p-4 transition-all hover:bg-gradient-to-br hover:from-violet-500/10 hover:to-blue-500/10"
                     >
                       {/* Date Column */}
-                      <div className="flex min-w-[90px] flex-col items-center rounded-md bg-muted p-2 text-center">
+                      <div className="flex min-w-[90px] flex-col items-center rounded-md bg-gradient-to-br from-violet-500/10 to-blue-500/10 p-2 text-center backdrop-blur-sm">
                         <span className="text-2xl font-semibold">
                           {format(new Date(entry.createdAt), "d")}
                         </span>
@@ -151,9 +166,11 @@ export default async function JournalsPage() {
         </TabsContent>
 
         <TabsContent value="calendar">
-          <Card>
+          <Card className="overflow-hidden bg-gradient-to-br from-violet-500/5 via-card to-blue-500/5">
             <CardHeader>
-              <CardTitle>Calendar View</CardTitle>
+              <CardTitle className="bg-gradient-to-r from-violet-500 to-blue-500 bg-clip-text text-transparent">
+                Calendar View
+              </CardTitle>
               <CardDescription>
                 View your entries and events in a calendar format. Emojis
                 indicate mood scores.

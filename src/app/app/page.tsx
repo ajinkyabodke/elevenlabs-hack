@@ -116,6 +116,14 @@ export default function Home() {
       start_progressive_muscle_relaxation: () => {
         setActiveTool("pmr");
       },
+      end_session: async () => {
+        console.log("Stopping recording...");
+        setIsProcessing(true);
+        await conversation.endSession();
+        setTranscript({ messages: [] });
+        transcriptRef.current.messages = [];
+        setIsProcessing(false);
+      },
     },
   });
 
@@ -146,6 +154,9 @@ export default function Home() {
           .join("\n")}`,
 
       `----`,
+      promptAttributes?.details &&
+        promptAttributes.details.length > 0 &&
+        `User's details: ${promptAttributes.details}`,
 
       `User's mood scores over the last 7 days: ${promptAttributes?.moodScoresWithDays
         .map((m) => `- ${m.day}: ${m.moodScore}`)
@@ -250,7 +261,7 @@ export default function Home() {
 
   const toggleAudio = () => {
     if (!audioRef.current) {
-      audioRef.current = new Audio("/ambient.mp3");
+      audioRef.current = new Audio("/ambient-trimmed.mp3");
       audioRef.current.loop = true;
       audioRef.current.volume = 0.3;
     }
