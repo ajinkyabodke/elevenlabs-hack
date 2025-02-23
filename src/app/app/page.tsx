@@ -32,6 +32,8 @@ type Mood = {
   prompt: string;
 };
 
+type MoodValue = (typeof MOODS)[number]["id"];
+
 const MOODS: Mood[] = [
   {
     id: "vent",
@@ -64,7 +66,7 @@ interface ConversationTranscript {
 }
 
 export default function Home() {
-  const [selectedMood, setSelectedMood] = useState<string>("chat");
+  const [selectedMood, setSelectedMood] = useState<MoodValue>("chat");
   const [isProcessing, setIsProcessing] = useState(false);
   const [isRecording, setIsRecording] = useState(false);
   const transcriptRef = useRef<ConversationTranscript>({
@@ -178,6 +180,20 @@ export default function Home() {
   };
 
   const getFirstMessage = () => {
+    console.log("selectedMood", selectedMood);
+    if (selectedMood === "vent") {
+      return `Hi ${name}! I'm here to listen. What's bothering you?`;
+    }
+
+    if (selectedMood === "chat") {
+      return `Hi ${name}! How was your day?`;
+    }
+
+    if (selectedMood === "unwind") {
+      return `Hi ${name}! How can I help you unwind today?`;
+    }
+
+    // Simple greeting that works for all moods
     return `Hi ${name}! How can I help you today?`;
   };
 

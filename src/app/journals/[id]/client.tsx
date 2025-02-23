@@ -3,8 +3,8 @@
 import { Button } from "@/components/ui/button";
 import { type JournalEntry } from "@/types";
 import { format } from "date-fns";
-import { motion } from "framer-motion";
 import { ArrowLeft, BookOpen, Quote, Sparkles } from "lucide-react";
+import { motion } from "motion/react";
 import Link from "next/link";
 
 interface JournalEntryClientProps {
