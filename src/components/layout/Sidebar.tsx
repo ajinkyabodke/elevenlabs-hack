@@ -124,7 +124,7 @@ export function Sidebar() {
       {/* Desktop Sidebar */}
       <div
         className={cn(
-          "hidden h-screen border-r border-white/20 bg-gradient-to-br from-violet-400/80 to-blue-400/80 text-black transition-all duration-300 md:block",
+          "hidden h-full min-h-screen border-r border-white/20 text-black transition-all duration-300 md:block",
           isSidebarCollapsed ? "w-[68px]" : "w-64",
         )}
       >
