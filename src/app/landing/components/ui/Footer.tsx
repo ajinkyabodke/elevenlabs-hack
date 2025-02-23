@@ -145,7 +145,7 @@ const Footer = () => {
             href="/"
             className="flex select-none items-center font-medium text-gray-700 sm:text-sm"
           >
-            <img src="/EchoLogo.png" alt="Echo Logo" className="ml-2 w-20" />
+            <img src="/EchoLogo.png" alt="Echo AI Logo" className="ml-2 w-20" />
 
             <span className="sr-only">Echo Logo (go home)</span>
           </Link>
