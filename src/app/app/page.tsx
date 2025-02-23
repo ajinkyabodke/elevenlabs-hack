@@ -22,7 +22,7 @@ import { useUser } from "@clerk/nextjs";
 import { useAtom } from "jotai";
 import { BookOpen, LucideX, Volume2, VolumeX } from "lucide-react";
 import { motion } from "motion/react";
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { toast } from "sonner";
 
 type Mood = {
@@ -65,6 +65,9 @@ interface ConversationTranscript {
   summary?: string;
 }
 
+const oneTimeMountedAudio = new Audio("/ambient-trimmed.mp3");
+let startedPlayingFirstTime = false;
+
 export default function Home() {
   const [selectedMood, setSelectedMood] = useState<MoodValue>("chat");
   const [isProcessing, setIsProcessing] = useState(false);
@@ -80,8 +83,25 @@ export default function Home() {
     api.user.getPromptAttributes.useQuery();
   const [activeTool, setActiveTool] = useAtom<ToolType | null>(activeToolAtom);
   const name = user?.firstName;
-  const [isPlaying, setIsPlaying] = useState(false);
+  const [isPlaying, setIsPlaying] = useState(true);
   const audioRef = useRef<HTMLAudioElement | null>(null);
+
+  useEffect(() => {
+    audioRef.current = oneTimeMountedAudio;
+
+    window.addEventListener("click", () => {
+      if (!startedPlayingFirstTime) {
+        startedPlayingFirstTime = true;
+        setTimeout(() => {
+          void oneTimeMountedAudio.play();
+        }, 500);
+      }
+    });
+
+    return () => {
+      audioRef.current?.pause();
+    };
+  }, []);
 
   const conversation = useConversation({
     onConnect: () => {
@@ -262,6 +282,8 @@ export default function Home() {
         toast.error("Failed to start recording");
       }
     }
+
+    toggleAudio();
   };
 
   const handleDeleteTranscript = () => {
@@ -271,6 +293,7 @@ export default function Home() {
       void conversation.endSession();
     }
     setTranscript({ messages: [] });
+    toggleAudio();
   };
 
   // Get the last two messages for the preview
@@ -278,7 +301,7 @@ export default function Home() {
 
   const toggleAudio = () => {
     if (!audioRef.current) {
-      audioRef.current = new Audio("/ambient-trimmed.mp3");
+      audioRef.current = oneTimeMountedAudio;
       audioRef.current.loop = true;
       audioRef.current.volume = 0.3;
     }
@@ -288,6 +311,7 @@ export default function Home() {
     } else {
       void audioRef.current.play();
     }
+
     setIsPlaying(!isPlaying);
   };
 
@@ -388,6 +412,8 @@ export default function Home() {
             isProcessing={isProcessing}
             onMouseDown={toggleRecording}
             disabled={isProcessing || isPending}
+            // onRecordingStart={toggleAudio}
+            // onRecordingEnd={toggleAudio}
           />
 
           {isRecording && (
