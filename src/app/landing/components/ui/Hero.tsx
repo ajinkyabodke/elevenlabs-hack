@@ -1,6 +1,9 @@
+import { cn } from "@/lib/utils";
 import { RiArrowRightUpLine } from "@remixicon/react";
+import { Inter } from "next/font/google";
 import { FadeContainer, FadeDiv, FadeSpan } from "../Fade";
 import GameOfLife from "./HeroBackground";
+const inter = Inter({ subsets: ["latin"] });
 
 export function Hero() {
   return (
@@ -30,15 +33,25 @@ export function Hero() {
         </FadeDiv>
         <h1 className="mt-8 text-center text-5xl font-bold tracking-tighter text-gray-900 sm:text-8xl sm:leading-[5.5rem]">
           <FadeSpan>Transform</FadeSpan>{" "}
-          <FadeSpan className="text-7xl font-normal text-gray-700">
+          <FadeSpan
+            className={cn(
+              "text-7xl font-normal text-gray-700",
+              inter.className,
+            )}
+          >
             your
           </FadeSpan>
           <br />
           <FadeSpan>Thoughts</FadeSpan>{" "}
-          <FadeSpan className="text-7xl font-normal text-gray-700">
+          <FadeSpan
+            className={cn(
+              "text-7xl font-normal text-gray-700",
+              inter.className,
+            )}
+          >
             into
           </FadeSpan>{" "}
-          <FadeSpan>Memories</FadeSpan>
+          <FadeSpan className={inter.className}>Memories</FadeSpan>
         </h1>
         <p className="mt-5 max-w-2xl text-center text-base text-gray-700 sm:mt-8 sm:text-xl">
           <FadeSpan>Your AI-powered voice journal that turns</FadeSpan>{" "}

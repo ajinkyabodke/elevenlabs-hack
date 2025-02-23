@@ -1,7 +1,6 @@
 import { Sidebar } from "@/components/layout/Sidebar";
 import { siteConfig } from "@/siteConfig";
 import "@/styles/globals.css";
-
 import { TRPCReactProvider } from "@/trpc/react";
 import { ClerkProvider } from "@clerk/nextjs";
 import { auth } from "@clerk/nextjs/server";
@@ -14,13 +13,7 @@ export const metadata: Metadata = {
   title: siteConfig.name,
   description: siteConfig.description,
   keywords: ["Voice Journal", "Mood Tracking", "Thoughts"],
-  authors: [
-    {
-      name: "yourname",
-      url: "",
-    },
-  ],
-  creator: "yourname",
+
   openGraph: {
     type: "website",
     locale: "en_US",
@@ -29,12 +22,7 @@ export const metadata: Metadata = {
     description: siteConfig.description,
     siteName: siteConfig.name,
   },
-  twitter: {
-    card: "summary_large_image",
-    title: siteConfig.name,
-    description: siteConfig.description,
-    creator: "@yourname",
-  },
+
   icons: {
     icon: "/favicon.ico",
   },
