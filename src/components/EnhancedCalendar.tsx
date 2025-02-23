@@ -10,6 +10,7 @@ import {
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Textarea } from "@/components/ui/textarea";
 import {
   Tooltip,
@@ -160,10 +161,10 @@ export function EnhancedCalendar({
   return (
     <div className="flex flex-col space-y-4">
       {/* Calendar Header */}
-      <div className="flex items-center justify-between">
-        <div className="flex items-center gap-2">
+      <div className="mt-4 flex items-center justify-between">
+        <div className="flex w-96 items-center gap-2">
           <Button
-            variant="outline"
+            variant="ghost"
             size="icon"
             onClick={() => {
               if (view === "week") {
@@ -179,7 +180,7 @@ export function EnhancedCalendar({
             {format(currentDate, "MMMM yyyy")}
           </h2>
           <Button
-            variant="outline"
+            variant="ghost"
             size="icon"
             onClick={() => {
               if (view === "week") {
@@ -192,36 +193,41 @@ export function EnhancedCalendar({
             <ChevronRight className="h-4 w-4" />
           </Button>
         </div>
-        <div className="flex items-center gap-2">
-          <Button
-            variant={view === "week" ? "default" : "outline"}
-            size="sm"
-            onClick={() => setView("week")}
+
+        <div className="ml-auto">
+          <Tabs
+            value={view}
+            onValueChange={(v) => setView(v as "week" | "month")}
           >
-            Week
-          </Button>
-          <Button
-            variant={view === "month" ? "default" : "outline"}
-            size="sm"
-            onClick={() => setView("month")}
-          >
-            Month
-          </Button>
+            <TabsList className="rounded-full">
+              <TabsTrigger className="rounded-full px-6" value="week">
+                Week
+              </TabsTrigger>
+              <TabsTrigger className="rounded-full px-6" value="month">
+                Month
+              </TabsTrigger>
+            </TabsList>
+          </Tabs>
         </div>
       </div>
 
       {/* Calendar Grid */}
       <div
         className={cn(
-          "grid gap-px bg-muted",
+          "grid",
           view === "week" ? "grid-cols-7" : "grid-cols-7",
+          "rounded-t-xl border border-border/70 bg-gradient-to-br from-violet-500/5 to-blue-500/5",
         )}
       >
         {/* Weekday Headers */}
         {["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"].map((day) => (
           <div
             key={day}
-            className="bg-background p-2 text-center text-sm font-medium"
+            className={cn(
+              "border-[0.5px] border-border/70 p-2 text-center text-sm font-medium",
+              day === "Mon" && "rounded-tl-xl",
+              day === "Sun" && "rounded-tr-xl",
+            )}
           >
             {day}
           </div>
@@ -238,9 +244,10 @@ export function EnhancedCalendar({
             <div
               key={date.toISOString()}
               className={cn(
-                "group relative flex min-h-[120px] flex-col bg-background p-2",
+                "group relative flex min-h-[120px] flex-col border-[0.5px] border-border/70 bg-background p-2",
                 !isCurrentMonth && "text-muted-foreground/50",
                 isToday && "bg-accent/50",
+                "bg-violet-500/4",
               )}
             >
               {/* Header with date and average mood emoji */}
@@ -280,6 +287,7 @@ export function EnhancedCalendar({
                   </div>
                 )}
               </div>
+
               {/* Significant Events */}
               {dayEntries.length > 0 &&
                 dayEntries[0]?.significantEvents &&
@@ -307,7 +315,7 @@ export function EnhancedCalendar({
                             <TooltipTrigger className="text-xs text-muted-foreground">
                               +{dayEntries[0].significantEvents.length - 3} more
                             </TooltipTrigger>
-                            <TooltipContent className="flex flex-col gap-y-1 rounded-sm border border-border bg-background p-1 text-foreground">
+                            <TooltipContent className="flex flex-col gap-y-1 rounded-sm border border-border/70 bg-background p-1 text-foreground">
                               {dayEntries[0].significantEvents.map(
                                 (event, index) => (
                                   <div

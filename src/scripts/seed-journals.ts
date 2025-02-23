@@ -153,10 +153,12 @@ async function seedJournals() {
         },
         body: JSON.stringify({
           rawEntry: `user: ${entry}\nai: Thank you for sharing. I'm here to listen.`,
+          date: date.toISOString(),
         }),
       });
 
       if (!response.ok) {
+        console.log(await response.text());
         throw new Error(`Failed to create entry: ${response.statusText}`);
       }
 
@@ -193,7 +195,7 @@ void seedJournals();
 // export async function POST(req: Request) {
 //   try {
 //     // const { userId } = await auth();
-//     const userId = "user_2n74T8HfwTkQNtGB9dmc7YAnwuv";
+//     const userId = "user_2n74zkY7Uq70LglIyuj1LDuQ3ib";
 //     if (!userId) {
 //       return Response.json({ error: "User not found" }, { status: 404 });
 //     }

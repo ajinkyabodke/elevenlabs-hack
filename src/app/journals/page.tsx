@@ -1,13 +1,7 @@
 import { getJournalEntries } from "@/app/_actions/journal";
 import { CalendarWrapper } from "@/components/CalendarWrapper";
 import { SearchCommand } from "@/components/SearchCommand";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { auth } from "@clerk/nextjs/server";
 import { format, formatDistanceToNow } from "date-fns";
@@ -78,12 +72,18 @@ export default async function JournalsPage() {
       </div>
 
       <Tabs defaultValue="list" className="space-y-4">
-        <TabsList className="bg-gradient-to-br from-violet-500/10 via-card to-blue-500/10">
-          <TabsTrigger value="list" className="flex items-center gap-2">
+        <TabsList className="rounded-full bg-gradient-to-br from-violet-500/10 via-card to-blue-500/10">
+          <TabsTrigger
+            value="list"
+            className="flex items-center gap-2 rounded-full"
+          >
             <ListIcon className="h-4 w-4" />
             List View
           </TabsTrigger>
-          <TabsTrigger value="calendar" className="flex items-center gap-2">
+          <TabsTrigger
+            value="calendar"
+            className="flex items-center gap-2 rounded-full"
+          >
             <CalendarIcon className="h-4 w-4" />
             Calendar View
           </TabsTrigger>
@@ -166,16 +166,15 @@ export default async function JournalsPage() {
         </TabsContent>
 
         <TabsContent value="calendar">
-          <Card className="overflow-hidden bg-gradient-to-br from-violet-500/5 via-card to-blue-500/5">
-            <CardHeader>
-              <CardTitle className="bg-gradient-to-r from-violet-500 to-blue-500 bg-clip-text text-transparent">
-                Calendar View
-              </CardTitle>
+          {/* <Card className="overflow-hidden bg-gradient-to-br from-violet-500/5 via-card to-blue-500/5"> */}
+          <Card className="overflow-hidden">
+            {/* <CardHeader>
+              <CardTitle className="">Calendar View</CardTitle>
               <CardDescription>
                 View your entries and events in a calendar format. Emojis
                 indicate mood scores.
               </CardDescription>
-            </CardHeader>
+            </CardHeader> */}
             <CardContent>
               <CalendarWrapper entries={entries} />
             </CardContent>
