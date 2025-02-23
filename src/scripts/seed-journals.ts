@@ -1,5 +1,3 @@
-import fetch from "node-fetch";
-
 const MOODS = {
   VERY_POSITIVE: {
     events: [
