@@ -139,7 +139,9 @@ export function Sidebar() {
             />
           )}
 
-          {!isSidebarCollapsed && <h2 className="font-semibold">Echo</h2>}
+          {!isSidebarCollapsed && (
+            <h2 className="font-semibold text-white">Echo</h2>
+          )}
 
           <Button
             variant="ghost"
