@@ -10,6 +10,7 @@ export const userRouter = createTRPCRouter({
       where: (u, { eq }) => eq(u.id, ctx.session.userId),
       columns: {
         memory: true,
+        details: true,
       },
     });
 
@@ -52,6 +53,7 @@ export const userRouter = createTRPCRouter({
 
     return {
       memory: user.memory,
+      details: user.details ?? "",
       moodScoresWithDays,
       significantEventsWithDays,
     };
@@ -83,6 +85,35 @@ export const userRouter = createTRPCRouter({
       await ctx.db
         .update(users)
         .set({ memory: memories })
+        .where(eq(users.id, ctx.session.userId));
+    }),
+
+  getDetails: protectedProcedure.query(async ({ ctx }) => {
+    const user = await ctx.db.query.users.findFirst({
+      where: (u, { eq }) => eq(u.id, ctx.session.userId),
+      columns: {
+        details: true,
+      },
+    });
+
+    if (!user) {
+      throw new TRPCError({ code: "UNAUTHORIZED" });
+    }
+
+    return user.details ?? "";
+  }),
+
+  updateDetails: protectedProcedure
+    .input(
+      z.object({
+        details: z.string(),
+      }),
+    )
+    .mutation(async ({ ctx, input }) => {
+      const { details } = input;
+      await ctx.db
+        .update(users)
+        .set({ details: details || "" }) // Ensure empty string if falsy
         .where(eq(users.id, ctx.session.userId));
     }),
 });

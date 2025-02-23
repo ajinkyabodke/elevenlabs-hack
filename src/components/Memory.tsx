@@ -1,28 +1,52 @@
 "use client";
 
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { Textarea } from "@/components/ui/textarea";
 import { cn } from "@/lib/utils";
 import { api } from "@/trpc/react";
-import { Plus, Trash2 } from "lucide-react";
-import { useRef, useState } from "react";
+import { Edit2, Loader2, Save, Trash2 } from "lucide-react";
+import { useEffect, useState } from "react";
 import { toast } from "sonner";
 
 export function Memory() {
   const { data: userData, isLoading, refetch } = api.user.getMemory.useQuery();
-  const [newMemory, setNewMemory] = useState("");
-  const inputRef = useRef<HTMLInputElement>(null);
+  const [isEditing, setIsEditing] = useState(false);
+  const { data: userDetails } = api.user.getDetails.useQuery();
+  const [details, setDetails] = useState("");
 
-  const { mutateAsync: updateMemories, isPending: isUpdatingMemories } =
+  const { mutateAsync: deleteMemory, isPending: isDeleting } =
     api.user.updateMemories.useMutation({
       onSuccess: () => {
-        setNewMemory("");
-        toast.success("Memory saved");
-        void refetch();
+        toast.success("Memory deleted");
+        void utils.user.getMemory.invalidate();
+      },
+    });
+
+  // Update details state when userDetails changes
+  useEffect(() => {
+    if (!isEditing) {
+      setDetails(userDetails ?? "");
+    }
+  }, [userDetails, isEditing]);
+
+  const utils = api.useUtils();
+
+  const { mutateAsync: updateDetails, isPending: isUpdating } =
+    api.user.updateDetails.useMutation({
+      onSuccess: () => {
+        setIsEditing(false);
+        toast.success("Details saved");
+        void utils.user.getDetails.invalidate();
       },
       onError: () => {
-        toast.error("Failed to save memory");
-        void refetch();
+        toast.error("Failed to save details");
       },
     });
 
@@ -36,43 +60,84 @@ export function Memory() {
 
   return (
     <div className="space-y-6">
-      {/* Add new memory input */}
-      <div className="flex gap-2">
-        <Input
-          ref={inputRef}
-          placeholder="Add a new memory..."
-          value={newMemory}
-          onChange={(e) => setNewMemory(e.target.value)}
-          onKeyDown={(e) => {
-            if (e.key === "Enter") {
-              if (userData) {
-                void updateMemories({ memories: [...userData, newMemory] });
-              }
-            }
-          }}
-          className="flex-1"
-        />
-        <Button
-          onClick={() => {
-            if (userData) {
-              void updateMemories({ memories: [...userData, newMemory] });
-            }
-          }}
-          disabled={!newMemory.trim() || isUpdatingMemories}
-        >
-          <Plus className="mr-2 h-4 w-4" />
-          Add
-        </Button>
-      </div>
+      {/* User Details Card */}
+      <Card className="bg-gradient-to-br from-violet-500/5 via-card to-blue-500/5">
+        <CardHeader>
+          <CardTitle>About You</CardTitle>
+          <CardDescription>
+            Tell us about yourself to help personalize your experience
+          </CardDescription>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          {isEditing ? (
+            <>
+              <Textarea
+                value={details === "null" || !details ? "" : details}
+                onChange={(e) => setDetails(e.target.value)}
+                placeholder="Tell us about yourself..."
+                className="min-h-[100px] resize-none bg-gradient-to-br from-violet-500/5 via-card to-blue-500/5"
+              />
+              <div className="flex justify-end gap-2">
+                <Button
+                  variant="outline"
+                  onClick={() => {
+                    setIsEditing(false);
+                    setDetails(userDetails ?? "");
+                  }}
+                >
+                  Cancel
+                </Button>
+                <Button
+                  onClick={() => {
+                    void updateDetails({ details });
+                  }}
+                  disabled={isUpdating}
+                >
+                  {isUpdating ? (
+                    <>
+                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                      Saving...
+                    </>
+                  ) : (
+                    <>
+                      <Save className="mr-2 h-4 w-4" />
+                      Save
+                    </>
+                  )}
+                </Button>
+              </div>
+            </>
+          ) : (
+            <div className="space-y-4">
+              <p className="min-h-[50px] whitespace-pre-wrap text-muted-foreground">
+                {!userDetails || userDetails === "null" ? (
+                  <span className="text-muted-foreground/50">
+                    No details added yet
+                  </span>
+                ) : (
+                  userDetails
+                )}
+              </p>
+              <div className="flex justify-end">
+                <Button variant="outline" onClick={() => setIsEditing(true)}>
+                  <Edit2 className="mr-2 h-4 w-4" />
+                  Edit Details
+                </Button>
+              </div>
+            </div>
+          )}
+        </CardContent>
+      </Card>
 
       {/* Memory list */}
-      <div className="flex flex-col-reverse space-y-2">
+      <div className="flex flex-col-reverse gap-2">
         {userData?.map((memory, index) => (
           <div
             key={index}
             className={cn(
-              "group flex items-center gap-2 rounded-lg border bg-card p-4 transition-all",
-              "hover:border-primary/20 hover:shadow-sm",
+              "group flex items-center gap-2 rounded-lg border p-4 transition-all",
+              "bg-gradient-to-br from-violet-500/5 via-card to-blue-500/5",
+              "hover:from-violet-500/10 hover:to-blue-500/10 hover:shadow-md",
             )}
           >
             <span className="flex-1 text-sm">{memory}</span>
@@ -81,7 +146,7 @@ export function Memory() {
               size="icon"
               onClick={() => {
                 if (userData) {
-                  void updateMemories({
+                  void deleteMemory({
                     memories: userData.filter((_, i) => i !== index),
                   });
                 }
@@ -94,8 +159,10 @@ export function Memory() {
         ))}
 
         {userData?.length === 0 && (
-          <div className="flex min-h-[100px] items-center justify-center rounded-lg border border-dashed">
-            <p className="text-sm text-muted-foreground">No memories yet</p>
+          <div className="flex min-h-[100px] items-center justify-center rounded-lg border border-dashed bg-gradient-to-br from-violet-500/5 via-card to-blue-500/5">
+            <p className="text-sm text-muted-foreground">
+              No memories yet. Your memories will appear here as you journal.
+            </p>
           </div>
         )}
       </div>

@@ -6,11 +6,13 @@ export default function MemoryPage() {
       <div className="flex flex-col gap-3">
         <div className="flex items-center gap-3">
           <Brain className="h-8 w-8 text-primary" />
-          <h1 className="text-4xl font-bold tracking-tight">Memory Bank</h1>
+          <h1 className="text-4xl font-bold tracking-tight">
+            Long Term Memory
+          </h1>
         </div>
         <p className="text-lg text-muted-foreground">
-          Your important memories to personalize your experience with our
-          journalling agent.
+          Important memories to personalize your experience with our journalling
+          agent.
         </p>
       </div>
 

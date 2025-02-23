@@ -17,10 +17,10 @@ export function JournalAnalytics() {
       <div>
         <h2
           id="journal-analytics"
-          className="relative scroll-my-24 text-lg font-semibold tracking-tight text-cyan-500"
+          className="relative scroll-my-24 text-lg font-semibold tracking-tight text-violet-500"
         >
           Journal Analytics
-          <div className="absolute -left-[8px] top-1 h-5 w-[3px] rounded-r-sm bg-cyan-500" />
+          <div className="absolute -left-[8px] top-1 h-5 w-[3px] rounded-r-sm bg-violet-500" />
         </h2>
         <p className="mt-2 max-w-lg text-balance text-3xl font-semibold tracking-tighter text-gray-900 md:text-4xl">
           Transform your voice journals into meaningful insights

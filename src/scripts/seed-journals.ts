@@ -100,7 +100,7 @@ const generateEntry = (date: Date, mood: MoodKey) => {
 
   return {
     date,
-    entry: template.replace("{event}", event),
+    entry: template?.replace("{event}", event ?? "") ?? "",
     mood,
     event,
   };
@@ -119,7 +119,7 @@ const generateMoodPattern = (days: number): MoodKey[] => {
   ];
 
   for (let i = 0; i < days; i++) {
-    pattern.push(moodLevels[currentMoodIndex]);
+    pattern.push(moodLevels[currentMoodIndex] ?? "NEUTRAL");
 
     // Simulate mood changes with some randomness
     const change = Math.floor(Math.random() * 3) - 1; // -1, 0, or 1
@@ -144,7 +144,7 @@ async function seedJournals() {
     const date = new Date(endDate);
     date.setDate(date.getDate() - i);
 
-    const mood = moodPattern[i];
+    const mood = moodPattern[i] ?? "NEUTRAL";
     const { entry } = generateEntry(date, mood);
 
     try {
@@ -167,7 +167,7 @@ async function seedJournals() {
       // Add a small delay to prevent rate limiting
       await new Promise((resolve) => setTimeout(resolve, 1000));
     } catch (error) {
-      console.error(`Failed to create entry for ${date}:`, error);
+      console.error(`Failed to create entry for ${date.toISOString()}:`, error);
     }
   }
 }

@@ -13,13 +13,14 @@ import {
 } from "@/components/ui/dialog";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { activeToolAtom, type ToolType } from "@/lib/atoms";
+import { basePrompt } from "@/lib/basePrompt";
 import { cn } from "@/lib/utils";
 import { api } from "@/trpc/react";
 import type { JournalEntry } from "@/types";
 import { useConversation } from "@11labs/react";
 import { useUser } from "@clerk/nextjs";
 import { useAtom } from "jotai";
-import { BookOpen, LucideX } from "lucide-react";
+import { BookOpen, LucideX, Volume2, VolumeX } from "lucide-react";
 import { motion } from "motion/react";
 import { useRef, useState } from "react";
 import { toast } from "sonner";
@@ -77,6 +78,8 @@ export default function Home() {
     api.user.getPromptAttributes.useQuery();
   const [activeTool, setActiveTool] = useAtom<ToolType | null>(activeToolAtom);
   const name = user?.firstName;
+  const [isPlaying, setIsPlaying] = useState(false);
+  const audioRef = useRef<HTMLAudioElement | null>(null);
 
   const conversation = useConversation({
     onConnect: () => {
@@ -113,19 +116,28 @@ export default function Home() {
       start_progressive_muscle_relaxation: () => {
         setActiveTool("pmr");
       },
+      end_session: async () => {
+        console.log("Stopping recording...");
+        setIsRecording(false);
+        setIsProcessing(true);
+        await conversation.endSession();
+        setTranscript({ messages: [] });
+        transcriptRef.current.messages = [];
+        setIsProcessing(false);
+      },
     },
   });
 
   const selectedMoodData = MOODS.find((mood) => mood.id === selectedMood);
 
   const getSystemPrompt = (mood: string) => {
-    const basePrompt = `You are an empathetic and insightful journaling assistant designed to help users reflect on their day. Your role is to gently prompt users with open-ended questions that encourage self-exploration and emotional clarity. Ask questions like, 'What moment stood out to you today?' or 'How did you feel during that experience?' Maintain a supportive, non-judgmental tone, and allow the user's pace and mood to guide the conversation. Always encourage honesty and self-compassion, ensuring the user feels safe and understood. Respond in at most 2-3 sentences.`;
-
     const moodPrompts: Record<string, string> = {
-      vent: "The user needs to vent. Be extra patient and understanding. Let them express their frustrations freely. Acknowledge their feelings and validate their experiences. Don't rush to offer solutions unless specifically asked. Start by creating a safe space for them to express their feelings.",
-      chat: "Keep the conversation light and casual. Be friendly and engaging, but still maintain emotional awareness. Feel free to share brief, relevant observations while keeping the focus on the user. Guide the conversation naturally without being too formal.",
+      vent: "The user needs to vent. Create a safe and supportive space for them to express their frustrations openly. Be patient and empathetic, acknowledging their feelings without judgment. Validate their experiences by saying things like, 'It's completely understandable to feel that way.' Avoid rushing to provide solutions unless they specifically ask for advice. Allow them the freedom to share as much or as little as they wish.",
+
+      chat: "Keep the conversation light-hearted and casual while remaining emotionally aware. Engage with the user in a friendly manner, sharing brief, relevant observations that encourage connection. Maintain a natural flow in the conversation without being overly formal or scripted. Ask open-ended questions to guide the dialogue and ensure the user feels heard and valued.",
+
       unwind:
-        "Help the user relax and decompress. Use a calming tone and gentle pacing. Guide them toward positive reflection while acknowledging any stress or tension they may be carrying. Focus on breathing and present-moment awareness if appropriate.",
+        "Help the user relax and decompress by using a soothing tone and gentle pacing. Encourage them to let go of stress and tension while guiding them toward positive reflections. If appropriate, incorporate mindfulness techniques such as deep breathing or present-moment awareness. Offer prompts that invite them to focus on calming thoughts or pleasant memories, creating a peaceful atmosphere for relaxation.",
     };
 
     const moodData = MOODS.find((m) => m.id === mood) ?? MOODS[0];
@@ -138,19 +150,22 @@ export default function Home() {
       `----`,
       promptAttributes?.memory &&
         promptAttributes.memory.length > 0 &&
-        `Summary of previous journal entries: ${promptAttributes.memory
+        `Summary of user's previous journal entries: ${promptAttributes.memory
           .map((m, idx) => `- ${idx + 1}. ${m}`)
           .join("\n")}`,
 
       `----`,
+      promptAttributes?.details &&
+        promptAttributes.details.length > 0 &&
+        `User's details: ${promptAttributes.details}`,
 
-      `Mood scores over the last 7 days: ${promptAttributes?.moodScoresWithDays
+      `User's mood scores over the last 7 days: ${promptAttributes?.moodScoresWithDays
         .map((m) => `- ${m.day}: ${m.moodScore}`)
         .join("\n")}`,
 
       `----`,
 
-      `Significant events over the last 7 days: ${promptAttributes?.significantEventsWithDays
+      `Significant events over the last 7 days in the user's life: ${promptAttributes?.significantEventsWithDays
         .map((e) => `- ${e.day}: ${e.significantEvents.join(", ")}`)
         .join("\n")}`,
     ].join("\n");
@@ -245,23 +260,50 @@ export default function Home() {
   // Get the last two messages for the preview
   const lastTwoMessages = transcript.messages.slice(-2);
 
+  const toggleAudio = () => {
+    if (!audioRef.current) {
+      audioRef.current = new Audio("/ambient-trimmed.mp3");
+      audioRef.current.loop = true;
+      audioRef.current.volume = 0.3;
+    }
+
+    if (isPlaying) {
+      audioRef.current.pause();
+    } else {
+      void audioRef.current.play();
+    }
+    setIsPlaying(!isPlaying);
+  };
+
   return (
     <>
       {activeTool && <ToolDialog />}
 
-      <div className="space-y-6">
+      <div className="relative min-h-screen space-y-6 bg-gradient-to-br from-blue-50 via-white to-blue-100/50 p-6">
         <div className="mx-auto mt-10 w-full max-w-lg">
-          <div className="relative flex items-center rounded-full bg-secondary/30 p-1">
+          <Button
+            variant="ghost"
+            size="icon"
+            className="absolute right-4 top-4 z-10 text-blue-500 hover:text-blue-600"
+            onClick={toggleAudio}
+          >
+            {isPlaying ? (
+              <Volume2 className="h-4 w-4" />
+            ) : (
+              <VolumeX className="h-4 w-4 text-blue-400/70" />
+            )}
+          </Button>
+          <div className="relative flex items-center rounded-xl bg-white/50 p-1 shadow-lg backdrop-blur-sm">
             {MOODS.map((mood) => (
               <button
                 key={mood.id}
                 onClick={() => setSelectedMood(mood.id)}
                 className={cn(
-                  "relative z-10 flex w-full items-center justify-center gap-2 rounded-full py-2.5 text-sm font-medium transition-colors duration-200",
-                  "hover:text-primary",
+                  "relative z-10 flex w-full items-center justify-center gap-2 rounded-lg py-3 text-sm font-medium transition-all duration-200",
+                  "hover:text-blue-600",
                   selectedMood === mood.id
-                    ? "text-primary-foreground"
-                    : "text-muted-foreground hover:text-primary",
+                    ? "text-white"
+                    : "text-blue-500/70 hover:text-blue-600",
                 )}
               >
                 <motion.span
@@ -291,28 +333,40 @@ export default function Home() {
               }}
               transition={{ type: "spring", stiffness: 300, damping: 30 }}
             >
-              <div className="h-full w-[calc(100%/3)] rounded-full bg-primary shadow-sm" />
+              <div className="h-full w-[calc(100%/3)] rounded-lg bg-gradient-to-r from-blue-500 to-violet-400 shadow-lg" />
             </motion.div>
           </div>
         </div>
         <div className="mt-20 h-20" />
         {selectedMoodData && (
-          <h4 className="flex w-full justify-center gap-3 text-center font-serif text-6xl text-card-foreground">
-            {/* <span className="text-orange-400">✱</span> */}
+          <motion.h4
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.2 }}
+            className="flex w-full justify-center gap-3 text-center font-serif text-6xl text-blue-900"
+          >
             <span>{selectedMoodData.description}</span>
-          </h4>
+          </motion.h4>
         )}
-        <div className="-mt-4 flex items-center justify-center gap-3 text-center font-serif text-4xl tracking-tight sm:text-6xl">
-          {/* <h1>Happy late night, {name}</h1> */}
-
+        <div className="-mt-4 flex items-center justify-center gap-3 text-center">
           {selectedMoodData && (
-            <h1 className="flex items-center gap-3 text-center text-2xl tracking-normal text-accent-foreground">
+            <motion.h1
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.3 }}
+              className="flex items-center gap-3 text-center text-2xl tracking-normal text-blue-600/80"
+            >
               <span className="text-orange-400">✱</span>
               {selectedMoodData.prompt}
-            </h1>
+            </motion.h1>
           )}
         </div>
-        <div className="flex items-center justify-center gap-2">
+        <motion.div
+          initial={{ opacity: 0, scale: 0.95 }}
+          animate={{ opacity: 1, scale: 1 }}
+          transition={{ delay: 0.4 }}
+          className="flex items-center justify-center gap-2"
+        >
           <RecordButton
             isRecording={isRecording}
             isProcessing={isProcessing}
@@ -324,29 +378,40 @@ export default function Home() {
             <Button
               variant="ghost"
               size="icon"
-              className="rounded-full"
+              className="rounded-full text-blue-500 hover:bg-blue-50 hover:text-blue-600"
               onClick={handleDeleteTranscript}
               disabled={isProcessing}
             >
               <LucideX className="h-4 w-4" />
             </Button>
           )}
-        </div>
+        </motion.div>
 
         {lastTwoMessages.length > 0 && (
-          <div className="space-y-2">
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.5 }}
+            className="space-y-2"
+          >
             <div className="flex items-center justify-between">
               <Dialog>
                 <DialogTrigger asChild>
-                  <Button variant="ghost" size="sm">
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    className="text-blue-600 hover:bg-blue-50 hover:text-blue-700"
+                  >
                     <BookOpen className="mr-2 h-4 w-4" />
                     View Full Conversation
                   </Button>
                 </DialogTrigger>
-                <DialogContent className="max-w-2xl">
+                <DialogContent className="max-w-2xl bg-gradient-to-br from-blue-50 via-white to-blue-50">
                   <DialogHeader>
-                    <DialogTitle>Conversation History</DialogTitle>
-                    <DialogDescription>
+                    <DialogTitle className="text-blue-900">
+                      Conversation History
+                    </DialogTitle>
+                    <DialogDescription className="text-blue-600">
                       Full transcript of your current session
                     </DialogDescription>
                   </DialogHeader>
@@ -356,10 +421,10 @@ export default function Home() {
                         <div
                           key={idx}
                           className={cn(
-                            "rounded-lg p-3",
+                            "rounded-lg p-3 shadow-sm backdrop-blur-sm",
                             msg.source === "user"
-                              ? "bg-primary/10 text-primary"
-                              : "bg-muted text-muted-foreground",
+                              ? "bg-gradient-to-r from-blue-500/10 to-violet-400/5 text-blue-700"
+                              : "bg-white/50 text-blue-600",
                           )}
                         >
                           {msg.message}
@@ -371,36 +436,22 @@ export default function Home() {
               </Dialog>
             </div>
 
-            <div className="space-y-2 rounded-lg bg-muted p-4 font-serif text-card-foreground">
+            <div className="space-y-2 rounded-lg bg-white/50 p-4 font-serif text-blue-900 shadow-lg backdrop-blur-sm">
               {lastTwoMessages.map((msg, idx) => (
                 <div
                   key={idx}
                   className={cn(
                     "text-sm",
-                    msg.source === "user"
-                      ? "text-primary"
-                      : "text-muted-foreground",
+                    msg.source === "user" ? "text-blue-700" : "text-blue-600",
                   )}
                 >
                   {msg.message}
                 </div>
               ))}
             </div>
-          </div>
+          </motion.div>
         )}
       </div>
     </>
-    // <div className="mx-auto max-w-2xl space-y-6">
-    //   <ToolDialog />
-    //   <Card className="relative w-full overflow-hidden border-sage-200 bg-gradient-to-br from-sage-50 to-white shadow-none transition-all hover:border-sage-300 hover:shadow-lg">
-    //     <CardHeader>
-    //       <CardTitle>Voice Journal</CardTitle>
-    //       <CardDescription>
-    //         Select your mood and start recording your thoughts
-    //       </CardDescription>
-    //     </CardHeader>
-
-    //   </Card>
-    // </div>
   );
 }

@@ -4,8 +4,9 @@ import { db } from "@/server/db";
 import { journalEntries } from "@/server/db/schema";
 import { desc, eq } from "drizzle-orm";
 
-export async function getJournalEntries() {
+export async function getJournalEntries(userId: string) {
   return await db.query.journalEntries.findMany({
+    where: eq(journalEntries.userId, userId),
     orderBy: [desc(journalEntries.createdAt)],
   });
 }

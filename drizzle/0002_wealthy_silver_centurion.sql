@@ -1,0 +1,1 @@
+ALTER TABLE "elevenlabs-hack_user" ADD COLUMN "details" text[] DEFAULT ARRAY[]::text[] NOT NULL;
