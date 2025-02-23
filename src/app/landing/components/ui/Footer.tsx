@@ -175,7 +175,7 @@ const Footer = () => {
               {/* <Link
                 href="#"
                 target="_blank"
-                rel="noopener noreferrer"
+                rel="noopener noreferre"
                 className="rounded-sm p-2 text-gray-700 transition-colors duration-200 hover:bg-gray-200 hover:text-gray-900"
               >
                 <RiSlackFill className="size-5" />
