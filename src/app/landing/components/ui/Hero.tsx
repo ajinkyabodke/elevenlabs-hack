@@ -19,9 +19,7 @@ export function Hero() {
                 News
               </span>
               <span className="flex items-center gap-1 truncate">
-                <span className="w-full truncate">
-                  Voice Journal Beta Launch
-                </span>
+                <span className="w-full truncate">Echo Beta Launch</span>
 
                 <RiArrowRightUpLine className="size-4 shrink-0 text-gray-700" />
               </span>
@@ -31,13 +29,15 @@ export function Hero() {
         <h1 className="mt-8 text-center text-5xl font-semibold tracking-tighter text-gray-900 sm:text-8xl sm:leading-[5.5rem]">
           <FadeSpan>Transform</FadeSpan> <FadeSpan>your</FadeSpan>
           <br />
-          <FadeSpan>thoughts</FadeSpan> <FadeSpan>to</FadeSpan>{" "}
-          <FadeSpan>wisdom</FadeSpan>
+          <FadeSpan>thoughts</FadeSpan> <FadeSpan>into</FadeSpan>{" "}
+          <FadeSpan>Insights</FadeSpan>
         </h1>
         <p className="mt-5 max-w-xl text-balance text-center text-base text-gray-700 sm:mt-8 sm:text-xl">
           <FadeSpan>Your AI-powered voice journal that turns</FadeSpan>{" "}
-          <FadeSpan>daily reflections into meaningful insights</FadeSpan>{" "}
-          <FadeSpan>and personal growth.</FadeSpan>
+          <FadeSpan>
+            daily reflections into meaningful insights over time
+          </FadeSpan>{" "}
+          <FadeSpan>and unlocks unlimited personal growth.</FadeSpan>
         </p>
         <FadeDiv>
           <a
