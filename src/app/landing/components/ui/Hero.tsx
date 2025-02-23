@@ -30,10 +30,14 @@ export function Hero() {
         </FadeDiv>
         <h1 className="mt-8 text-center text-5xl font-bold tracking-tighter text-gray-900 sm:text-8xl sm:leading-[5.5rem]">
           <FadeSpan>Transform</FadeSpan>{" "}
-          <FadeSpan className="text-7xl font-normal">your</FadeSpan>
+          <FadeSpan className="text-7xl font-normal text-gray-700">
+            your
+          </FadeSpan>
           <br />
           <FadeSpan>Thoughts</FadeSpan>{" "}
-          <FadeSpan className="text-7xl font-normal">into</FadeSpan>{" "}
+          <FadeSpan className="text-7xl font-normal text-gray-700">
+            into
+          </FadeSpan>{" "}
           <FadeSpan>Memories</FadeSpan>
         </h1>
         <p className="mt-5 max-w-2xl text-center text-base text-gray-700 sm:mt-8 sm:text-xl">
@@ -45,7 +49,7 @@ export function Hero() {
         </p>
         <FadeDiv>
           <a
-            className="mt-6 inline-flex cursor-pointer flex-row items-center justify-center gap-1 whitespace-nowrap rounded-full border-b-[2.5px] border-violet-900 bg-gradient-to-br from-violet-400 to-blue-400 px-5 py-3 font-medium leading-4 tracking-wide text-white shadow-[0_0_0_2px_rgba(0,0,0,0.04),0_0_14px_0_rgba(255,255,255,0.19)] transition-all duration-200 ease-in-out hover:-translate-y-0.5 hover:shadow-violet-500"
+            className="mt-6 inline-flex cursor-pointer flex-row items-center justify-center gap-1 whitespace-nowrap rounded-full border-b-[2.5px] border-violet-900 bg-gradient-to-br from-violet-500 to-blue-500 px-5 py-3 font-medium leading-4 tracking-wide text-white shadow-[0_0_0_2px_rgba(0,0,0,0.04),0_0_14px_0_rgba(255,255,255,0.19)] transition-all duration-200 ease-in-out hover:-translate-y-0.5 hover:shadow-violet-500"
             href="/app"
           >
             Start Journaling
