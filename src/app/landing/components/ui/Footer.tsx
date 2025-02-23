@@ -1,9 +1,4 @@
-import {
-  RiGithubFill,
-  RiSlackFill,
-  RiTwitterXFill,
-  RiYoutubeFill,
-} from "@remixicon/react";
+import { RiGithubFill, RiYoutubeFill } from "@remixicon/react";
 import Link from "next/link";
 const CURRENT_YEAR = new Date().getFullYear();
 
@@ -153,16 +148,16 @@ const Footer = () => {
           <div>
             <div className="mt-4 flex items-center">
               {/* Social Icons */}
-              <Link
+              {/* <Link
                 href="#"
                 target="_blank"
                 rel="noopener noreferrer"
                 className="rounded-sm p-2 text-gray-700 transition-colors duration-200 hover:bg-gray-200 hover:text-gray-900"
               >
                 <RiTwitterXFill className="size-5" />
-              </Link>
+              </Link> */}
               <Link
-                href="#"
+                href="https://youtu.be/HnCzj1JZeHg"
                 target="_blank"
                 rel="noopener noreferrer"
                 className="rounded-sm p-2 text-gray-700 transition-colors duration-200 hover:bg-gray-200 hover:text-gray-900"
@@ -170,21 +165,21 @@ const Footer = () => {
                 <RiYoutubeFill className="size-5" />
               </Link>
               <Link
-                href="#"
+                href="https://github.com/ajinkyabodke/elevenlabs-hack"
                 target="_blank"
                 rel="noopener noreferrer"
                 className="rounded-sm p-2 text-gray-700 transition-colors duration-200 hover:bg-gray-200 hover:text-gray-900"
               >
                 <RiGithubFill className="size-5" />
               </Link>
-              <Link
+              {/* <Link
                 href="#"
                 target="_blank"
                 rel="noopener noreferrer"
                 className="rounded-sm p-2 text-gray-700 transition-colors duration-200 hover:bg-gray-200 hover:text-gray-900"
               >
                 <RiSlackFill className="size-5" />
-              </Link>
+              </Link> */}
             </div>
             <div className="ml-2 hidden text-sm text-gray-700 lg:inline">
               &copy; {CURRENT_YEAR} Echo AI | All rights reserved
