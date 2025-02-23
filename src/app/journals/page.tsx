@@ -67,7 +67,7 @@ export default async function JournalsPage() {
     <div className="space-y-8">
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div>
-          <h1 className="bg-gradient-to-r from-violet-500 to-blue-500 bg-clip-text text-4xl font-bold text-transparent">
+          <h1 className="text-4xl font-bold text-neutral-900 text-transparent">
             Journal Entries
           </h1>
           <p className="text-lg text-muted-foreground">

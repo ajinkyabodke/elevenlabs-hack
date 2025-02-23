@@ -8,10 +8,18 @@ import {
   SheetTitle,
   SheetTrigger,
 } from "@/components/ui/sheet";
-
 import { cn } from "@/lib/utils";
+import { sidebarCollapsedAtom } from "@/store/sidebar";
 import { UserButton } from "@clerk/nextjs";
-import { BookOpen, Brain, LineChart, Menu, MessageSquare } from "lucide-react";
+import { useAtom } from "jotai";
+import {
+  BookOpen,
+  Brain,
+  LineChart,
+  LucideSidebar,
+  Menu,
+  MessageSquare,
+} from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 
@@ -46,10 +54,12 @@ const sidebarItems = [
 
 export function Sidebar() {
   const pathname = usePathname();
+  const [isSidebarCollapsed, setIsSidebarCollapsed] =
+    useAtom(sidebarCollapsedAtom);
 
   const SidebarContent = () => (
     <div className="flex h-full flex-col">
-      <div className="flex-1 py-4">
+      <div className="space-3 flex flex-1 flex-col gap-3 py-4">
         {sidebarItems.map((item, idx) => (
           <Link key={idx} href={item.href}>
             <Button
@@ -58,16 +68,17 @@ export function Sidebar() {
                 "w-full justify-start gap-2 transition-all",
                 pathname === item.href
                   ? "bg-white/20 text-white hover:bg-white/30 hover:text-white"
-                  : "text-black/80 hover:bg-white/10 hover:text-white",
+                  : "text-white hover:bg-white/10 hover:text-white",
+                isSidebarCollapsed && "px-3",
               )}
             >
               <item.icon
                 className={cn(
                   "h-4 w-4",
-                  pathname === item.href ? "text-black" : "text-black/80",
+                  pathname === item.href ? "text-white" : "text-white/80",
                 )}
               />
-              {item.title}
+              {!isSidebarCollapsed && item.title}
             </Button>
           </Link>
         ))}
@@ -111,16 +122,38 @@ export function Sidebar() {
       </Sheet>
 
       {/* Desktop Sidebar */}
-      <div className="hidden h-screen w-64 border-r border-white/20 bg-gradient-to-br from-violet-400 to-blue-400 text-black md:block">
+      <div
+        className={cn(
+          "hidden h-screen border-r border-white/20 bg-gradient-to-br from-violet-400/80 to-blue-400/80 text-black transition-all duration-300 md:block",
+          isSidebarCollapsed ? "w-[68px]" : "w-64",
+        )}
+      >
         <div className="flex h-14 items-center gap-3 border-b border-white/20 px-4">
-          <UserButton
-            appearance={{
-              elements: {
-                rootBox: "w-10 h-10",
-              },
-            }}
-          />
-          <h2 className="font-semibold">Echo</h2>
+          {!isSidebarCollapsed && (
+            <UserButton
+              appearance={{
+                elements: {
+                  rootBox: "w-8 h-8",
+                },
+              }}
+            />
+          )}
+
+          {!isSidebarCollapsed && <h2 className="font-semibold">Echo</h2>}
+
+          <Button
+            variant="ghost"
+            size="icon"
+            className="ml-auto"
+            onClick={() => setIsSidebarCollapsed(!isSidebarCollapsed)}
+          >
+            <LucideSidebar
+              className={cn(
+                "h-4 w-4 text-white transition-transform",
+                isSidebarCollapsed && "rotate-180",
+              )}
+            />
+          </Button>
         </div>
         <div className="px-4">
           <SidebarContent />

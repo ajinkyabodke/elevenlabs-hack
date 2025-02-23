@@ -327,17 +327,15 @@ export default function Home() {
               <VolumeX className="h-4 w-4 text-zinc-400/70" />
             )}
           </Button>
-          <div className="relative flex items-center rounded-xl bg-white/50 p-1 shadow-lg backdrop-blur-sm">
+          <div className="relative flex items-center rounded-full border border-neutral-100 bg-white/50 p-1 shadow-xl backdrop-blur-sm">
             {MOODS.map((mood) => (
               <button
                 key={mood.id}
                 onClick={() => setSelectedMood(mood.id)}
                 className={cn(
-                  "relative z-10 flex w-full items-center justify-center gap-2 rounded-lg py-3 text-sm font-medium transition-all duration-200",
-                  "hover:text-zinc-600",
-                  selectedMood === mood.id
-                    ? "text-white"
-                    : "text-zinc-500/70 hover:text-zinc-600",
+                  "relative z-10 flex w-full items-center justify-center gap-2 rounded-full py-3 text-sm font-medium transition-all duration-200",
+                  "",
+                  selectedMood === mood.id ? "text-white" : "text-zinc-500/70",
                 )}
               >
                 <motion.span
@@ -367,7 +365,7 @@ export default function Home() {
               }}
               transition={{ type: "spring", stiffness: 300, damping: 30 }}
             >
-              <div className="h-full w-[calc(100%/3)] rounded-lg bg-gradient-to-r from-blue-500 to-violet-400 shadow-lg" />
+              <div className="h-full w-[calc(100%/3)] rounded-full bg-gradient-to-r from-blue-500 to-violet-400 shadow-lg hover:text-white" />
             </motion.div>
           </div>
         </div>
